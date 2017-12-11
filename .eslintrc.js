@@ -17,6 +17,8 @@ module.exports = {
         'prefer-arrow-callback': 0,
         'no-console': process.env.NODE_ENV === 'production' ? 2 : 0,
         'no-unused-vars': 0,
-        'consistent-return': 0
+        'consistent-return': 0,
+        'prefer-template': 0,
+        'object-curly-newline': 0
       }
 };
