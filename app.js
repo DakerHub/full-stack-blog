@@ -38,8 +38,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'content-type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST,DELETE,PUT,PATCH');
   next();
 });
+
+app.use(function (req, res, next) {
+  if (req.method.toLowerCase() === 'options') {
+    res.send({
+      code: 200,
+      msg: 'continue'
+    })
+    return;
+  }
+  next();
+});
+
 app.use('/', index);
 app.use('/users', users);
 
