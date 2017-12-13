@@ -54,9 +54,16 @@ const uploadMid = function (req, res, next) {
  * /users:
  *   get:
  *     description: 获取用户列表
+ *     tags:
+ *       - 用户
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: token
+ *         description: token
+ *         in: query
+ *         required: true
+ *         type: string
  *       - name: username
  *         description: 通过用户名进行查找
  *         in: query
@@ -85,6 +92,7 @@ const uploadMid = function (req, res, next) {
  *                 $ref: '#/definitions/User'
  */
 router.get('/', function (req, res, next) {
+  console.log(req.userId);
   const { username, id } = req.query;
   const query = {};
   if (username) {
@@ -116,9 +124,16 @@ router.get('/', function (req, res, next) {
  * /users:
  *   post:
  *     description: 添加用户
+ *     tags:
+ *       - 用户
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: token
+ *         description: token
+ *         in: query
+ *         required: true
+ *         type: string
  *       - name: username
  *         description: 用户密码
  *         in: query
@@ -181,9 +196,16 @@ router.post('/', function (req, res, next) {
  * /users:
  *   delete:
  *     description: 删除用户
+ *     tags:
+ *       - 用户
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: token
+ *         description: token
+ *         in: query
+ *         required: true
+ *         type: string
  *       - name: id
  *         description: 用户ID
  *         in: query
@@ -228,21 +250,18 @@ router.delete('/', function (req, res, next) {
 /**
  * @swagger
  * /users/avatar:
- *   post:
+ *   patch:
  *     description: 修改用户头像
- *     requestBody:
- *       content:
- *         multipart/form-data:
- *           schema:
- *             properties:
- *               id:
- *                 type: string
- *               avatar:
- *                 type: string
- *                 format: binary
+ *     tags:
+ *       - 用户
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: token
+ *         description: token
+ *         in: query
+ *         required: true
+ *         type: string
  *       - name: id
  *         description: 用户id
  *         in: formData
@@ -269,7 +288,7 @@ router.delete('/', function (req, res, next) {
  *               type: object
  *               $ref: '#/definitions/User'
  */
-router.post('/avatar', uploadMid, function (req, res, next) {
+router.patch('/avatar', uploadMid, function (req, res, next) {
   const _id = req.body.id;
   console.log(req.file);
   const userPic = STATIC_URL + AVATAR_PATH + req.file.filename;

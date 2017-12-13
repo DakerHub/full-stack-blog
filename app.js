@@ -5,9 +5,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var swaggerJSDoc = require('swagger-jsdoc');
+var jws = require('jws');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var login = require('./routes/login')
 
 var app = express();
 
@@ -18,7 +20,7 @@ var options = {
       version: '1.0.0', // Version (required)
     },
   },
-  apis: ['./routes/*.js'], // Path to the API docs
+  apis: ['./routes/*.js'] // Path to the API docs
 };
 
 // Initialize swagger-jsdoc -> returns validated swagger spec in json format
@@ -54,7 +56,23 @@ app.use(function (req, res, next) {
   next();
 });
 
+app.use(function (req, res, next) {
+  if (req.query.token) {
+    var signature = req.query.token;
+    var valid = jws.verify(signature, 'HS256', 'fcclovepotato@');
+    var userId = ''
+    if (!valid) {
+      res.sendStatus(401);
+    } else {
+      userId = jws.decode(signature).payload.user_id;
+    }
+    req.userId = userId;
+  }
+  next();
+});
+
 app.use('/', index);
+app.use('/login', login)
 app.use('/users', users);
 
 // return a doc of json to render swagger
