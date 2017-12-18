@@ -1,6 +1,7 @@
 const express = require('express');
 const { Users } = require('./../model/users');
 const jws = require('jws');
+const { SECRET } = require('./../config/config');
 
 const router = express.Router();
 
@@ -85,7 +86,7 @@ router.post('/', function (req, res, next) {
     const token = jws.sign({
       header: { typ: 'JW', alg: 'HS256' },
       payload: '{iss: "fcc\'blog",user_id: "' + user._id + '"}',
-      secret: 'fcclovepotato@'
+      secret: SECRET
     });
     res.send({
       code: 200,

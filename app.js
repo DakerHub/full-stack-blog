@@ -6,10 +6,12 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var swaggerJSDoc = require('swagger-jsdoc');
 var jws = require('jws');
+var { SECRET, whiteList } = require('./config/config')
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-var login = require('./routes/login')
+var login = require('./routes/login');
+var posts = require('./routes/posts');
 
 var app = express();
 
@@ -57,23 +59,28 @@ app.use(function (req, res, next) {
 });
 
 app.use(function (req, res, next) {
-  if (req.query.token) {
+  if (whiteList.includes(req._parsedUrl.pathname)) {
+    next();
+  } else if (req.query.token) {
     var signature = req.query.token;
-    var valid = jws.verify(signature, 'HS256', 'fcclovepotato@');
-    var userId = ''
+    var valid = jws.verify(signature, 'HS256', SECRET);
+    var userId = '';
     if (!valid) {
       res.sendStatus(401);
     } else {
       userId = jws.decode(signature).payload.user_id;
     }
     req.userId = userId;
+    next();
+  } else {
+    return res.sendStatus(401);
   }
-  next();
 });
 
 app.use('/', index);
-app.use('/login', login)
+app.use('/login', login);
 app.use('/users', users);
+app.use('/posts', posts);
 
 // return a doc of json to render swagger
 app.get('/api-docs.json', function(req, res) {

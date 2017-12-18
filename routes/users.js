@@ -94,12 +94,12 @@ const uploadMid = function (req, res, next) {
 router.get('/', function (req, res, next) {
   console.log(req.userId);
   const { username, id } = req.query;
-  const query = {};
+  let query = {};
   if (username) {
     query.username = username;
   }
   if (id) {
-    query.id = id;
+    query = { _id: id };
   }
   Users.find(query).exec(function (err, rows) {
     if (err) {
@@ -246,7 +246,6 @@ router.delete('/', function (req, res, next) {
   });
 });
 
-
 /**
  * @swagger
  * /users/avatar:
@@ -310,6 +309,5 @@ router.patch('/avatar', uploadMid, function (req, res, next) {
     });
   });
 });
-
 
 module.exports = router;
