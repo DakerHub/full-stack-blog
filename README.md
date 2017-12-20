@@ -8,3 +8,10 @@
 </ul>
 <p>旨在了解全栈开发流程，搭建一个自用的个人博客。</p>
 <p>蜗速开发中...</p>
+<p><input type="checkbox" checked> 登录</p>
+<p><input type="checkbox" checked> 用户的增删改查</p>
+<p><input type="checkbox" checked> 文章的增删改查</p>
+<p><input type="checkbox"> 标签的增删改查</p>
+<p><input type="checkbox"> 分类的增删改查</p>
+<p><input type="checkbox"> 文章关联分类</p>
+<p><input type="checkbox"> 文章关联标签</p>
