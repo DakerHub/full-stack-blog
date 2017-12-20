@@ -69,7 +69,7 @@ const uploadMid = function (req, res, next) {
  *         in: query
  *         required: false
  *         type: string
- *       - name: id
+ *       - name: _id
  *         description: 通过用户id进行查找
  *         in: query
  *         required: false
@@ -93,13 +93,13 @@ const uploadMid = function (req, res, next) {
  */
 router.get('/', function (req, res, next) {
   console.log(req.userId);
-  const { username, id } = req.query;
+  const { username, _id } = req.query;
   let query = {};
   if (username) {
     query.username = username;
   }
-  if (id) {
-    query = { _id: id };
+  if (_id) {
+    query = { _id };
   }
   Users.find(query).exec(function (err, rows) {
     if (err) {
@@ -177,7 +177,7 @@ router.post('/', function (req, res, next) {
       });
       return;
     }
-    const { username: name, userPic, regDate, _id: id } = newUser;
+    const { username: name, userPic, regDate, _id } = newUser;
     res.send({
       code: 200,
       msg: 'success',
@@ -185,7 +185,7 @@ router.post('/', function (req, res, next) {
         username: name,
         regDate,
         userPic: '',
-        id
+        _id
       }
     });
   });
@@ -206,7 +206,7 @@ router.post('/', function (req, res, next) {
  *         in: query
  *         required: true
  *         type: string
- *       - name: id
+ *       - name: _id
  *         description: 用户ID
  *         in: query
  *         required: true
@@ -228,7 +228,7 @@ router.post('/', function (req, res, next) {
  *               $ref: '#/definitions/User'
  */
 router.delete('/', function (req, res, next) {
-  Users.deleteMany({ _id: req.query.id }, function (err) {
+  Users.deleteOne({ _id: req.query._id }, function (err) {
     if (err) {
       console.log(err);
       res.send({
@@ -261,7 +261,7 @@ router.delete('/', function (req, res, next) {
  *         in: query
  *         required: true
  *         type: string
- *       - name: id
+ *       - name: _id
  *         description: 用户id
  *         in: formData
  *         required: true
@@ -288,7 +288,7 @@ router.delete('/', function (req, res, next) {
  *               $ref: '#/definitions/User'
  */
 router.patch('/avatar', uploadMid, function (req, res, next) {
-  const _id = req.body.id;
+  const { _id } = req.body;
   console.log(req.file);
   const userPic = STATIC_URL + AVATAR_PATH + req.file.filename;
   Users.findByIdAndUpdate(_id, { userPic }, { new: true }, function (err, newUser) {

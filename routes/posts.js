@@ -39,7 +39,7 @@ const router = express.Router();
  *         in: query
  *         required: false
  *         type: string
- *       - name: id
+ *       - name: _id
  *         description: 通过文章id进行查找
  *         in: query
  *         required: false
@@ -62,15 +62,15 @@ const router = express.Router();
  *                 $ref: '#/definitions/Post'
  */
 router.get('/', function (req, res, next) {
-  const { title, id } = req.query;
+  const { title, _id } = req.query;
   let query = {};
   if (title) {
     query.title = title;
   }
-  if (id) {
-    query = { _id: id };
+  if (_id) {
+    query = { _id };
   }
-  Posts.find(query).exec(function (err, rows) {
+  Posts.find(query).select('-__v -comments -content').exec(function (err, rows) {
     if (err) {
       console.error(err);
       res.send({
@@ -270,8 +270,60 @@ router.put('/', function (req, res, next) {
   });
 });
 
+/**
+ * @swagger
+ * /posts:
+ *   delete:
+ *     description: 更新文章
+ *     tags:
+ *       - 文章
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: token
+ *         description: token
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: _id
+ *         description: 文章id
+ *         in: query
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK
+ *         schema:
+ *           type: object
+ *           properties:
+ *             code:
+ *               type: integer
+ *               description: 返回结果状态.
+ *             msg:
+ *               type: string
+ *               description: 返回结果文本.
+ *             sources:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/Post'
+ */
 router.delete('/', function (req, res, next) {
-
+  Posts.deleteOne({ _id: req.query._id }, function (err) {
+    if (err) {
+      console.log(err);
+      res.send({
+        code: 500,
+        msg: err.errmsg || err.message,
+        source: null
+      });
+      return;
+    }
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: null
+    });
+  });
 });
 
 module.exports = router;
