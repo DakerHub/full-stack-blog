@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { connection } = require('./connect');
+const { mongoose, connection } = require('./connect');
+const { tagsSchema } = require('./tags');
 
 const { ObjectId } = mongoose.Schema.Types;
 
@@ -45,9 +45,12 @@ const posts = {
   category: {
     type: ObjectId
   },
-  tags: [],
+  tags: [tagsSchema],
   comments: []
 };
 
-const Posts = connection.model('post', posts);
+const postsSchema = new mongoose.Schema(posts);
+const Posts = mongoose.model('post', postsSchema);
+
 module.exports.Posts = Posts;
+module.exports.postsSchema = postsSchema;

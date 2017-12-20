@@ -5,3 +5,4 @@ mongoose.Promise = global.Promise;
 mongoose.connect(DB_URI, { useMongoClient: true });
 
 module.exports.connection = mongoose.connection;
+module.exports.mongoose = mongoose;

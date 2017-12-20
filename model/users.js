@@ -1,4 +1,4 @@
-const { connection } = require('./connect');
+const { mongoose, connection } = require('./connect');
 
 const users = {
   username: {
@@ -14,7 +14,8 @@ const users = {
   userPic: String
 };
 
-const Users = connection.model('user', users);
+const usersSchema = new mongoose.Schema(users);
+const Users = mongoose.model('user', usersSchema);
 
-module.exports.connection = connection;
 module.exports.Users = Users;
+module.exports.usersSchema = usersSchema;
