@@ -45,7 +45,7 @@ const uploadMid = function (req, res, next) {
  *         type: string
  *       regDate:
  *         type: string
- *       id:
+ *       _id:
  *         type: string
  */
 

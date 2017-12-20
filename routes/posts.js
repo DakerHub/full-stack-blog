@@ -11,11 +11,11 @@ const router = express.Router();
  *     properties:
  *       title:
  *         type: string
- *       abstact:
- *         type: string
  *       date:
  *         type: string
- *       id:
+ *       publishStatus:
+ *         type: string
+ *       _id:
  *         type: string
  */
 
@@ -86,6 +86,192 @@ router.get('/', function (req, res, next) {
       sources: rows
     });
   });
+});
+
+/**
+ * @swagger
+ * /posts:
+ *   post:
+ *     description: 新建文章
+ *     tags:
+ *       - 文章
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: token
+ *         description: token
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: title
+ *         description: 文章名
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: abstract
+ *         description: 文章摘要
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: content
+ *         description: 文章内容
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: date
+ *         description: 文章日期
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: publishStatus
+ *         description: 文章发布状态
+ *         in: query
+ *         required: false
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK
+ *         schema:
+ *           type: object
+ *           properties:
+ *             code:
+ *               type: integer
+ *               description: 返回结果状态.
+ *             msg:
+ *               type: string
+ *               description: 返回结果文本.
+ *             sources:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/Post'
+ */
+router.post('/', function (req, res, next) {
+  const { title, abstract, content, date = Date.now(), publishStatus = '1' } = req.query;
+  const post = {
+    title,
+    abstract,
+    content,
+    date,
+    publishStatus
+  };
+  Posts.create(post, function (err, newPost) {
+    const { title, abstract, content, date, publishStatus, _id, tags } = newPost;
+    if (err) {
+      console.error(err);
+      res.send({
+        code: 500,
+        msg: err.errmsg || err.message,
+        sources: null
+      });
+      return;
+    }
+    res.send({
+      code: 200,
+      msg: 'success',
+      sources: { title, date, publishStatus, _id }
+    });
+  });
+});
+
+/**
+ * @swagger
+ * /posts:
+ *   put:
+ *     description: 更新文章
+ *     tags:
+ *       - 文章
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: token
+ *         description: token
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: _id
+ *         description: 文章id
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: title
+ *         description: 文章名
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: abstract
+ *         description: 文章摘要
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: content
+ *         description: 文章内容
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: date
+ *         description: 文章日期
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: publishStatus
+ *         description: 文章发布状态
+ *         in: query
+ *         required: false
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK
+ *         schema:
+ *           type: object
+ *           properties:
+ *             code:
+ *               type: integer
+ *               description: 返回结果状态.
+ *             msg:
+ *               type: string
+ *               description: 返回结果文本.
+ *             sources:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/Post'
+ */
+router.put('/', function (req, res, next) {
+  const { _id, title, abstract, content, date, publishStatus } = req.query;
+  const plainObj = { title, abstract, content, date, publishStatus };
+  const updatedPost = {};
+  for (const key in plainObj) {
+    if (plainObj.hasOwnProperty(key)) {
+      const element = plainObj[key];
+      if (element) {
+        updatedPost[key] = element;
+      }
+    }
+  }
+  
+  if (!_id) {
+    res.sendStatus(400);
+  }
+  Posts.findByIdAndUpdate(_id, updatedPost, { new: true }, function (err, newUser) {
+    const { title, date, publishStatus, _id } = newUser;
+    if (err) {
+      console.error(err);
+      res.send({
+        code: 500,
+        msg: err.errmsg || err.message,
+        sources: null
+      });
+      return;
+    }
+    res.send({
+      code: 200,
+      msg: 'success',
+      sources: { title, date, publishStatus, _id }
+    });
+  });
+});
+
+router.delete('/', function (req, res, next) {
+
 });
 
 module.exports = router;

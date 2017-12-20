@@ -2,34 +2,45 @@ const mongoose = require('mongoose');
 const { connection } = require('./connect');
 
 const { ObjectId } = mongoose.Schema.Types;
+
+/**
+ * title: 文章名
+ * abstract: 文章简介
+ * authorId: 作者id
+ * authorName: 作者名
+ * content: 文章内容
+ * date: 文章日期
+ * publishStatus: 发布状态 1: 公开 2: 私有 3: 回收
+ * category: 文章分类id
+ * tags: 标签
+ * comments: 一级评论
+ */
 const posts = {
   title: {
     type: String,
-    require: true
+    required: true
   },
   abstract: {
     type: String,
-    require: true
-  },
-  authorId: {
-    type: ObjectId,
-    require: true
-  },
-  authorName: {
-    type: String,
-    require: true
+    required: true
   },
   content: {
     type: String,
-    require: true
+    required: true
   },
   date: {
     type: Date,
-    require: true
+    required: true
   },
   publishStatus: {
     type: String,
-    require: true
+    required: true
+  },
+  authorId: {
+    type: ObjectId
+  },
+  authorName: {
+    type: String
   },
   category: {
     type: ObjectId

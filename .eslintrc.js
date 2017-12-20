@@ -21,6 +21,9 @@ module.exports = {
         'prefer-template': 0,
         'object-curly-newline': 0,
         'no-underscore-dangle': 0,
-        'no-shadow': 0
+        'no-shadow': 0,
+        'camelcase': 0,
+        'no-prototype-builtins': 0,
+        'no-restricted-syntax': 0
       }
 };
