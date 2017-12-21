@@ -1,5 +1,5 @@
 const { mongoose, connection } = require('./connect');
-const { tagsSchema } = require('./tags');
+const { tagsSchema, Tags } = require('./tags');
 
 const { ObjectId } = mongoose.Schema.Types;
 
@@ -46,12 +46,78 @@ const posts = {
   category: {
     type: ObjectId
   },
-  tags: [tagsSchema],
+  tags: [{
+    oriId: {
+      type: String
+    },
+    name: {
+      type: String
+    }
+  }],
   comments: []
 };
 
 const postsSchema = new mongoose.Schema(posts);
+postsSchema.methods.$_linkTags = function (tags, callback) {
+  const self = this;
+  const _tags = this.tags;
+  const _tagsLen = _tags.length;
+  const existTagIds = [];
+  const uniqueTags = [...new Set(tags)];
+  const tagLen = uniqueTags.length;
+  const failIds = [];
+  let successCount = 0;
+  if (_tagsLen > 0) {
+    for (let i = 0; i < _tags.length; i++) {
+      existTagIds.push(_tags[i]._id);
+    }
+    existTagIds.forEach(id => {
+      _tags.id(id).remove();
+    });
+  }
+  console.log(_tags);
+  if (tagLen === 0) {
+    if (_tagsLen > 0) {
+      this.save(function (savePostErr) {
+        if (savePostErr) {
+          console.log(savePostErr, 'savePostErr');
+          callback(savePostErr);
+        }
+        return callback(null);
+      });
+    } else {
+      callback(null);
+    }
+    return;
+  }
+  uniqueTags.forEach(tagId => {
+    Tags.findById(tagId)
+      .exec(function (findErr, tag) {
+        if (findErr) {
+          console.log(findErr, 'findErr');
+          failIds.push(tagId);
+        } else {
+          self.tags.addToSet({
+            oriId: tagId,
+            name: tag.name
+          });
+          successCount += 1;
+        }
+        if (tagLen === failIds.length + successCount) {
+          self.save(function (savePostErr) {
+            if (savePostErr) {
+              console.log(savePostErr, 'savePostErr');
+              return callback(savePostErr);
+            }
+            callback(failIds.length > 0 ? failIds : null);
+          });
+        }
+      });
+  });
+};
+
 const Posts = mongoose.model('post', postsSchema);
 
 module.exports.Posts = Posts;
+
 module.exports.postsSchema = postsSchema;

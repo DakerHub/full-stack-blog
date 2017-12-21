@@ -5,10 +5,6 @@ const tags = {
     type: String,
     required: true
   },
-  relatedCount: {
-    type: Number,
-    default: 0
-  },
   createDate: {
     type: Date,
     default: Date.now

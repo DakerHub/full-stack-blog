@@ -128,6 +128,11 @@ router.get('/', function (req, res, next) {
  *         in: query
  *         required: false
  *         type: string
+ *       - name: tags
+ *         description: 文章标签
+ *         in: query
+ *         required: false
+ *         type: string
  *     responses:
  *       200:
  *         description: OK
@@ -146,7 +151,8 @@ router.get('/', function (req, res, next) {
  *                 $ref: '#/definitions/Post'
  */
 router.post('/', function (req, res, next) {
-  const { title, abstract, content, date = Date.now(), publishStatus = '1' } = req.query;
+  const { title, abstract, content, date = Date.now(), publishStatus = '1', tags } = req.query;
+  const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
   const post = {
     title,
     abstract,
@@ -155,9 +161,8 @@ router.post('/', function (req, res, next) {
     publishStatus
   };
   Posts.create(post, function (err, newPost) {
-    const { title, abstract, content, date, publishStatus, _id, tags } = newPost;
     if (err) {
-      console.error(err);
+      console.error(err, 'create');
       res.send({
         code: 500,
         msg: err.errmsg || err.message,
@@ -165,10 +170,28 @@ router.post('/', function (req, res, next) {
       });
       return;
     }
-    res.send({
-      code: 200,
-      msg: 'success',
-      sources: { title, date, publishStatus, _id }
+    const { title, abstract, content, date, publishStatus, _id, tags } = newPost;
+    newPost.$_linkTags(tagIds, function (errId) {
+      if (errId && Array.isArray(errId)) {
+        res.send({
+          code: 500,
+          msg: 'failed to link tags whose id is `' + errId.join(',') + '`',
+          sources: null
+        });
+        return;
+      } else if (errId) {
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null
+        });
+        return;
+      }
+      res.send({
+        code: 200,
+        msg: 'success',
+        sources: { title, date, publishStatus, _id }
+      });
     });
   });
 });
@@ -270,6 +293,89 @@ router.put('/', function (req, res, next) {
   });
 });
 
+/**
+ * @swagger
+ * /posts/tags:
+ *   patch:
+ *     description: 更新文章标签
+ *     tags:
+ *       - 文章
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: token
+ *         description: token
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: _id
+ *         description: 文章id
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: tags
+ *         description: 文章标签
+ *         in: query
+ *         required: false
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK
+ *         schema:
+ *           type: object
+ *           properties:
+ *             code:
+ *               type: integer
+ *               description: 返回结果状态.
+ *             msg:
+ *               type: string
+ *               description: 返回结果文本.
+ *             sources:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/Post'
+ */
+router.patch('/tags', function (req, res, next) {
+  const { _id, tags } = req.query;
+  const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
+  
+  if (!_id) {
+    res.sendStatus(400);
+  }
+  Posts.findById(_id, function (err, post) {
+    const { title, date, publishStatus, _id } = post;
+    if (err) {
+      res.send({
+        code: 500,
+        msg: err.errmsg || err.message,
+        sources: null
+      });
+      return;
+    }
+    post.$_linkTags(tagIds, function (errId) {
+      if (errId && Array.isArray(errId)) {
+        res.send({
+          code: 500,
+          msg: 'failed to link tags whose id is `' + errId.join(',') + '`',
+          sources: null
+        });
+        return;
+      } else if (errId) {
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null
+        });
+        return;
+      }
+      res.send({
+        code: 200,
+        msg: 'success',
+        sources: { title, date, publishStatus, _id }
+      });
+    });
+  });
+});
 /**
  * @swagger
  * /posts:
