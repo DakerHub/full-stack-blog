@@ -34,6 +34,7 @@ const posts = {
   },
   publishStatus: {
     type: String,
+    enum: ['1', '2', '3'],
     required: true
   },
   authorId: {

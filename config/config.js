@@ -9,7 +9,7 @@ const SITE_URL = 'http://localhost:3000';
 const STATIC_URL = SITE_URL + '/static';
 const AVATAR_PATH = '/avatar/';
 const SECRET = 'fcclovepotato@';
-const whiteList = ['/login', '/api-docs.json'];
+const whiteList = ['/login', '/swagger.json'];
 
 module.exports.DB_URI = 'mongodb://' + DB_IP + ':' + DB_PORT + '/' + DB_NAME;
 module.exports.STATIC_PATH = STATIC_PATH;

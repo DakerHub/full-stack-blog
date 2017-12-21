@@ -12,6 +12,7 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 var login = require('./routes/login');
 var posts = require('./routes/posts');
+var tags = require('./routes/tags');
 
 var app = express();
 
@@ -85,9 +86,10 @@ app.use('/', index);
 app.use('/login', login);
 app.use('/users', users);
 app.use('/posts', posts);
+app.use('/tags', tags);
 
 // return a doc of json to render swagger
-app.get('/api-docs.json', function(req, res) {
+app.get('/swagger.json', function(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);

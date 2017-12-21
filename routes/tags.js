@@ -1,4 +1,4 @@
-const { Posts } = require('./../model/posts');
+const { Tags } = require('./../model/tags');
 const express = require('express');
 
 const router = express.Router();
@@ -6,14 +6,10 @@ const router = express.Router();
 /**
  * @swagger
  * definitions:
- *   Post:
+ *   Tag:
  *     type: object
  *     properties:
- *       title:
- *         type: string
- *       date:
- *         type: string
- *       publishStatus:
+ *       name:
  *         type: string
  *       _id:
  *         type: string
@@ -21,11 +17,11 @@ const router = express.Router();
 
 /**
  * @swagger
- * /posts:
+ * /Tags:
  *   get:
- *     description: 获取文章列表
+ *     description: 获取标签列表
  *     tags:
- *       - 文章
+ *       - 标签
  *     produces:
  *       - application/json
  *     parameters:
@@ -35,12 +31,12 @@ const router = express.Router();
  *         required: true
  *         type: string
  *       - name: title
- *         description: 通过文章名进行查找
+ *         description: 通过标签名进行查找
  *         in: query
  *         required: false
  *         type: string
  *       - name: _id
- *         description: 通过文章id进行查找
+ *         description: 通过标签id进行查找
  *         in: query
  *         required: false
  *         type: string
@@ -59,18 +55,18 @@ const router = express.Router();
  *             sources:
  *               type: array
  *               items:
- *                 $ref: '#/definitions/Post'
+ *                 $ref: '#/definitions/Tag'
  */
 router.get('/', function (req, res, next) {
-  const { title, _id } = req.query;
+  const { name, _id } = req.query;
   let query = {};
-  if (title) {
-    query.title = title;
+  if (name) {
+    query.name = name;
   }
   if (_id) {
     query = { _id };
   }
-  Posts.find(query).select('-__v -comments -content').exec(function (err, rows) {
+  Tags.find(query).select('-__v').exec(function (err, rows) {
     if (err) {
       console.error(err);
       res.send({
@@ -90,11 +86,11 @@ router.get('/', function (req, res, next) {
 
 /**
  * @swagger
- * /posts:
+ * /Tags:
  *   post:
- *     description: 新建文章
+ *     description: 新建标签
  *     tags:
- *       - 文章
+ *       - 标签
  *     produces:
  *       - application/json
  *     parameters:
@@ -103,30 +99,10 @@ router.get('/', function (req, res, next) {
  *         in: query
  *         required: true
  *         type: string
- *       - name: title
- *         description: 文章名
+ *       - name: name
+ *         description: 标签名
  *         in: query
  *         required: true
- *         type: string
- *       - name: abstract
- *         description: 文章摘要
- *         in: query
- *         required: true
- *         type: string
- *       - name: content
- *         description: 文章内容
- *         in: query
- *         required: false
- *         type: string
- *       - name: date
- *         description: 文章日期
- *         in: query
- *         required: false
- *         type: string
- *       - name: publishStatus
- *         description: 文章发布状态
- *         in: query
- *         required: false
  *         type: string
  *     responses:
  *       200:
@@ -143,19 +119,15 @@ router.get('/', function (req, res, next) {
  *             sources:
  *               type: array
  *               items:
- *                 $ref: '#/definitions/Post'
+ *                 $ref: '#/definitions/Tag'
  */
 router.post('/', function (req, res, next) {
-  const { title, abstract, content, date = Date.now(), publishStatus = '1' } = req.query;
-  const post = {
-    title,
-    abstract,
-    content,
-    date,
-    publishStatus
+  const { name } = req.query;
+  const tag = {
+    name
   };
-  Posts.create(post, function (err, newPost) {
-    const { title, abstract, content, date, publishStatus, _id, tags } = newPost;
+  Tags.create(tag, function (err, newTag) {
+    const { _id, name, createDate } = newTag;
     if (err) {
       console.error(err);
       res.send({
@@ -168,18 +140,18 @@ router.post('/', function (req, res, next) {
     res.send({
       code: 200,
       msg: 'success',
-      sources: { title, date, publishStatus, _id }
+      sources: { _id, name, createDate }
     });
   });
 });
 
 /**
  * @swagger
- * /posts:
+ * /Tags:
  *   put:
- *     description: 更新文章
+ *     description: 更新标签
  *     tags:
- *       - 文章
+ *       - 标签
  *     produces:
  *       - application/json
  *     parameters:
@@ -189,32 +161,12 @@ router.post('/', function (req, res, next) {
  *         required: true
  *         type: string
  *       - name: _id
- *         description: 文章id
+ *         description: 标签id
  *         in: query
  *         required: true
  *         type: string
- *       - name: title
- *         description: 文章名
- *         in: query
- *         required: false
- *         type: string
- *       - name: abstract
- *         description: 文章摘要
- *         in: query
- *         required: false
- *         type: string
- *       - name: content
- *         description: 文章内容
- *         in: query
- *         required: false
- *         type: string
- *       - name: date
- *         description: 文章日期
- *         in: query
- *         required: false
- *         type: string
- *       - name: publishStatus
- *         description: 文章发布状态
+ *       - name: name
+ *         description: 标签名
  *         in: query
  *         required: false
  *         type: string
@@ -233,26 +185,17 @@ router.post('/', function (req, res, next) {
  *             sources:
  *               type: array
  *               items:
- *                 $ref: '#/definitions/Post'
+ *                 $ref: '#/definitions/Tag'
  */
 router.put('/', function (req, res, next) {
-  const { _id, title, abstract, content, date, publishStatus } = req.query;
-  const plainObj = { title, abstract, content, date, publishStatus };
-  const updatedPost = {};
-  for (const key in plainObj) {
-    if (plainObj.hasOwnProperty(key)) {
-      const element = plainObj[key];
-      if (element) {
-        updatedPost[key] = element;
-      }
-    }
-  }
+  const { _id, name } = req.query;
+  const updatedTag = { name };
   
   if (!_id) {
-    res.sendStatus(400);
+    return res.sendStatus(400);
   }
-  Posts.findByIdAndUpdate(_id, updatedPost, { new: true }, function (err, newPost) {
-    const { title, date, publishStatus, _id } = newPost;
+  Tags.findByIdAndUpdate(_id, updatedTag, { new: true }, function (err, newTag) {
+    const { _id, name, createDate } = newTag;
     if (err) {
       console.error(err);
       res.send({
@@ -265,18 +208,18 @@ router.put('/', function (req, res, next) {
     res.send({
       code: 200,
       msg: 'success',
-      sources: { title, date, publishStatus, _id }
+      sources: { _id, name, createDate }
     });
   });
 });
 
 /**
  * @swagger
- * /posts:
+ * /Tags:
  *   delete:
- *     description: 更新文章
+ *     description: 删除标签
  *     tags:
- *       - 文章
+ *       - 标签
  *     produces:
  *       - application/json
  *     parameters:
@@ -286,7 +229,7 @@ router.put('/', function (req, res, next) {
  *         required: true
  *         type: string
  *       - name: _id
- *         description: 文章id
+ *         description: 标签id
  *         in: query
  *         required: true
  *         type: string
@@ -305,10 +248,10 @@ router.put('/', function (req, res, next) {
  *             sources:
  *               type: array
  *               items:
- *                 $ref: '#/definitions/Post'
+ *                 $ref: '#/definitions/Tag'
  */
 router.delete('/', function (req, res, next) {
-  Posts.deleteOne({ _id: req.query._id }, function (err) {
+  Tags.deleteOne({ _id: req.query._id }, function (err) {
     if (err) {
       console.log(err);
       res.send({
