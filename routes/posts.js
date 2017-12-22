@@ -2,7 +2,7 @@ const { Posts } = require('./../model/posts');
 const { Tags } = require('./../model/tags');
 const { Categories } = require('./../model/categories');
 const express = require('express');
-const { findByIds } = require('./../model/model');
+const { findByIds, delByIds } = require('./../model/model');
 
 const router = express.Router();
 
@@ -352,7 +352,7 @@ router.put('/', function (req, res, next) {
  *         in: query
  *         required: true
  *         type: string
- *       - name: _id
+ *       - name: ids
  *         description: 文章id
  *         in: query
  *         required: true
@@ -375,19 +375,19 @@ router.put('/', function (req, res, next) {
  *                 $ref: '#/definitions/Post'
  */
 router.delete('/', function (req, res, next) {
-  Posts.deleteOne({ _id: req.query._id }, function (err) {
-    if (err) {
-      console.log(err);
-      res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        source: null
-      });
-      return;
-    }
+  const { ids } = req.query;
+  const tagIds = ids && typeof ids === 'string' ? ids.split(',') : [];
+  delByIds(Posts, tagIds).then(() => {
     res.send({
       code: 200,
       msg: 'success',
+      source: null
+    });
+  }).catch(err => {
+    console.log(err);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message,
       source: null
     });
   });
