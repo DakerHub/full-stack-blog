@@ -3,6 +3,7 @@ const { mongoose, connection } = require('./connect');
 const tags = { 
   name: {
     type: String,
+    unique: true,
     required: true
   },
   createDate: {

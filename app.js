@@ -13,6 +13,7 @@ var users = require('./routes/users');
 var login = require('./routes/login');
 var posts = require('./routes/posts');
 var tags = require('./routes/tags');
+var categories = require('./routes/categories');
 
 var app = express();
 
@@ -87,6 +88,7 @@ app.use('/login', login);
 app.use('/users', users);
 app.use('/posts', posts);
 app.use('/tags', tags);
+app.use('/categories', categories);
 
 // return a doc of json to render swagger
 app.get('/swagger.json', function(req, res) {

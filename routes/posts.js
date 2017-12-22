@@ -1,5 +1,8 @@
 const { Posts } = require('./../model/posts');
+const { Tags } = require('./../model/tags');
+const { Categories } = require('./../model/categories');
 const express = require('express');
+const { findByIds } = require('./../model/model');
 
 const router = express.Router();
 
@@ -132,7 +135,7 @@ router.get('/', function (req, res, next) {
  *       - name: content
  *         description: 文章内容
  *         in: query
- *         required: false
+ *         required: true
  *         type: string
  *       - name: date
  *         description: 文章日期
@@ -146,6 +149,11 @@ router.get('/', function (req, res, next) {
  *         type: string
  *       - name: tags
  *         description: 文章标签
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: category
+ *         description: 文章分类
  *         in: query
  *         required: false
  *         type: string
@@ -167,7 +175,7 @@ router.get('/', function (req, res, next) {
  *                 $ref: '#/definitions/Post'
  */
 router.post('/', function (req, res, next) {
-  const { title, abstract, content, date = Date.now(), publishStatus = '1', tags } = req.query;
+  const { title, abstract, content, date = Date.now(), publishStatus = '1', tags, category } = req.query;
   const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
   const post = {
     title,
@@ -175,23 +183,35 @@ router.post('/', function (req, res, next) {
     content,
     date,
     publishStatus,
+    category,
     tags: tagIds
   };
-  Posts.create(post, function (err, newPost) {
-    if (err) {
-      console.error(err, 'createPost');
+  const savePost = function (res, post) {
+    Posts.create(post, function (err, newPost) {
+      if (err) {
+        console.error(err, 'createPost');
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null
+        });
+        return;
+      }
+      const { title, date, publishStatus, _id } = newPost;
       res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        sources: null
+        code: 200,
+        msg: 'success',
+        sources: { title, date, publishStatus, _id }
       });
-      return;
-    }
-    const { title, date, publishStatus, _id } = newPost;
+    });
+  };
+  Promise.all([findByIds(Categories, [category]), findByIds(Tags, tagIds)]).then(() => {
+    savePost(res, post);
+  }).catch((err) => {
     res.send({
-      code: 200,
-      msg: 'success',
-      sources: { title, date, publishStatus, _id }
+      code: 400,
+      msg: err.errmsg || err.message || err,
+      sources: null
     });
   });
 });
@@ -246,6 +266,11 @@ router.post('/', function (req, res, next) {
  *         in: query
  *         required: false
  *         type: string
+ *       - name: category
+ *         description: 文章分类
+ *         in: query
+ *         required: false
+ *         type: string
  *     responses:
  *       200:
  *         description: OK
@@ -264,9 +289,9 @@ router.post('/', function (req, res, next) {
  *                 $ref: '#/definitions/Post'
  */
 router.put('/', function (req, res, next) {
-  const { _id, title, abstract, content, date, publishStatus, tags } = req.query;
+  const { _id, title, abstract, content, date, publishStatus, tags, category } = req.query;
   const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
-  const plainObj = { title, abstract, content, date, publishStatus };
+  const plainObj = { title, abstract, content, date, publishStatus, category };
   const updatedPost = {};
   for (const key in plainObj) {
     if (plainObj.hasOwnProperty(key)) {
@@ -276,27 +301,38 @@ router.put('/', function (req, res, next) {
       }
     }
   }
-  if (tagIds.length > 0) {
-    updatedPost.tags = tagIds;
-  }
+  updatedPost.tags = tagIds;
+
   if (!_id) {
     res.sendStatus(400);
   }
-  Posts.findByIdAndUpdate(_id, updatedPost, { new: true }, function (err, newPost) {
-    const { title, date, publishStatus, _id } = newPost;
-    if (err) {
-      console.error(err);
+  const updatePost = function () {
+    Posts.findByIdAndUpdate(_id, updatedPost, { new: true }, function (err, newPost) {
+      const { title, date, publishStatus, _id } = newPost;
+      if (err) {
+        console.error(err);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null
+        });
+        return;
+      }
       res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        sources: null
+        code: 200,
+        msg: 'success',
+        sources: { title, date, publishStatus, _id }
       });
-      return;
-    }
+    });
+  };
+
+  Promise.all([findByIds(Categories, [category]), findByIds(Tags, tagIds)]).then(() => {
+    updatePost(res, updatedPost);
+  }).catch((err) => {
     res.send({
-      code: 200,
-      msg: 'success',
-      sources: { title, date, publishStatus, _id }
+      code: 400,
+      msg: err.errmsg || err.message || err,
+      sources: null
     });
   });
 });

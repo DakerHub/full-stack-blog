@@ -1,4 +1,4 @@
-const { Tags } = require('./../model/tags');
+const { Categories } = require('./../model/categories');
 const express = require('express');
 
 const router = express.Router();
@@ -6,22 +6,26 @@ const router = express.Router();
 /**
  * @swagger
  * definitions:
- *   Tag:
+ *   Category:
  *     type: object
  *     properties:
  *       name:
  *         type: string
  *       _id:
  *         type: string
+ *       pId:
+ *         type: string
+ *       status:
+ *         type: string
  */
 
 /**
  * @swagger
- * /Tags:
+ * /Categories:
  *   get:
- *     description: 获取标签列表
+ *     description: 获取分类列表
  *     tags:
- *       - 标签
+ *       - 分类
  *     produces:
  *       - application/json
  *     parameters:
@@ -30,13 +34,13 @@ const router = express.Router();
  *         in: query
  *         required: true
  *         type: string
- *       - name: title
- *         description: 通过标签名进行查找
+ *       - name: name
+ *         description: 通过分类名进行查找
  *         in: query
  *         required: false
  *         type: string
  *       - name: _id
- *         description: 通过标签id进行查找
+ *         description: 通过分类id进行查找
  *         in: query
  *         required: false
  *         type: string
@@ -55,7 +59,7 @@ const router = express.Router();
  *             sources:
  *               type: array
  *               items:
- *                 $ref: '#/definitions/Tag'
+ *                 $ref: '#/definitions/Category'
  */
 router.get('/', function (req, res, next) {
   const { name, _id } = req.query;
@@ -66,7 +70,7 @@ router.get('/', function (req, res, next) {
   if (_id) {
     query = { _id };
   }
-  Tags.find(query).select('-__v').exec(function (err, rows) {
+  Categories.find(query).select('-__v -createdDate').exec(function (err, rows) {
     if (err) {
       console.error(err);
       res.send({
@@ -86,11 +90,11 @@ router.get('/', function (req, res, next) {
 
 /**
  * @swagger
- * /Tags:
+ * /Categories:
  *   post:
- *     description: 新建标签
+ *     description: 新建分类
  *     tags:
- *       - 标签
+ *       - 分类
  *     produces:
  *       - application/json
  *     parameters:
@@ -100,75 +104,17 @@ router.get('/', function (req, res, next) {
  *         required: true
  *         type: string
  *       - name: name
- *         description: 标签名
+ *         description: 分类名
  *         in: query
  *         required: true
  *         type: string
- *     responses:
- *       200:
- *         description: OK
- *         schema:
- *           type: object
- *           properties:
- *             code:
- *               type: integer
- *               description: 返回结果状态.
- *             msg:
- *               type: string
- *               description: 返回结果文本.
- *             sources:
- *               type: array
- *               items:
- *                 $ref: '#/definitions/Tag'
- */
-router.post('/', function (req, res, next) {
-  const { name } = req.query;
-  const tag = {
-    name
-  };
-  Tags.init().then(function () {
-    Tags.create(tag, function (err, newTag) {
-      const { _id, name, createDate } = newTag;
-      if (err) {
-        console.error(err);
-        res.send({
-          code: 500,
-          msg: err.errmsg || err.message,
-          sources: null
-        });
-        return;
-      }
-      res.send({
-        code: 200,
-        msg: 'success',
-        sources: { _id, name, createDate }
-      });
-    });
-  });
-});
-
-/**
- * @swagger
- * /Tags:
- *   put:
- *     description: 更新标签
- *     tags:
- *       - 标签
- *     produces:
- *       - application/json
- *     parameters:
- *       - name: token
- *         description: token
+ *       - name: pId
+ *         description: 父分类id
  *         in: query
- *         required: true
+ *         required: false
  *         type: string
- *       - name: _id
- *         description: 标签id
- *         in: query
- *         required: true
- *         type: string
- *       - name: name
- *         description: 标签名
+ *       - name: status
+ *         description: 父分类可见性
  *         in: query
  *         required: false
  *         type: string
@@ -187,17 +133,110 @@ router.post('/', function (req, res, next) {
  *             sources:
  *               type: array
  *               items:
- *                 $ref: '#/definitions/Tag'
+ *                 $ref: '#/definitions/Category'
+ */
+router.post('/', function (req, res, next) {
+  const { name, pId = '', status = '1' } = req.query;
+  const tag = {
+    name,
+    pId,
+    status
+  };
+  const saveCate = function (tag, res) {
+    Categories.init().then(function () {
+      Categories.create(tag, function (err, newCategory) {
+        const { _id, name, pId } = newCategory;
+        if (err) {
+          console.error(err);
+          res.send({
+            code: 500,
+            msg: err.errmsg || err.message,
+            sources: null
+          });
+          return;
+        }
+        res.send({
+          code: 200,
+          msg: 'success',
+          sources: { _id, name, pId }
+        });
+      });
+    });
+  };
+
+  if (pId !== '') {
+    Categories.findById(pId, function (err, cate) {
+      if (cate) {
+        saveCate(tag, res);
+      } else {
+        res.send({
+          code: 404,
+          msg: 'can\'t find category whose id is ' + pId,
+          sources: null
+        });
+      }
+    });
+  } else {
+    saveCate(tag, res);
+  }
+});
+
+/**
+ * @swagger
+ * /Categories:
+ *   put:
+ *     description: 更新分类
+ *     tags:
+ *       - 分类
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: token
+ *         description: token
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: _id
+ *         description: 分类id
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: name
+ *         description: 分类名
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: status
+ *         description: 分类可见性
+ *         in: query
+ *         required: false
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK
+ *         schema:
+ *           type: object
+ *           properties:
+ *             code:
+ *               type: integer
+ *               description: 返回结果状态.
+ *             msg:
+ *               type: string
+ *               description: 返回结果文本.
+ *             sources:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/Category'
  */
 router.put('/', function (req, res, next) {
-  const { _id, name } = req.query;
-  const updatedTag = { name };
+  const { _id, name, status } = req.query;
+  const updatedCate = { name, status };
   
   if (!_id) {
     return res.sendStatus(400);
   }
-  Tags.findByIdAndUpdate(_id, updatedTag, { new: true }, function (err, newTag) {
-    const { _id, name, createDate } = newTag;
+  Categories.findByIdAndUpdate(_id, updatedCate, { new: true }, function (err, newCategory) {
+    const { _id, name, pId } = newCategory;
     if (err) {
       console.error(err);
       res.send({
@@ -210,18 +249,18 @@ router.put('/', function (req, res, next) {
     res.send({
       code: 200,
       msg: 'success',
-      sources: { _id, name, createDate }
+      sources: { _id, name, pId }
     });
   });
 });
 
 /**
  * @swagger
- * /Tags:
+ * /Categories:
  *   delete:
- *     description: 删除标签
+ *     description: 删除分类
  *     tags:
- *       - 标签
+ *       - 分类
  *     produces:
  *       - application/json
  *     parameters:
@@ -231,7 +270,7 @@ router.put('/', function (req, res, next) {
  *         required: true
  *         type: string
  *       - name: _id
- *         description: 标签id
+ *         description: 分类id
  *         in: query
  *         required: true
  *         type: string
@@ -250,10 +289,14 @@ router.put('/', function (req, res, next) {
  *             sources:
  *               type: array
  *               items:
- *                 $ref: '#/definitions/Tag'
+ *                 $ref: '#/definitions/Category'
  */
 router.delete('/', function (req, res, next) {
-  Tags.deleteOne({ _id: req.query._id }, function (err) {
+  if (!req.query._id) {
+    return res.sendStatus(400);
+  }
+
+  Categories.deleteOne({ _id: req.query._id }, function (err) {
     if (err) {
       console.log(err);
       res.send({

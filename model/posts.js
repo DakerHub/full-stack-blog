@@ -12,8 +12,7 @@ const { ObjectId } = mongoose.Schema.Types;
  * date: 文章日期
  * publishStatus: 发布状态 1: 公开 2: 私有 3: 回收
  * category: 文章分类id
- * tags: 标签
- * comments: 一级评论
+ * tags: 标签Id数组
  */
 const posts = {
   title: {
@@ -46,8 +45,7 @@ const posts = {
   category: {
     type: ObjectId
   },
-  tags: [String],
-  comments: []
+  tags: [ObjectId]
 };
 
 const postsSchema = new mongoose.Schema(posts);
