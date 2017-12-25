@@ -1,5 +1,6 @@
 const { Categories } = require('./../model/categories');
 const express = require('express');
+const { deleteByIdsRecursive } = require('./../model/model');
 
 const router = express.Router();
 
@@ -269,7 +270,7 @@ router.put('/', function (req, res, next) {
  *         in: query
  *         required: true
  *         type: string
- *       - name: _id
+ *       - name: ids
  *         description: 分类id
  *         in: query
  *         required: true
@@ -292,23 +293,21 @@ router.put('/', function (req, res, next) {
  *                 $ref: '#/definitions/Category'
  */
 router.delete('/', function (req, res, next) {
-  if (!req.query._id) {
+  if (!req.query.ids) {
     return res.sendStatus(400);
   }
-
-  Categories.deleteOne({ _id: req.query._id }, function (err) {
-    if (err) {
-      console.log(err);
-      res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        source: null
-      });
-      return;
-    }
+  const { ids } = req.query;
+  const idsArr = ids && typeof ids === 'string' ? ids.split(',') : [];
+  deleteByIdsRecursive(Categories, idsArr, 'pId').then(result => {
     res.send({
       code: 200,
       msg: 'success',
+      source: null
+    });
+  }).catch(err => {
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message || err,
       source: null
     });
   });

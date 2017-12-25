@@ -14,6 +14,7 @@ var login = require('./routes/login');
 var posts = require('./routes/posts');
 var tags = require('./routes/tags');
 var categories = require('./routes/categories');
+var comments = require('./routes/comment')
 
 var app = express();
 
@@ -66,6 +67,7 @@ app.use(function (req, res, next) {
   } else if (req.query.token) {
     var signature = req.query.token;
     if (signature === 'TOKEN001') {
+      req.userId = 'admin';
       next();
     } else {
       var valid = jws.verify(signature, 'HS256', SECRET);
@@ -89,6 +91,7 @@ app.use('/users', users);
 app.use('/posts', posts);
 app.use('/tags', tags);
 app.use('/categories', categories);
+app.use('/comments', comments);
 
 // return a doc of json to render swagger
 app.get('/swagger.json', function(req, res) {

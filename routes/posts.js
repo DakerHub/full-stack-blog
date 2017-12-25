@@ -2,7 +2,7 @@ const { Posts } = require('./../model/posts');
 const { Tags } = require('./../model/tags');
 const { Categories } = require('./../model/categories');
 const express = require('express');
-const { findByIds, delByIds } = require('./../model/model');
+const { findByIds, deleteByIds } = require('./../model/model');
 
 const router = express.Router();
 
@@ -377,7 +377,7 @@ router.put('/', function (req, res, next) {
 router.delete('/', function (req, res, next) {
   const { ids } = req.query;
   const tagIds = ids && typeof ids === 'string' ? ids.split(',') : [];
-  delByIds(Posts, tagIds).then(() => {
+  deleteByIds(Posts, tagIds).then(() => {
     res.send({
       code: 200,
       msg: 'success',
