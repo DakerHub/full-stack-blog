@@ -48,6 +48,21 @@ const router = express.Router();
  *         in: query
  *         required: false
  *         type: string
+ *       - name: postId
+ *         description: 通过文章id进行查找
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: page
+ *         description: 分页页数
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: size
+ *         description: 每页的数据量
+ *         in: query
+ *         required: false
+ *         type: string
  *     responses:
  *       200:
  *         description: OK
@@ -60,33 +75,55 @@ const router = express.Router();
  *             msg:
  *               type: string
  *               description: 返回结果文本.
+ *             total:
+ *               type: number
+ *               description: 查询结果的总量.
  *             sources:
  *               type: array
  *               items:
  *                 $ref: '#/definitions/Comment'
  */
-router.get('/', function (req, res, next) {
-  const { pId } = req.query;
-  let query = null;
+router.get('/', async function (req, res, next) {
+  const { pId, postId } = req.query;
+  let { page = '1', size = '10' } = req.query;
+  let query = {};
+  let total = 0;
+  
+  page = Number.parseInt(page, 10);
+  size = Number.parseInt(size, 10);
+  if (postId) {
+    query.postId = postId;
+  }
   if (pId) {
+    // 如果有pId,则不管其他条件
     query = { pId };
   }
-  Comments.find(query).select('-__v').exec(function (err, rows) {
-    if (err) {
-      console.error(err);
+
+  total = await Comments.find(query).count().exec();
+
+  Comments
+    .find(query)
+    .skip((page - 1) * size)
+    .limit(size)
+    .select('-__v')
+    .exec(function (err, rows) {
+      if (err) {
+        console.error(err);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null,
+          total
+        });
+        return;
+      }
       res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        sources: null
+        code: 200,
+        msg: 'success',
+        sources: rows,
+        total
       });
-      return;
-    }
-    res.send({
-      code: 200,
-      msg: 'success',
-      sources: rows
     });
-  });
 });
 
 /**
@@ -147,7 +184,7 @@ router.get('/', function (req, res, next) {
  *                 $ref: '#/definitions/Comment'
  */
 router.post('/', function (req, res, next) {
-  const { content, postId, authorId, pId = '', status = '1' } = req.query;
+  const { content, postId, authorId, pId = '0', status = '1' } = req.query;
   const missing = hasMissing({ content, postId, authorId });
   if (missing) {
     res.send({
@@ -195,7 +232,7 @@ router.post('/', function (req, res, next) {
       }
     })
   ];
-  if (pId !== '') {
+  if (pId && pId !== '0') {
     promises.push(Comments.findById(pId).exec().then(comment => {
       if (!comment) {
         throw Error('there is no such comment whose id is ' + pId);
@@ -253,16 +290,16 @@ router.post('/', function (req, res, next) {
  *                 $ref: '#/definitions/Comment'
  */
 router.delete('/', async function (req, res, next) {
-  console.log(req.userId);
   const { userId, query } = req;
   const { ids } = query;
+  console.log(userId);
   if (!ids) {
     return res.sendStatus(400);
   }
   if (userId !== 'admin') {
-    /* 请求接口的用户不是评论者或者管理员 */
     const comment = await Comments.findById({ _id: ids }).exec();
-    if (comment !== userId) {
+    if (comment.authorId !== userId) {
+      /* 请求接口的用户不是评论者或者管理员 */
       res.send({
         code: 401,
         msg: 'no access!',

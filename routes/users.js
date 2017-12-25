@@ -74,6 +74,16 @@ const uploadMid = function (req, res, next) {
  *         in: query
  *         required: false
  *         type: string
+ *       - name: page
+ *         description: 分页页数
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: size
+ *         description: 每页的数据量
+ *         in: query
+ *         required: false
+ *         type: string
  *     responses:
  *       200:
  *         description: OK
@@ -86,37 +96,54 @@ const uploadMid = function (req, res, next) {
  *             msg:
  *               type: string
  *               description: 返回结果文本.
+ *             total:
+ *               type: number
+ *               description: 查询结果的总量.
  *             sources:
  *               type: array
  *               items:
  *                 $ref: '#/definitions/User'
  */
-router.get('/', function (req, res, next) {
+router.get('/', async function (req, res, next) {
   console.log(req.userId);
   const { username, _id } = req.query;
+  let { page = '1', size = '10' } = req.query;
   let query = {};
+  let total = 0;
+
+  page = Number.parseInt(page, 10);
+  size = Number.parseInt(size, 10);
   if (username) {
     query.username = username;
   }
   if (_id) {
     query = { _id };
   }
-  Users.find(query).exec(function (err, rows) {
-    if (err) {
-      console.error(err);
+  
+  total = await Users.find(query).count().exec();
+
+  Users
+    .find(query)
+    .skip((page - 1) * size)
+    .limit(size)
+    .exec(function (err, rows) {
+      if (err) {
+        console.error(err);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null,
+          total
+        });
+        return;
+      }
       res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        sources: null
+        code: 200,
+        msg: 'success',
+        sources: rows,
+        total
       });
-      return;
-    }
-    res.send({
-      code: 200,
-      msg: 'success',
-      sources: rows
     });
-  });
 });
 
 /**

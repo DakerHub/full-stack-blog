@@ -71,13 +71,15 @@ app.use(function (req, res, next) {
       next();
     } else {
       var valid = jws.verify(signature, 'HS256', SECRET);
-      var userId = '';
+      var payload = null;
       if (!valid) {
         res.sendStatus(401);
+        return;
       } else {
-        userId = jws.decode(signature).payload.user_id;
+        payload = JSON.parse(jws.decode(signature).payload);
       }
-      req.userId = userId;
+      console.log(payload.userid);
+      req.userId = payload.userid;
       next();
     }
   } else {

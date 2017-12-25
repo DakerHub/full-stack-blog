@@ -47,6 +47,21 @@ const router = express.Router();
  *         in: query
  *         required: false
  *         type: string
+ *       - name: categoryId
+ *         description: 通过分类id进行查找
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: page
+ *         description: 分页页数
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: size
+ *         description: 每页的数据量
+ *         in: query
+ *         required: false
+ *         type: string
  *     responses:
  *       200:
  *         description: OK
@@ -59,52 +74,73 @@ const router = express.Router();
  *             msg:
  *               type: string
  *               description: 返回结果文本.
+ *             total:
+ *               type: number
+ *               description: 查询结果的总量.
  *             sources:
  *               type: array
  *               items:
  *                 $ref: '#/definitions/Post'
  */
-router.get('/', function (req, res, next) {
-  const { title, _id } = req.query;
+router.get('/', async function (req, res, next) {
+  const { title, _id, categoryId } = req.query;
+  let { page = '1', size = '10' } = req.query;
   let query = {};
+  let total = 0;
+  
+  page = Number.parseInt(page, 10);
+  size = Number.parseInt(size, 10);
   if (title) {
     query.title = title;
+  }
+  if (categoryId) {
+    query.category = categoryId;
   }
   if (_id) {
     query = { _id };
   }
-  Posts.find(query).select('-__v -comments -content').exec(function (err, rows) {
-    if (err) {
-      console.error(err);
-      res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        sources: null
+
+  total = await Posts.find(query).count().exec();
+
+  Posts.find(query)
+    .skip((page - 1) * size)
+    .limit(size)
+    .select('-__v -comments -content')
+    .exec(function (err, rows) {
+      if (err) {
+        console.error(err);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null,
+          total
+        });
+        return;
+      }
+      const promises = [];
+      rows.forEach(row => {
+        promises.push(row.$_getReleatedTags().then(tags => {
+          row.tags = tags;
+        }));
       });
-      return;
-    }
-    const promises = [];
-    rows.forEach(row => {
-      promises.push(row.$_getReleatedTags().then(tags => {
-        row.tags = tags;
-      }));
+      Promise.all(promises).then((tagsMap) => {
+        console.log(tagsMap);
+        res.send({
+          code: 200,
+          msg: 'success',
+          sources: rows,
+          total
+        });
+      }).catch(err => {
+        console.error(err);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message || err,
+          sources: null,
+          total
+        });
+      });
     });
-    Promise.all(promises).then((tagsMap) => {
-      console.log(tagsMap);
-      res.send({
-        code: 200,
-        msg: 'success',
-        sources: rows
-      });
-    }).catch(err => {
-      console.error(err);
-      res.send({
-        code: 500,
-        msg: err.errmsg || err.message || err,
-        sources: null
-      });
-    });
-  });
 });
 
 /**
@@ -205,15 +241,16 @@ router.post('/', function (req, res, next) {
       });
     });
   };
-  Promise.all([findByIds(Categories, [category]), findByIds(Tags, tagIds)]).then(() => {
-    savePost(res, post);
-  }).catch((err) => {
-    res.send({
-      code: 400,
-      msg: err.errmsg || err.message || err,
-      sources: null
+  Promise.all([findByIds(Categories, category ? [category] : []), findByIds(Tags, tagIds)])
+    .then(() => {
+      savePost(res, post);
+    }).catch((err) => {
+      res.send({
+        code: 400,
+        msg: err.errmsg || err.message || err,
+        sources: null
+      });
     });
-  });
 });
 
 /**

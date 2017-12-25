@@ -85,7 +85,7 @@ router.post('/', function (req, res, next) {
     // 密码验证正确
     const token = jws.sign({
       header: { typ: 'JW', alg: 'HS256' },
-      payload: '{iss: "fcc\'blog",user_id: "' + user._id + '"}',
+      payload: '{"iss": "fcc\'blog","userid": "' + user._id + '"}',
       secret: SECRET
     });
     res.send({
