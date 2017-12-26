@@ -1,6 +1,6 @@
-# views
+# blog-fontend
 
-> A Vue.js project
+> blog and it's CMS
 
 ## Build Setup
 
