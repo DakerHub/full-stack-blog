@@ -1,4 +1,4 @@
-const { Tags } = require('./../model/tags');
+const { Tags } = require('./../lib/models/tags');
 const express = require('express');
 
 const router = express.Router();

@@ -1,5 +1,5 @@
 const express = require('express');
-const { Users } = require('./../model/users');
+const { Users } = require('./../lib/models/users');
 const { STATIC_PATH, SITE_PATH, STATIC_URL, AVATAR_PATH } = require('./../config/config');
 const path = require('path');
 const multer = require('multer');

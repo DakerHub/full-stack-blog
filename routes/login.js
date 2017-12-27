@@ -1,5 +1,5 @@
 const express = require('express');
-const { Users } = require('./../model/users');
+const { Users } = require('./../lib/models/users');
 const jws = require('jws');
 const { SECRET } = require('./../config/config');
 

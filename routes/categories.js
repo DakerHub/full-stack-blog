@@ -1,6 +1,6 @@
-const { Categories } = require('./../model/categories');
+const { Categories } = require('./../lib/models/categories');
 const express = require('express');
-const { deleteByIdsRecursive } = require('./../model/model');
+const { deleteByIdsRecursive } = require('./../lib/controllers/crud');
 
 const router = express.Router();
 

@@ -1,8 +1,8 @@
-const { Posts } = require('./../model/posts');
-const { Tags } = require('./../model/tags');
-const { Categories } = require('./../model/categories');
+const { Posts } = require('./../lib/models/posts');
+const { Tags } = require('./../lib/models/tags');
+const { Categories } = require('./../lib/models/categories');
 const express = require('express');
-const { findByIds, deleteByIds } = require('./../model/model');
+const { findByIds, deleteByIds } = require('./../lib/controllers/crud');
 
 const router = express.Router();
 

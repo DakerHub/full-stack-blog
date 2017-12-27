@@ -1,9 +1,9 @@
-const { Comments } = require('./../model/comment');
-const { Users } = require('./../model/users');
-const { Posts } = require('./../model/posts');
+const { Comments } = require('./../lib/models/comment');
+const { Users } = require('./../lib/models/users');
+const { Posts } = require('./../lib/models/posts');
 const express = require('express');
-const { deleteByIdsRecursive, findByIds } = require('./../model/model');
-const { hasMissing } = require('./../lib/util');
+const { deleteByIdsRecursive, findByIds } = require('./../lib/controllers/crud');
+const { hasMissing } = require('./../lib/util/util');
 
 const router = express.Router();
 
