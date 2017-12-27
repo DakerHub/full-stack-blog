@@ -1,9 +1,10 @@
+const express = require('express');
 const { Comments } = require('./../lib/models/comment');
 const { Users } = require('./../lib/models/users');
 const { Posts } = require('./../lib/models/posts');
-const express = require('express');
 const { deleteByIdsRecursive, findByIds } = require('./../lib/controllers/crud');
 const { hasMissing } = require('./../lib/util/util');
+const logger = require('./../lib/util/log');
 
 const router = express.Router();
 
@@ -108,7 +109,7 @@ router.get('/', async function (req, res, next) {
     .select('-__v')
     .exec(function (err, rows) {
       if (err) {
-        console.error(err);
+        logger.reqErr(err, req);
         res.send({
           code: 500,
           msg: err.errmsg || err.message,
@@ -187,6 +188,7 @@ router.post('/', function (req, res, next) {
   const { content, postId, authorId, pId = '0', status = '1' } = req.query;
   const missing = hasMissing({ content, postId, authorId });
   if (missing) {
+    logger.reqErr(missing, req);
     res.send({
       code: 500,
       msg: missing,
@@ -204,7 +206,7 @@ router.post('/', function (req, res, next) {
     Comments.create(comment, function (err, newComment) {
       const { _id } = newComment;
       if (err) {
-        console.error(err);
+        logger.reqErr(err, req);
         res.send({
           code: 500,
           msg: err.errmsg || err.message,
@@ -242,6 +244,7 @@ router.post('/', function (req, res, next) {
   Promise.all(promises).then(result => {
     saveCate(comment, res);
   }).catch(err => {
+    logger.reqErr(err, req);
     res.send({
       code: 404,
       msg: err.errmsg || err.message || err,
@@ -300,6 +303,7 @@ router.delete('/', async function (req, res, next) {
     const comment = await Comments.findById({ _id: ids }).exec();
     if (comment.authorId !== userId) {
       /* 请求接口的用户不是评论者或者管理员 */
+      logger.reqErr('no access!', req);
       res.send({
         code: 401,
         msg: 'no access!',
@@ -316,6 +320,7 @@ router.delete('/', async function (req, res, next) {
       source: null
     });
   }).catch(err => {
+    logger.reqErr(err, req);
     res.send({
       code: 500,
       msg: err.errmsg || err.message || err,

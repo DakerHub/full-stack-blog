@@ -1,7 +1,8 @@
 const express = require('express');
-const { Users } = require('./../lib/models/users');
 const jws = require('jws');
+const { Users } = require('./../lib/models/users');
 const { SECRET } = require('./../config/config');
+const logger = require('./../lib/util/log');
 
 const router = express.Router();
 
@@ -56,6 +57,7 @@ router.post('/', function (req, res, next) {
   Users.findOne({ username }, { __v: 0 }, function (err, user) {
     console.log(user);
     if (err) {
+      logger.reqErr(err, req);
       res.send({
         code: 500,
         msg: err.errmsg || err.message,

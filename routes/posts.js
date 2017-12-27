@@ -1,8 +1,9 @@
+const express = require('express');
 const { Posts } = require('./../lib/models/posts');
 const { Tags } = require('./../lib/models/tags');
 const { Categories } = require('./../lib/models/categories');
-const express = require('express');
 const { findByIds, deleteByIds } = require('./../lib/controllers/crud');
+const logger = require('./../lib/util/log');
 
 const router = express.Router();
 
@@ -108,7 +109,7 @@ router.get('/', async function (req, res, next) {
     .select('-__v -comments -content')
     .exec(function (err, rows) {
       if (err) {
-        console.error(err);
+        logger.reqErr(err, req);
         res.send({
           code: 500,
           msg: err.errmsg || err.message,
@@ -132,7 +133,7 @@ router.get('/', async function (req, res, next) {
           total
         });
       }).catch(err => {
-        console.error(err);
+        logger.reqErr(err, req);
         res.send({
           code: 500,
           msg: err.errmsg || err.message || err,
@@ -225,7 +226,7 @@ router.post('/', function (req, res, next) {
   const savePost = function (res, post) {
     Posts.create(post, function (err, newPost) {
       if (err) {
-        console.error(err, 'createPost');
+        logger.reqErr(err, req);
         res.send({
           code: 500,
           msg: err.errmsg || err.message,
@@ -245,6 +246,7 @@ router.post('/', function (req, res, next) {
     .then(() => {
       savePost(res, post);
     }).catch((err) => {
+      logger.reqErr(err, req);
       res.send({
         code: 400,
         msg: err.errmsg || err.message || err,
@@ -347,7 +349,7 @@ router.put('/', function (req, res, next) {
     Posts.findByIdAndUpdate(_id, updatedPost, { new: true }, function (err, newPost) {
       const { title, date, publishStatus, _id } = newPost;
       if (err) {
-        console.error(err);
+        logger.reqErr(err, req);
         res.send({
           code: 500,
           msg: err.errmsg || err.message,
@@ -366,6 +368,7 @@ router.put('/', function (req, res, next) {
   Promise.all([findByIds(Categories, [category]), findByIds(Tags, tagIds)]).then(() => {
     updatePost(res, updatedPost);
   }).catch((err) => {
+    logger.reqErr(err, req);
     res.send({
       code: 400,
       msg: err.errmsg || err.message || err,
@@ -421,7 +424,7 @@ router.delete('/', function (req, res, next) {
       source: null
     });
   }).catch(err => {
-    console.log(err);
+    logger.reqErr(err, req);
     res.send({
       code: 500,
       msg: err.errmsg || err.message,

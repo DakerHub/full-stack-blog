@@ -1,5 +1,6 @@
-const { Tags } = require('./../lib/models/tags');
 const express = require('express');
+const { Tags } = require('./../lib/models/tags');
+const logger = require('./../lib/util/log');
 
 const router = express.Router();
 
@@ -68,7 +69,7 @@ router.get('/', function (req, res, next) {
   }
   Tags.find(query).select('-__v').exec(function (err, rows) {
     if (err) {
-      console.error(err);
+      logger.reqErr(err, req);
       res.send({
         code: 500,
         msg: err.errmsg || err.message,
@@ -130,7 +131,7 @@ router.post('/', function (req, res, next) {
     Tags.create(tag, function (err, newTag) {
       const { _id, name, createDate } = newTag;
       if (err) {
-        console.error(err);
+        logger.reqErr(err, req);
         res.send({
           code: 500,
           msg: err.errmsg || err.message,
@@ -199,7 +200,7 @@ router.put('/', function (req, res, next) {
   Tags.findByIdAndUpdate(_id, updatedTag, { new: true }, function (err, newTag) {
     const { _id, name, createDate } = newTag;
     if (err) {
-      console.error(err);
+      logger.reqErr(err, req);
       res.send({
         code: 500,
         msg: err.errmsg || err.message,
@@ -255,7 +256,7 @@ router.put('/', function (req, res, next) {
 router.delete('/', function (req, res, next) {
   Tags.deleteOne({ _id: req.query._id }, function (err) {
     if (err) {
-      console.log(err);
+      logger.reqErr(err, req);
       res.send({
         code: 500,
         msg: err.errmsg || err.message,

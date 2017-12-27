@@ -1,8 +1,9 @@
 const express = require('express');
-const { Users } = require('./../lib/models/users');
-const { STATIC_PATH, SITE_PATH, STATIC_URL, AVATAR_PATH } = require('./../config/config');
 const path = require('path');
 const multer = require('multer');
+const { Users } = require('./../lib/models/users');
+const { STATIC_PATH, SITE_PATH, STATIC_URL, AVATAR_PATH } = require('./../config/config');
+const logger = require('./../lib/util/log');
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ const upload = multer({ storage }).single('avatar');
 const uploadMid = function (req, res, next) {
   upload(req, res, function (err) {
     if (err) {
+      logger.reqErr(err, req);
       res.send({
         code: 500,
         msg: err.errmsg || err.message
@@ -128,7 +130,7 @@ router.get('/', async function (req, res, next) {
     .limit(size)
     .exec(function (err, rows) {
       if (err) {
-        console.error(err);
+        logger.reqErr(err, req);
         res.send({
           code: 500,
           msg: err.errmsg || err.message,
@@ -197,6 +199,7 @@ router.post('/', function (req, res, next) {
   };
   Users.create(user, function (err, newUser) {
     if (err) {
+      logger.reqErr(err, req);
       res.send({
         code: 500,
         msg: err.errmsg || err.message,
@@ -257,7 +260,7 @@ router.post('/', function (req, res, next) {
 router.delete('/', function (req, res, next) {
   Users.deleteOne({ _id: req.query._id }, function (err) {
     if (err) {
-      console.log(err);
+      logger.reqErr(err, req);
       res.send({
         code: 500,
         msg: err.errmsg || err.message,
@@ -316,12 +319,10 @@ router.delete('/', function (req, res, next) {
  */
 router.patch('/avatar', uploadMid, function (req, res, next) {
   const { _id } = req.body;
-  console.log(req.file);
   const userPic = STATIC_URL + AVATAR_PATH + req.file.filename;
   Users.findByIdAndUpdate(_id, { userPic }, { new: true }, function (err, newUser) {
-    console.log(err);
-    console.log(newUser);
     if (err) {
+      logger.reqErr(err, req);
       res.send({
         code: 500,
         msg: err.errmsg || err.message,

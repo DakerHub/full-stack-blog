@@ -1,6 +1,7 @@
-const { Categories } = require('./../lib/models/categories');
 const express = require('express');
+const { Categories } = require('./../lib/models/categories');
 const { deleteByIdsRecursive } = require('./../lib/controllers/crud');
+const logger = require('./../lib/util/log');
 
 const router = express.Router();
 
@@ -73,7 +74,7 @@ router.get('/', function (req, res, next) {
   }
   Categories.find(query).select('-__v -createdDate').exec(function (err, rows) {
     if (err) {
-      console.error(err);
+      logger.reqErr(err, req);
       res.send({
         code: 500,
         msg: err.errmsg || err.message,
@@ -148,7 +149,7 @@ router.post('/', function (req, res, next) {
       Categories.create(tag, function (err, newCategory) {
         const { _id, name, pId } = newCategory;
         if (err) {
-          console.error(err);
+          logger.reqErr(err, req);
           res.send({
             code: 500,
             msg: err.errmsg || err.message,
@@ -167,6 +168,15 @@ router.post('/', function (req, res, next) {
 
   if (pId !== '') {
     Categories.findById(pId, function (err, cate) {
+      if (err) {
+        logger.reqErr(err, req);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null
+        });
+        return;
+      }
       if (cate) {
         saveCate(tag, res);
       } else {
@@ -239,7 +249,7 @@ router.put('/', function (req, res, next) {
   Categories.findByIdAndUpdate(_id, updatedCate, { new: true }, function (err, newCategory) {
     const { _id, name, pId } = newCategory;
     if (err) {
-      console.error(err);
+      logger.reqErr(err, req);
       res.send({
         code: 500,
         msg: err.errmsg || err.message,
@@ -305,6 +315,7 @@ router.delete('/', function (req, res, next) {
       source: null
     });
   }).catch(err => {
+    logger.reqErr(err, req);
     res.send({
       code: 500,
       msg: err.errmsg || err.message || err,
