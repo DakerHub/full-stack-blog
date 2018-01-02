@@ -53,7 +53,7 @@ const router = express.Router();
  *                   type: string
  */
 router.post('/', function (req, res, next) {
-  const { username, password } = req.query;
+  const { username, password } = req.body;
   Users.findOne({ username }, { __v: 0 }, function (err, user) {
     console.log(user);
     if (err) {
