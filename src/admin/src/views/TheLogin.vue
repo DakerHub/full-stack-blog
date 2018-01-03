@@ -1,6 +1,7 @@
 <template>
   <div class="admin-login">
     <h1 class="system-title">FCC's博客内容管理系统</h1>
+    <div :class="{'login-info': true, 'is-error': isError}">{{loginInfo}}</div>
     <div class="admin-login-form">
       <el-form :model="user" ref="userInfo">
         <el-form-item
@@ -15,7 +16,7 @@
           prop="password"
           :rules="[
             { required: true, message: '密码不能为空' },
-            { min: 6, max: 18, message: '密码长度要求在6-18之间' }
+            { max: 18, message: '密码长度应小于18' }
           ]">
           <el-input v-model="user.password" type="password" placeholder="password" @keyup.native.enter="submit"></el-input>
         </el-form-item>
@@ -36,30 +37,51 @@ export default {
         username: '',
         password: ''
       },
-      submiting: false
+      loginInfo: '',
+      isError: false,
+      submiting: false,
+      timer: 0
     }
   },
   methods: {
     validateUser () {
       let result = true;
       this.$refs.userInfo.validate(valid => {
-        console.log(valid);
         result = valid;
       });
       return result;
     },
-    submit () {
+    async submit () {
       const valid = this.validateUser();
-      this.submiting = true
+      this.submiting = true;
 
       if (valid) {
-        this.api.login(this.user).catch(err => {
-          console.log(err);
-        }).then(() => {
-          this.submiting = false;
-        });
+        try {
+          const res = await this.api.login(this.user);
+          this.isError = false;
+          this.loginInfo = '登录成功!';
+          this.afterLogin(res);
+        } catch (err) {
+          this.isError = true;
+          if (err.code === 404 || err.code === 400) {
+            this.loginInfo = err.msg;
+          } else {
+            this.loginInfo = '登录失败!';
+          }
+          this.timer = setTimeout(() => {
+            this.loginInfo = '';
+          }, 2000);
+        }
+        this.submiting = false;
       }
+    },
+    afterLogin ({source}) {
+      source.token
+      console.log(res);
     }
+  },
+  beforeDestroy () {
+    clearTimeout(this.timer);
   }
 }
 </script>
@@ -85,5 +107,14 @@ export default {
   color: #303133;
   padding: 20px 0;
   margin-top: -64px;
+}
+.login-info{
+  font-size: 12px;
+  color: #67C23A;
+  height: 30px;
+  line-height: 30px;
+}
+.login-info.is-error{
+  color: #F56C6C;
 }
 </style>
