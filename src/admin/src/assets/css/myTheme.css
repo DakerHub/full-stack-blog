@@ -1,0 +1,17 @@
+/* 用于覆盖element的默认配色以及样式 */
+.el-menu-item.is-active{
+  color: #303F9F;
+}
+
+/* 全局样式begin */
+.iconfont{
+  display: inline-block;
+  height: 18px;
+  width: 24px;
+  line-height: 18px;
+  margin-right: 5px;
+  text-align: center;
+  font-size: 18px;
+  vertical-align: middle;
+}
+/* 全局样式end */

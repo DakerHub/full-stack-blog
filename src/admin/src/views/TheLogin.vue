@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import Cookies from 'js-cookie';
 export default {
   name: 'TheLogin',
   data () {
@@ -76,8 +77,10 @@ export default {
       }
     },
     afterLogin ({source}) {
-      source.token
-      console.log(res);
+      Cookies.set('token', source.token);
+      Cookies.set('_id', source._id);
+      this.$store.commit('updateUser', source);
+      this.$router.push('/');
     }
   },
   beforeDestroy () {
