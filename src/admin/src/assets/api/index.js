@@ -20,6 +20,12 @@ const login = function (arg) {
   return axios.post(APIS.login, params);
 };
 
+const getPost = function (arg) {
+  const params = qs.stringify(arg);
+  return axios.get(APIS.post, params);
+};
+
 export default {
-  login
+  login,
+  getPost
 };

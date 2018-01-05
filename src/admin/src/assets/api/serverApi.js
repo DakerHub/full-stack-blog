@@ -13,7 +13,8 @@ function pretendApiRoot(obj) {
 }
 
 const APIS = {
-  login: 'login'
+  login: 'login',
+  post: 'posts'
 };
 
 export default pretendApiRoot(APIS);

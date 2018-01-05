@@ -45,7 +45,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'content-type');
+  res.setHeader('Access-Control-Allow-Headers', 'content-type,authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST,DELETE,PUT,PATCH');
   next();
 });
@@ -62,10 +62,10 @@ app.use(function (req, res, next) {
 });
 
 app.use(function (req, res, next) {
+  var signature = req.headers.authorization;
   if (whiteList.includes(req._parsedUrl.pathname)) {
     next();
-  } else if (req.query.token) {
-    var signature = req.query.token;
+  } else if (signature) {
     if (signature === 'TOKEN001') {
       req.userId = 'admin';
       next();

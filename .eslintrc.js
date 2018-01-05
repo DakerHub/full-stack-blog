@@ -32,6 +32,8 @@ module.exports = {
         'no-plusplus': 0,
         'no-await-in-loop': 0,
         'no-loop-func': 0,
-        'import/extensions': 0
+        'import/extensions': 0,
+        'no-undef': 0,
+        'valid-typeof': 0
       }
 };

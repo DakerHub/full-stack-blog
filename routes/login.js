@@ -55,7 +55,6 @@ const router = express.Router();
 router.post('/', function (req, res, next) {
   const { username, password } = req.body;
   Users.findOne({ username }, { __v: 0 }, function (err, user) {
-    console.log(user);
     if (err) {
       logger.reqErr(err, req);
       res.send({
