@@ -13,7 +13,10 @@ export default new Router({
     {
       path: '/login',
       name: 'TheLogin',
-      component: TheLogin
+      component: TheLogin,
+      meta: {
+        noAuth: true
+      }
     },
     {
       path: '/',

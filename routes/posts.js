@@ -3,6 +3,7 @@ const { Posts } = require('./../lib/models/posts');
 const { Tags } = require('./../lib/models/tags');
 const { Categories } = require('./../lib/models/categories');
 const { findByIds, deleteByIds } = require('./../lib/controllers/crud');
+const { formatDate } = require('./../lib/util/util');
 const logger = require('./../lib/util/log');
 
 const router = express.Router();
@@ -104,6 +105,7 @@ router.get('/', async function (req, res, next) {
   total = await Posts.find(query).count().exec();
 
   Posts.find(query)
+    .lean()
     .skip((page - 1) * size)
     .limit(size)
     .select('-__v -comments -content')
@@ -120,16 +122,19 @@ router.get('/', async function (req, res, next) {
       }
       const promises = [];
       rows.forEach(row => {
-        promises.push(row.$_getReleatedTags().then(tags => {
+        console.log(row.tags);
+        promises.push(findByIds(Tags, row.tags, '-__v').then(tags => {
+          console.log(tags);
           row.tags = tags;
         }));
+        row.date = formatDate(row.date, 'YYYY-MM-DD hh:mm:ss');
       });
       Promise.all(promises).then((tagsMap) => {
-        console.log(tagsMap);
         res.send({
           code: 200,
           msg: 'success',
           sources: rows,
+
           total
         });
       }).catch(err => {

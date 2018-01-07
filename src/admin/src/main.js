@@ -18,6 +18,14 @@ Vue.use(ElementUI);
 Vue.prototype.api = api;
 Vue.prototype.Cookies = Cookies;
 
+router.beforeEach((to, from, next) => {
+  if (!Cookies.get('token') && !to.meta.noAuth) {
+    router.replace('/login');
+  } else {
+    next();
+  }
+});
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
