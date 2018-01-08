@@ -6,11 +6,9 @@ export default {
       let sameTab = false;
       let existIdx = -1;
       tabs.forEach(function (tab, index) {
-        if (tab.title === targetName) {
+        if (tab.route === route) {
           existIdx = index;
-          if (tab.route === route) {
-            sameTab = true;
-          }
+          sameTab = true;
         }
       });
       if (sameTab) {

@@ -40,6 +40,15 @@ export default new Vuex.Store({
         return false;
       });
     },
+    setTagNameByRoute(state, payload) {
+      state.tabs.some(tab => {
+        if (tab.route === payload.route) {
+          tab.title = payload.label;
+          return true;
+        }
+        return false;
+      });
+    },
     removeTab(state, targetName) {
       const { tabs } = state;
       state.tabs = tabs.filter(tab => tab.name !== targetName);

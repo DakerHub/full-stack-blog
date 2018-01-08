@@ -2,7 +2,12 @@
   <div class="post-new">
     <div class="vertical-center padding-b-20">
       <label class="short-label" for="postTitle">标题</label>
-      <el-input id="postTitle" class="post-title" v-model="title" clearable></el-input>
+      <el-input
+        id="postTitle"
+        class="post-title"
+        v-model="title"
+        clearable
+        @change="modified=true" />
     </div>
     <div class="vertical-center padding-b-20">
       <label class="short-label" for="postAbstract">摘要</label>
@@ -10,14 +15,19 @@
         id="postAbstract"
         class="post-abstract"
         v-model="abstract"
-        type="textarea"></el-input>
+        type="textarea"
+        @change="modified=true" />
     </div>
     <div class="padding-b-20">
-      <mavon-editor v-model="content"/>
+      <mavon-editor v-model="content" @change="modified=true" />
     </div>
     <div class="vertical-center padding-b-20">
       <label class="short-label" for="postTitle">标签</label>
-      <el-select v-model="tagsSelected" multiple placeholder="请选择标签">
+      <el-select
+        v-model="tagsSelected"
+        multiple
+        placeholder="请选择标签"
+        @change="modified=true" >
         <el-option
           v-for="tag in tagList"
           :key="tag._id"
@@ -50,6 +60,7 @@ export default {
 
       tagList: [],
 
+      modified: false,
       submiting: false
     };
   },
@@ -59,8 +70,7 @@ export default {
     }
   },
   beforeRouteLeave(to, from, next) {
-    // ...
-    if (this.title || this.content || this.abstract) {
+    if (this.modified) {
       this.$msgbox({
         title: '提示',
         message: '离开此页面后，所填写的内容将被清空，请确保您已保存！是否离开？',
@@ -91,6 +101,7 @@ export default {
       try {
         this.submiting = true;
         await this.api.newPost(params);
+        this.modified = false;
       } catch (error) {
         console.error(error);
       } finally {
@@ -109,6 +120,9 @@ export default {
   created() {
     this.addTab('新建文章', '/post/new');
     this.getTags();
+  },
+  mounted() {
+    this.modified = false;
   }
 }
 </script>
