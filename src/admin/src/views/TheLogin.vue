@@ -77,7 +77,7 @@ export default {
       }
     },
     afterLogin ({source}) {
-      Cookies.set('token', source.token);
+      Cookies.set('blog-admin-token', source.token);
       Cookies.set('_id', source._id);
       this.$store.commit('updateUser', source);
       this.$router.push('/');

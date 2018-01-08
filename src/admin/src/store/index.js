@@ -31,6 +31,15 @@ export default new Vuex.Store({
     setActivedTab(state, val) {
       state.activedTab = val;
     },
+    setActivedTabByRoute(state, route) {
+      state.tabs.some(tab => {
+        if (tab.route === route) {
+          state.activedTab = tab.name;
+          return true;
+        }
+        return false;
+      });
+    },
     removeTab(state, targetName) {
       const { tabs } = state;
       state.tabs = tabs.filter(tab => tab.name !== targetName);

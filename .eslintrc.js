@@ -34,6 +34,8 @@ module.exports = {
         'no-loop-func': 0,
         'import/extensions': 0,
         'no-undef': 0,
-        'valid-typeof': 0
+        'valid-typeof': 0,
+        'object-shorthand': 0,
+        'prefer-destructuring': 0
       }
 };

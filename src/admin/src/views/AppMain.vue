@@ -32,23 +32,23 @@
           </el-menu-item>
         </el-menu>
       </el-aside>
-      <el-container>
+      <el-container class="overflow-hidden" direction="vertical">
+        <el-tabs 
+          v-model="$store.state.activedTab"
+          v-show="$store.state.tabs.length > 0"
+          type="card"
+          closable
+          @tab-remove="handleRemoveTab"
+          @tab-click="changeView">
+          <el-tab-pane
+            v-for="item in $store.state.tabs"
+            :key="item.name"
+            :label="item.title"
+            :name="item.name"
+          >
+          </el-tab-pane>
+        </el-tabs>
         <el-main>
-          <el-tabs 
-            v-model="$store.state.activedTab"
-            v-show="$store.state.tabs.length > 0"
-            type="card"
-            closable
-            @tab-remove="removeTab"
-            @tab-click="changeView">
-            <el-tab-pane
-              v-for="item in $store.state.tabs"
-              :key="item.name"
-              :label="item.title"
-              :name="item.name"
-            >
-            </el-tab-pane>
-          </el-tabs>
           <router-view></router-view>
         </el-main>
       </el-container>
@@ -87,8 +87,8 @@ export default {
     }
   },
   methods: {
-    removeTab(val) {
-      this.$store.commit('removeTab', val);
+    handleRemoveTab(val) {
+      this.removeTab(val);
       if (this.$store.state.tabs.length === 0) {
         this.$router.push('/home');
       }
@@ -103,5 +103,11 @@ export default {
 }
 .el-menu{
   height: 100%;
+}
+.el-tabs{
+  padding: 10px 10px 0 10px;
+  box-shadow: 0px -2px 6px 1px #1f2c79;
+  position: relative;
+  z-index: 1;
 }
 </style>

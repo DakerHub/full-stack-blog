@@ -4,6 +4,8 @@ import TheLogin from '@/views/TheLogin.vue';
 import TheHome from '@/views/TheHome.vue';
 import AppMain from '@/views/AppMain.vue';
 import PostList from '@/views/PostList.vue';
+import PostNew from '@/views/PostNew.vue';
+import PostEdit from '@/views/PostEdit.vue';
 import TagList from '@/views/TagList.vue';
 
 Vue.use(Router);
@@ -35,6 +37,14 @@ export default new Router({
           path: 'post',
           name: 'PostList',
           component: PostList
+        },
+        {
+          path: 'post/new',
+          component: PostNew
+        },
+        {
+          path: 'post/edit/:id',
+          component: PostEdit
         },
         {
           path: 'tag',

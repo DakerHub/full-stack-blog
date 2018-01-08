@@ -88,6 +88,10 @@ router.get('/', async function (req, res, next) {
   const { title, _id, categoryId } = req.query;
   let { page = '1', size = '10' } = req.query;
   let query = {};
+  let field = '-__v -content';
+  const sort = {
+    date: -1
+  }; 
   let total = 0;
   
   page = Number.parseInt(page, 10);
@@ -100,15 +104,17 @@ router.get('/', async function (req, res, next) {
   }
   if (_id) {
     query = { _id };
+    field = '-__v';
   }
 
   total = await Posts.find(query).count().exec();
 
   Posts.find(query)
+    .sort(sort)
     .lean()
     .skip((page - 1) * size)
     .limit(size)
-    .select('-__v -comments -content')
+    .select(field)
     .exec(function (err, rows) {
       if (err) {
         logger.reqErr(err, req);
@@ -122,9 +128,7 @@ router.get('/', async function (req, res, next) {
       }
       const promises = [];
       rows.forEach(row => {
-        console.log(row.tags);
         promises.push(findByIds(Tags, row.tags, '-__v').then(tags => {
-          console.log(tags);
           row.tags = tags;
         }));
         row.date = formatDate(row.date, 'YYYY-MM-DD hh:mm:ss');
@@ -217,7 +221,7 @@ router.get('/', async function (req, res, next) {
  *                 $ref: '#/definitions/Post'
  */
 router.post('/', function (req, res, next) {
-  const { title, abstract, content, date = Date.now(), publishStatus = '1', tags, category } = req.query;
+  const { title, abstract, content, date = Date.now(), publishStatus = '1', tags, category } = req.body;
   const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
   const post = {
     title,
@@ -333,7 +337,7 @@ router.post('/', function (req, res, next) {
  *                 $ref: '#/definitions/Post'
  */
 router.put('/', function (req, res, next) {
-  const { _id, title, abstract, content, date, publishStatus, tags, category } = req.query;
+  const { _id, title, abstract, content, date, publishStatus, tags, category } = req.body;
   const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
   const plainObj = { title, abstract, content, date, publishStatus, category };
   const updatedPost = {};
@@ -370,7 +374,7 @@ router.put('/', function (req, res, next) {
     });
   };
 
-  Promise.all([findByIds(Categories, [category]), findByIds(Tags, tagIds)]).then(() => {
+  Promise.all([findByIds(Categories, category ? [category] : []), findByIds(Tags, tagIds)]).then(() => {
     updatePost(res, updatedPost);
   }).catch((err) => {
     logger.reqErr(err, req);

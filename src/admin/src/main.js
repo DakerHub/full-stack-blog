@@ -2,8 +2,10 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import ElementUI from 'element-ui';
+import mavonEditor from 'mavon-editor';
 import Cookies from 'js-cookie';
 import 'element-ui/lib/theme-chalk/index.css';
+import 'mavon-editor/dist/css/index.css';
 import App from './App.vue';
 import router from './router';
 import store from './store';
@@ -12,14 +14,15 @@ import './assets/css/reset.css';
 import './assets/css/palette.css';
 import './assets/css/myTheme.css';
 import './assets/icon/iconfont.css';
-
+    
 Vue.config.productionTip = false;
-Vue.use(ElementUI);
+Vue.use(ElementUI, { size: 'small' });
+Vue.use(mavonEditor);
 Vue.prototype.api = api;
 Vue.prototype.Cookies = Cookies;
 
 router.beforeEach((to, from, next) => {
-  if (!Cookies.get('token') && !to.meta.noAuth) {
+  if (!Cookies.get('blog-admin-token') && !to.meta.noAuth) {
     router.replace('/login');
   } else {
     next();
