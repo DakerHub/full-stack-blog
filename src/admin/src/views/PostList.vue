@@ -56,6 +56,7 @@
           <el-tag
             v-for="item in scoped.row.tags"
             :key="item.id"
+            color="rgba(210, 250, 255, 0.5)"
             size="small">{{item.name}}</el-tag>
         </template>
       </el-table-column>

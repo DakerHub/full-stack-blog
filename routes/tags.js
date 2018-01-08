@@ -1,5 +1,6 @@
 const express = require('express');
 const { Tags } = require('./../lib/models/tags');
+const { deleteByIds } = require('./../lib/controllers/crud');
 const logger = require('./../lib/util/log');
 
 const router = express.Router();
@@ -117,13 +118,13 @@ router.get('/', function (req, res, next) {
  *             msg:
  *               type: string
  *               description: 返回结果文本.
- *             sources:
+ *             source:
  *               type: array
  *               items:
  *                 $ref: '#/definitions/Tag'
  */
 router.post('/', function (req, res, next) {
-  const { name } = req.query;
+  const { name } = req.body;
   const tag = {
     name
   };
@@ -135,14 +136,14 @@ router.post('/', function (req, res, next) {
         res.send({
           code: 500,
           msg: err.errmsg || err.message,
-          sources: null
+          source: null
         });
         return;
       }
       res.send({
         code: 200,
         msg: 'success',
-        sources: { _id, name, createDate }
+        source: { _id, name, createDate }
       });
     });
   });
@@ -191,27 +192,31 @@ router.post('/', function (req, res, next) {
  *                 $ref: '#/definitions/Tag'
  */
 router.put('/', function (req, res, next) {
-  const { _id, name } = req.query;
+  const { _id, name } = req.body;
   const updatedTag = { name };
   
   if (!_id) {
     return res.sendStatus(400);
   }
-  Tags.findByIdAndUpdate(_id, updatedTag, { new: true }, function (err, newTag) {
-    const { _id, name, createDate } = newTag;
-    if (err) {
-      logger.reqErr(err, req);
+  Tags.init().then(function () {
+    Tags.findByIdAndUpdate(_id, updatedTag, { new: true }, function (err, newTag) {
+      if (newTag) {
+        const { _id, name, createDate } = newTag;
+      }
+      if (err) {
+        logger.reqErr(err, req);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          source: null
+        });
+        return;
+      }
       res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        sources: null
+        code: 200,
+        msg: 'success',
+        source: { _id, name, createDate }
       });
-      return;
-    }
-    res.send({
-      code: 200,
-      msg: 'success',
-      sources: { _id, name, createDate }
     });
   });
 });
@@ -254,19 +259,19 @@ router.put('/', function (req, res, next) {
  *                 $ref: '#/definitions/Tag'
  */
 router.delete('/', function (req, res, next) {
-  Tags.deleteOne({ _id: req.query._id }, function (err) {
-    if (err) {
-      logger.reqErr(err, req);
-      res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        source: null
-      });
-      return;
-    }
+  const { ids } = req.query;
+  const tagIds = ids && typeof ids === 'string' ? ids.split(',') : [];
+  deleteByIds(Tags, tagIds).then(() => {
     res.send({
       code: 200,
       msg: 'success',
+      source: null
+    });
+  }).catch(err => {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message,
       source: null
     });
   });

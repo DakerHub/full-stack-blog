@@ -23,6 +23,16 @@
 .el-input.is-active .el-input__inner, .el-input__inner:focus, .el-textarea__inner:focus{
   border-color: #3F51B5;
 }
+.el-tag .el-icon-close:hover {
+  background-color: #7586f3;
+}
+.el-tag .el-icon-close{
+  color: #00BCD4;
+  line-height: 17px;
+}
+.el-tag{
+  color: #00BCD4;
+}
 
 /* 全局样式begin */
 .iconfont{

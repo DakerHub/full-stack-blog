@@ -1,0 +1,30 @@
+[2018-01-08T23:26:26.051] [ERROR] default - E11000 duplicate key error collection: myBlog.tags index: name_1 dup key: { : "js" }
+PUT:/tags
+params:{}
+query:{}
+body:{"name":"js","_id":"5a537e5cdd38ba1eb4e69075"}
+
+[2018-01-08T23:26:33.363] [ERROR] default - E11000 duplicate key error collection: myBlog.tags index: name_1 dup key: { : "js" }
+PUT:/tags
+params:{}
+query:{}
+body:{"name":"js","_id":"5a537e5cdd38ba1eb4e69075"}
+
+[2018-01-08T23:27:05.744] [ERROR] default - E11000 duplicate key error collection: myBlog.tags index: name_1 dup key: { : "js" }
+PUT:/tags
+params:{}
+query:{}
+body:{"name":"js","_id":"5a537e5cdd38ba1eb4e69075"}
+
+[2018-01-08T23:27:52.235] [ERROR] default - E11000 duplicate key error collection: myBlog.tags index: name_1 dup key: { : "js" }
+PUT:/tags
+params:{}
+query:{}
+body:{"name":"js","_id":"5a537e5cdd38ba1eb4e69075"}
+
+[2018-01-08T23:28:09.344] [ERROR] default - E11000 duplicate key error collection: myBlog.tags index: name_1 dup key: { : "js" }
+PUT:/tags
+params:{}
+query:{}
+body:{"name":"js","_id":"5a537e5cdd38ba1eb4e69075"}
+

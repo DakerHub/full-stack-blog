@@ -6,8 +6,7 @@
         id="postTitle"
         class="post-title"
         v-model="title"
-        clearable
-        @change="modified=true" />
+        clearable />
     </div>
     <div class="vertical-center padding-b-20">
       <label class="short-label" for="postAbstract">摘要</label>
@@ -15,19 +14,17 @@
         id="postAbstract"
         class="post-abstract"
         v-model="abstract"
-        type="textarea"
-        @change="modified=true" />
+        type="textarea" />
     </div>
     <div class="padding-b-20">
-      <mavon-editor v-model="content" @change="modified=true" />
+      <mavon-editor v-model="content" />
     </div>
     <div class="vertical-center padding-b-20">
       <label class="short-label" for="postTitle">标签</label>
       <el-select
         v-model="tagsSelected"
         multiple
-        placeholder="请选择标签"
-        @change="modified=true" >
+        placeholder="请选择标签">
         <el-option
           v-for="tag in tagList"
           :key="tag._id"
@@ -67,6 +64,20 @@ export default {
   computed: {
     disabled() {
       return !(this.title && this.content && this.abstract);
+    }
+  },
+   watch: {
+    title(title) {
+      this.modified = true
+    },
+    content() {
+      this.modified = true
+    },
+    abstract() {
+      this.modified = true
+    },
+    tagsSelected() {
+      this.modified = true
     }
   },
   beforeRouteLeave(to, from, next) {

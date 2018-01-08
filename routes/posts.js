@@ -79,7 +79,7 @@ const router = express.Router();
  *             total:
  *               type: number
  *               description: 查询结果的总量.
- *             sources:
+ *             source:
  *               type: array
  *               items:
  *                 $ref: '#/definitions/Post'
@@ -331,7 +331,7 @@ router.post('/', function (req, res, next) {
  *             msg:
  *               type: string
  *               description: 返回结果文本.
- *             sources:
+ *             source:
  *               type: array
  *               items:
  *                 $ref: '#/definitions/Post'
@@ -418,15 +418,15 @@ router.put('/', function (req, res, next) {
  *             msg:
  *               type: string
  *               description: 返回结果文本.
- *             sources:
+ *             source:
  *               type: array
  *               items:
  *                 $ref: '#/definitions/Post'
  */
 router.delete('/', function (req, res, next) {
   const { ids } = req.query;
-  const tagIds = ids && typeof ids === 'string' ? ids.split(',') : [];
-  deleteByIds(Posts, tagIds).then(() => {
+  const postIds = ids && typeof ids === 'string' ? ids.split(',') : [];
+  deleteByIds(Posts, postIds).then(() => {
     res.send({
       code: 200,
       msg: 'success',

@@ -6,7 +6,7 @@
         id="postTitle"
         class="post-title"
         v-model="title"
-        clearable></el-input>
+        clearable />
     </div>
     <div class="vertical-center padding-b-20">
       <label class="short-label" for="postAbstract">摘要</label>
@@ -14,7 +14,7 @@
         id="postAbstract"
         class="post-abstract"
         v-model="abstract"
-        type="textarea"></el-input>
+        type="textarea" />
     </div>
     <div class="padding-b-20">
       <mavon-editor v-model="content" />

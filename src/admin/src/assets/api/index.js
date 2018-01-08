@@ -140,11 +140,91 @@ const getTags = function (arg) {
   });
 };
 
+const delTag = function (params) {
+  assert(params, [{
+    field: 'ids',
+    required: true,
+    type: 'string'
+  }]);
+  return axios.delete(APIS.tag, { params }).then(res => {
+    Message({
+      message: '删除成功!',
+      type: 'success'
+    });
+    return res;
+  }).catch(err => {
+    console.error(err);
+    Message({
+      message: '删除失败!',
+      type: 'error'
+    });
+  });
+};
+
+const newTag = function (arg) {
+  assert(arg, [{
+    field: 'name',
+    required: true,
+    type: 'string'
+  }]);
+  const params = qs.stringify(arg);
+  return axios.post(APIS.tag, params).then(res => {
+    Message({
+      message: '添加标签成功!',
+      type: 'success'
+    });
+    return res;
+  }).catch(err => {
+    console.error(err);
+    let errMsg = '修改标签失败!';
+    if (err.msg && err.msg.includes('duplicate key error')) {
+      errMsg = '存在相同的标签名!';
+    }
+    Message({
+      message: errMsg,
+      type: 'error'
+    });
+  });
+};
+
+const editTag = function (arg) {
+  assert(arg, [{
+    field: 'name',
+    required: true,
+    type: 'string'
+  }, {
+    field: '_id',
+    required: true,
+    type: 'string'
+  }]);
+  const params = qs.stringify(arg);
+  return axios.put(APIS.tag, params).then(res => {
+    Message({
+      message: '修改标签成功!',
+      type: 'success'
+    });
+    return res;
+  }).catch(err => {
+    console.error(err);
+    let errMsg = '修改标签失败!';
+    if (err.msg && err.msg.includes('duplicate key error')) {
+      errMsg = '存在相同的标签名!';
+    }
+    Message({
+      message: errMsg,
+      type: 'error'
+    });
+  });
+};
+
 export default {
   login,
   getPost,
   delPost,
   newPost,
+  editPost,
   getTags,
-  editPost
+  delTag,
+  newTag,
+  editTag
 };
