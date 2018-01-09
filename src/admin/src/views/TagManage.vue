@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="tags-oprate">
-      <el-input v-model="tagName" clearable />
+      <el-input v-model="tagName" clearable @keyup.enter.native="addTag" />
       <el-button
         class="tags-oprete-btn"
         type="primary"
@@ -29,7 +29,7 @@
 import elTab from './../assets/mixins/elTab.js';
 
 export default {
-  name: 'TagList',
+  name: 'TagManage',
   mixins: [elTab],
   data() {
     return {
@@ -101,7 +101,7 @@ export default {
     }
   },
   created () {
-    this.addTab('标签列表', '/tag');
+    this.addTab('标签管理', '/tag');
     this.getList();
   }
 }

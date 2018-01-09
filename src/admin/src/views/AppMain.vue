@@ -22,7 +22,7 @@
             <i class="iconfont icon-shengqian"></i>
             <span slot="title">标签管理</span>
           </el-menu-item>
-          <el-menu-item index="4">
+          <el-menu-item index="/category">
             <i class="iconfont icon-fenlei"></i>
             <span slot="title">分类管理</span>
           </el-menu-item>

@@ -6,7 +6,8 @@ import AppMain from '@/views/AppMain.vue';
 import PostList from '@/views/PostList.vue';
 import PostNew from '@/views/PostNew.vue';
 import PostEdit from '@/views/PostEdit.vue';
-import TagList from '@/views/TagList.vue';
+import TagManage from '@/views/TagManage.vue';
+import CategoryManage from '@/views/CategoryManage.vue';
 
 Vue.use(Router);
 
@@ -48,8 +49,13 @@ export default new Router({
         },
         {
           path: 'tag',
-          name: 'TagList',
-          component: TagList
+          name: 'TagManage',
+          component: TagManage
+        },
+        {
+          path: 'category',
+          name: 'CategoryManage',
+          component: CategoryManage
         }
       ]
     }

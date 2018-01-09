@@ -138,7 +138,7 @@ router.get('/', function (req, res, next) {
  *                 $ref: '#/definitions/Category'
  */
 router.post('/', function (req, res, next) {
-  const { name, pId = '', status = '1' } = req.query;
+  const { name, pId = '', status = '1' } = req.body;
   const tag = {
     name,
     pId,
@@ -240,7 +240,7 @@ router.post('/', function (req, res, next) {
  *                 $ref: '#/definitions/Category'
  */
 router.put('/', function (req, res, next) {
-  const { _id, name, status } = req.query;
+  const { _id, name, status } = req.body;
   const updatedCate = { name, status };
   
   if (!_id) {

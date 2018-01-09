@@ -11,6 +11,7 @@ export default new Vuex.Store({
       userPic: '',
       username: ''
     },
+    
     activedTab: '',
     tabIndex: 0,
     tabs: []

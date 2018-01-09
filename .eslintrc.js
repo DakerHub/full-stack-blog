@@ -36,6 +36,7 @@ module.exports = {
         'no-undef': 0,
         'valid-typeof': 0,
         'object-shorthand': 0,
-        'prefer-destructuring': 0
+        'prefer-destructuring': 0,
+        'no-unused-expressions': 0
       }
 };
