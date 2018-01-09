@@ -46,7 +46,7 @@ export default {
           _id: '0',
           pId: '-1',
           name: '全部'
-        })
+        });
         this.categorys = util.list2tree(sources, '0', {
           id: '_id',
           pId: 'pId',
@@ -58,29 +58,27 @@ export default {
     },
     renderNodeContent(h, { node, data }) {
       this.$set(data, 'submiting', false);
-      let ctrs = [];
       const self = this;
       const inRename = this.editNodeId === data._id;
       const wrapperClass = data.isNew ? 'tree-node-conent in-rename' : 'tree-node-conent';
 
+      const ctrs = [h('i', {
+        'class': 'el-icon-circle-plus-outline tree-node-btn',
+        style: {
+          display: inRename ? 'none' : 'inline'
+        },
+        on: {
+          click: function (e) {
+            e.stopPropagation()
+            self.addChild(e, node, data)
+          }
+        },
+        attrs: {
+          title: '添加子节点'
+        }
+      })];
       if (this.topId !== data._id) {
-        ctrs = [
-          h('i', {
-            'class': 'el-icon-circle-plus-outline tree-node-btn',
-            style: {
-              display: inRename ? 'none' : 'inline'
-            },
-            on: {
-              click: function (e) {
-                e.stopPropagation()
-                self.addChild(e, node, data)
-              }
-            },
-            attrs: {
-              title: '添加子节点'
-            }
-          }),
-          h('i', {
+        ctrs.push(...[h('i', {
             'class': 'el-icon-edit-outline tree-node-btn',
             style: {
               display: inRename ? 'none' : 'inline'
@@ -140,7 +138,7 @@ export default {
               title: '取消'
             }
           })
-        ];
+        ]);
       };
       return h('span', {'class': [wrapperClass, inRename ? 'in-rename' : '']}, [
         h('span', {
@@ -181,12 +179,20 @@ export default {
     },
     addChild(e, node, data) {
       const newId = Math.random() + '';
-      node.store.append({
+      const newNode = {
         _id: newId,
         name: '',
         pId: data._id,
-        isNew: true
-      }, data);
+        isNew: true,
+        children: []
+      };
+      if (node.childNodes && node.childNodes.length > 0) {
+        node.store.append(newNode, data);
+      } else {
+        console.log(node);
+        node.doCreateChildren([newNode]);
+        node.expand();
+      }
       this.editNodeId = newId;
     },
     beforeRename(el, node, data) {

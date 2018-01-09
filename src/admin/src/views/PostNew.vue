@@ -20,8 +20,9 @@
       <mavon-editor v-model="content" />
     </div>
     <div class="vertical-center padding-b-20">
-      <label class="short-label" for="postTitle">标签</label>
+      <label class="short-label" for="postTag">标签</label>
       <el-select
+        id="postTag"
         v-model="tagsSelected"
         multiple
         placeholder="请选择标签">
@@ -29,9 +30,18 @@
           v-for="tag in tagList"
           :key="tag._id"
           :label="tag.name"
-          :value="tag._id">
-        </el-option>
+          :value="tag._id" />
       </el-select>
+    </div>
+    <div class="vertical-center padding-b-20">
+      <label class="short-label" for="postCategory">分类</label>
+      <el-cascader
+        id="postCategory"
+        v-model="category"
+        :options="categoryList"
+        :props="{value:'_id','label':'name',children:'children'}"
+        clearable
+        placeholder="请选择分类" />
     </div>
     <el-button
       class="post-save-btn"
@@ -44,6 +54,7 @@
 
 <script>
 import elTab from './../assets/mixins/elTab.js';
+import util from './../assets/js/util.js';
 
 export default {
   name: 'PostNew',
@@ -54,8 +65,10 @@ export default {
       content: '',
       abstract: '',
       tagsSelected: [],
+      category: [],
 
       tagList: [],
+      categoryList: [],
 
       modified: false,
       submiting: false
@@ -77,6 +90,9 @@ export default {
       this.modified = true
     },
     tagsSelected() {
+      this.modified = true
+    },
+    category() {
       this.modified = true
     }
   },
@@ -101,13 +117,22 @@ export default {
       next();
     }
   },
+  created() {
+    this.addTab('新建文章', '/post/new');
+    this.getTags();
+    this.getCategories();
+  },
+  mounted() {
+    this.modified = false;
+  },
   methods: {
     async submit() {
       const params = {
         title: this.title,
         content: this.content,
         abstract: this.abstract,
-        tags: this.tagsSelected.join(',')
+        tags: this.tagsSelected.join(','),
+        category: this.category.join(',')
       }
       try {
         this.submiting = true;
@@ -126,14 +151,24 @@ export default {
       } catch (error) {
         console.error(error);
       }
+    },
+    async getCategories() {
+      try {
+        const { sources } = await this.api.getCategory();
+        sources.push({
+          _id: '0',
+          pId: '-1',
+          name: '全部'
+        });
+        this.categoryList = util.list2tree(sources, '0', {
+          id: '_id',
+          pId: 'pId',
+          label: 'name'
+        })[0].children || [];
+      } catch (error) {
+        console.error(error);
+      }
     }
-  },
-  created() {
-    this.addTab('新建文章', '/post/new');
-    this.getTags();
-  },
-  mounted() {
-    this.modified = false;
   }
 }
 </script>

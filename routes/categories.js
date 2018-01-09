@@ -138,15 +138,15 @@ router.get('/', function (req, res, next) {
  *                 $ref: '#/definitions/Category'
  */
 router.post('/', function (req, res, next) {
-  const { name, pId = '', status = '1' } = req.body;
-  const tag = {
+  const { name, pId = '0', status = '1' } = req.body;
+  const category = {
     name,
     pId,
     status
   };
-  const saveCate = function (tag, res) {
+  const saveCate = function (category, res) {
     Categories.init().then(function () {
-      Categories.create(tag, function (err, newCategory) {
+      Categories.create(category, function (err, newCategory) {
         const { _id, name, pId } = newCategory;
         if (err) {
           logger.reqErr(err, req);
@@ -166,7 +166,7 @@ router.post('/', function (req, res, next) {
     });
   };
 
-  if (pId !== '') {
+  if (pId !== '0') {
     Categories.findById(pId, function (err, cate) {
       if (err) {
         logger.reqErr(err, req);
@@ -178,7 +178,7 @@ router.post('/', function (req, res, next) {
         return;
       }
       if (cate) {
-        saveCate(tag, res);
+        saveCate(category, res);
       } else {
         res.send({
           code: 404,
@@ -188,7 +188,7 @@ router.post('/', function (req, res, next) {
       }
     });
   } else {
-    saveCate(tag, res);
+    saveCate(category, res);
   }
 });
 

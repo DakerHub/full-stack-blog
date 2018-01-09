@@ -131,6 +131,9 @@ router.get('/', async function (req, res, next) {
         promises.push(findByIds(Tags, row.tags, '-__v').then(tags => {
           row.tags = tags;
         }));
+        promises.push(findByIds(Categories, row.category, '-__v').then(category => {
+          row.category = category;
+        }));
         row.date = formatDate(row.date, 'YYYY-MM-DD hh:mm:ss');
       });
       Promise.all(promises).then((tagsMap) => {
@@ -223,13 +226,14 @@ router.get('/', async function (req, res, next) {
 router.post('/', function (req, res, next) {
   const { title, abstract, content, date = Date.now(), publishStatus = '1', tags, category } = req.body;
   const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
+  const categoryIds = category && typeof category === 'string' ? category.split(',') : [];
   const post = {
     title,
     abstract,
     content,
     date,
     publishStatus,
-    category,
+    category: categoryIds,
     tags: tagIds
   };
   const savePost = function (res, post) {
@@ -251,7 +255,7 @@ router.post('/', function (req, res, next) {
       });
     });
   };
-  Promise.all([findByIds(Categories, category ? [category] : []), findByIds(Tags, tagIds)])
+  Promise.all([findByIds(Categories, categoryIds), findByIds(Tags, tagIds)])
     .then(() => {
       savePost(res, post);
     }).catch((err) => {
@@ -339,7 +343,8 @@ router.post('/', function (req, res, next) {
 router.put('/', function (req, res, next) {
   const { _id, title, abstract, content, date, publishStatus, tags, category } = req.body;
   const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
-  const plainObj = { title, abstract, content, date, publishStatus, category };
+  const categoryIds = category && typeof category === 'string' ? category.split(',') : [];
+  const plainObj = { title, abstract, content, date, publishStatus };
   const updatedPost = {};
   for (const key in plainObj) {
     if (plainObj.hasOwnProperty(key)) {
@@ -350,6 +355,7 @@ router.put('/', function (req, res, next) {
     }
   }
   updatedPost.tags = tagIds;
+  updatedPost.category = categoryIds;
 
   if (!_id) {
     res.sendStatus(400);
@@ -374,7 +380,7 @@ router.put('/', function (req, res, next) {
     });
   };
 
-  Promise.all([findByIds(Categories, category ? [category] : []), findByIds(Tags, tagIds)]).then(() => {
+  Promise.all([findByIds(Categories, categoryIds), findByIds(Tags, tagIds)]).then(() => {
     updatePost(res, updatedPost);
   }).catch((err) => {
     logger.reqErr(err, req);

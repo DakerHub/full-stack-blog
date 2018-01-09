@@ -43,9 +43,8 @@
           <el-tab-pane
             v-for="item in $store.state.tabs"
             :key="item.name"
-            :label="item.title"
-            :name="item.name"
-          >
+            :name="item.name">
+            <span class="tab-label" slot="label" :title="item.title">{{item.title}}</span>
           </el-tab-pane>
         </el-tabs>
         <el-main>
@@ -109,5 +108,13 @@ export default {
   box-shadow: 0px -2px 6px 1px #1f2c79;
   position: relative;
   z-index: 1;
+}
+.tab-label{
+  max-width: 100px;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: middle;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

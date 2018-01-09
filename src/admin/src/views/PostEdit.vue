@@ -33,6 +33,16 @@
         </el-option>
       </el-select>
     </div>
+    <div class="vertical-center padding-b-20">
+      <label class="short-label" for="postCategory">分类</label>
+      <el-cascader
+        id="postCategory"
+        v-model="category"
+        :options="categoryList"
+        :props="{value:'_id','label':'name',children:'children'}"
+        clearable
+        placeholder="请选择分类" />
+    </div>
     <el-button
       class="post-save-btn"
       type="primary"
@@ -44,6 +54,7 @@
 
 <script>
 import elTab from './../assets/mixins/elTab.js';
+import util from './../assets/js/util.js';
 
 export default {
   name: 'PostEdit',
@@ -54,9 +65,11 @@ export default {
       content: '',
       abstract: '',
       tagsSelected: [],
+      category: [],
       _id: '',
 
       tagList: [],
+      categoryList: [],
 
       modified: false,
       submiting: false
@@ -101,6 +114,11 @@ export default {
   beforeRouteLeave(to, from, next) {
     this.confirmLeave(to, from, next);
   },
+  created() {
+    this.addTab('编辑文章', this.$route.fullPath);
+    this.getTags();
+    this.getCategories();
+  },
   methods: {
     async submit() {
       const params = {
@@ -108,6 +126,7 @@ export default {
         content: this.content,
         abstract: this.abstract,
         tags: this.tagsSelected.join(','),
+        category: this.category.join(','),
         _id: this._id
       }
       try {
@@ -127,12 +146,13 @@ export default {
       }
       try {
         const { sources } = await this.api.getPost(params);
-        const { title, content, abstract, tags, _id } = sources[0];
+        const { title, content, abstract, tags, _id, category } = sources[0];
         this.title = title;
         this.content = content;
         this._id = _id;
         this.abstract = abstract;
         this.tagsSelected = tags.map(tag => tag._id);
+        this.category = category.map(cate => cate._id);
         this.changeTabTitle(title);
         this.$nextTick(() => {
           this.modified = false;
@@ -145,6 +165,23 @@ export default {
       try {
         const { sources } = await this.api.getTags();
         this.tagList = sources;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async getCategories() {
+      try {
+        const { sources } = await this.api.getCategory();
+        sources.push({
+          _id: '0',
+          pId: '-1',
+          name: '全部'
+        });
+        this.categoryList = util.list2tree(sources, '0', {
+          id: '_id',
+          pId: 'pId',
+          label: 'name'
+        })[0].children || [];
       } catch (error) {
         console.error(error);
       }
@@ -173,13 +210,9 @@ export default {
     changeTabTitle(title) {
       this.$store.commit('setTagNameByRoute', {
         route: this.$route.path,
-        label: title
+        label: '>' + title + '<'
       });
     }
-  },
-  created() {
-    this.addTab('编辑文章', this.$route.fullPath);
-    this.getTags();
   }
 }
 </script>
