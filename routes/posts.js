@@ -85,29 +85,47 @@ const router = express.Router();
  *                 $ref: '#/definitions/Post'
  */
 router.get('/', async function (req, res, next) {
-  const { title, _id, categoryId } = req.query;
+  const { title, _id, category, tag, dateOrder } = req.query;
   let { page = '1', size = '10' } = req.query;
   let query = {};
   let field = '-__v -content';
   const sort = {
-    date: -1
+    date: Number.parseInt(dateOrder, 10) || -1
   }; 
   let total = 0;
   
   page = Number.parseInt(page, 10);
   size = Number.parseInt(size, 10);
   if (title) {
-    query.title = title;
+    query.title = new RegExp(title);
   }
-  if (categoryId) {
-    query.category = categoryId;
+  if (category && category !== 'nocategory') {
+    query.category = { $in: [category] };
+  } else if (category) {
+    query.category = [];
   }
+
+  if (tag) {
+    query.tags = { $in: [tag] };
+  } 
+
   if (_id) {
     query = { _id };
     field = '-__v';
   }
-
-  total = await Posts.find(query).count().exec();
+  console.log(query);
+  try {
+    total = await Posts.find(query).count().exec();
+  } catch (err) {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message || err,
+      sources: null,
+      total
+    });
+    return;
+  }
 
   Posts.find(query)
     .sort(sort)
@@ -128,10 +146,13 @@ router.get('/', async function (req, res, next) {
       }
       const promises = [];
       rows.forEach(row => {
-        promises.push(findByIds(Tags, row.tags, '-__v').then(tags => {
+        const tagsRaw = Array.isArray(row.tags) ? row.tags : [];
+        const cateRaw = Array.isArray(row.category) ? row.category : [];
+        
+        promises.push(findByIds(Tags, tagsRaw, '-__v').then(tags => {
           row.tags = tags;
         }));
-        promises.push(findByIds(Categories, row.category, '-__v').then(category => {
+        promises.push(findByIds(Categories, cateRaw, '-__v').then(category => {
           row.category = category;
         }));
         row.date = formatDate(row.date, 'YYYY-MM-DD hh:mm:ss');

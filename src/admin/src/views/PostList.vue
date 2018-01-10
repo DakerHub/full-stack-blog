@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-button-group>
+    <el-button-group class="post-list-btns box-content">
       <el-button
         type="primary"
         icon="el-icon-circle-plus-outline"
@@ -29,13 +29,48 @@
       </el-button>
     </el-button-group>
 
+    <el-select
+      class="box-content"
+      v-model="filter.tag"
+      clearable
+      placeholder="根据标签过滤">
+      <el-option
+        v-for="tag in tagList"
+        :key="tag._id"
+        :label="tag.name"
+        :value="tag._id" />
+    </el-select>
+
+    <el-cascader
+      class="box-content"
+      v-model="filter.category"
+      :options="categoryList"
+      :props="{value:'_id','label':'name',children:'children'}"
+      clearable
+      placeholder="根据分类过滤" />
+
+    <el-input
+      class="box-content filter-input"
+      :value="filter.title"
+      prefix-icon="el-icon-search"
+      placeholder="输入标题关键词"
+      @change="val => filter.title = val">
+      <i
+        class="el-input__icon el-icon-circle-close"
+        slot="suffix"
+        v-show="filter.title !== ''"
+        @click="filter.title = ''" />
+    </el-input>
+    
     <el-table
+      class="box-content"
       :data="list"
       :height="500"
       :row-class-name="tableRowClass"
       size="small"
       style="width: 100%"
-      @row-click="tableRowClick">
+      @row-click="tableRowClick"
+      @sort-change="tabelSortChange">
       <el-table-column
         prop="title"
         label="标题"
@@ -49,24 +84,32 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="name"
         label="标签"
         width="180">
         <template slot-scope="scoped">
           <el-tag
-            v-for="item in scoped.row.tags"
+            v-for="item in scoped.row.tags.filter(Boolean)"
             :key="item.id"
             color="rgba(210, 250, 255, 0.5)"
             size="small">{{item.name}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column
+        label="分类"
+        width="180">
+        <template slot-scope="scoped">
+          {{scoped.row.category.map(item => item.name).join('/')}}
+        </template>
+      </el-table-column>
+      <el-table-column
         prop="date"
+        sortable="custom"
         label="创建日期">
       </el-table-column>
     </el-table>
 
     <el-pagination
+      class="box-content"
       :current-page="curPage"
       :page-sizes="[20, 40, 80]"
       :page-size="pageSize"
@@ -83,6 +126,7 @@
 import elTab from './../assets/mixins/elTab.js';
 import elPage from './../assets/mixins/elPage.js';
 import elTable from './../assets/mixins/elTable.js';
+import util from './../assets/js/util.js';
 
 export default {
   name: 'PostList',
@@ -90,7 +134,15 @@ export default {
   data () {
     return {
       list: [],
-      filter: {}
+      tagList: [],
+      categoryList: [],
+
+      filter: {
+        tag: '',
+        category: [],
+        dateOrder: '',
+        title: ''
+      }
     };
   },
   computed: {
@@ -114,18 +166,70 @@ export default {
       return result;
     }
   },
+  watch: {
+    filter: {
+      deep: true,
+      handler() {
+        this.getList();
+      }
+    }
+  },
+  created () {
+    this.addTab('文章列表', '/post');
+    this.getList();
+    this.getTags();
+    this.getCategories();
+  },
   methods: {
     async getList() {
+      const { tag, category, dateOrder, title } = this.filter;
+      const params = {
+        page: this.curPage,
+        size: this.pageSize
+      }
+      if (category.length > 0) {
+        params.category = category[category.length - 1]
+      }
+      tag && (params.tag = tag);
+      dateOrder && (params.dateOrder = dateOrder);
+      title && (params.title = title);
+
       try {
-        const params = {
-          page: this.curPage,
-          size: this.pageSize
-        }
         const { sources, total } = await this.api.getPost(params);
         this.list = sources;
         this.total = total;
       } catch (error) {
         console.log(error);
+      }
+    },
+    async getTags() {
+      try {
+        const { sources } = await this.api.getTags();
+        this.tagList = sources;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async getCategories() {
+      try {
+        const { sources } = await this.api.getCategory();
+        sources.push({
+          _id: '0',
+          pId: '-1',
+          name: '全部'
+        });
+        this.categoryList = util.list2tree(sources, '0', {
+          id: '_id',
+          pId: 'pId',
+          label: 'name'
+        })[0].children || [];
+        this.categoryList.push({
+          _id: 'nocategory',
+          pId: '0',
+          name: '未分类'
+        });
+      } catch (error) {
+        console.error(error);
       }
     },
     delItem() {
@@ -148,6 +252,7 @@ export default {
               await this.api.delPost(ids.join(','));
               this.getList();
               this.clearRowSelect();
+              this.removePostTab(ids);
               instance.confirmButtonLoading = false;
               done();
             } catch (error) {
@@ -166,20 +271,40 @@ export default {
         }
       }).catch(() => {});
     },
+    removePostTab(ids) {
+      const routes = ids.map(id => '/post/edit/' + id);
+      this.$store.commit('removeTabsByRoute', routes);
+    },
     editItem() {
       const id = this.curSelect[0]._id;
       this.$router.push('/post/edit/' + id);
+    },
+    tabelSortChange({ order }) {
+      console.log(order);
+      if (order) {
+        this.filter.dateOrder = {
+          ascending: '1',
+          descending: '-1'
+        }[order];
+      } else {
+        this.filter.dateOrder = ''
+      }
     }
-  },
-  created () {
-    this.addTab('文章列表', '/post');
-    this.getList();
   }
 };
 </script>
 
 <style scoped>
+.post-list-btns,.el-select,.el-cascader,.filter-input{
+  margin-bottom: 15px;
+}
+.el-select,.el-cascader,.filter-input{
+  vertical-align: middle;
+  width: 160px;
+}
 .el-pagination{
   text-align: right;
+  margin-top: 5px;
+  background-color: #fff;
 }
 </style>

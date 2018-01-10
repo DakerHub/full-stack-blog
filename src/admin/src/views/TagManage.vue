@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="tags-oprate">
+    <div class="tags-oprate box-content">
       <el-input v-model="tagName" clearable @keyup.enter.native="addTag" />
       <el-button
         class="tags-oprete-btn"
@@ -9,7 +9,7 @@
         :disabled="!tagName"
         @click="addTag">{{tagSelect._id?'修改':'添加'}}</el-button>
     </div>
-    <div class="tags-wp">
+    <div class="tags-wp box-content">
       <el-tag
         :class="{'is-selected': item._id===tagSelect._id}"
         v-for="(item, index) in list"
@@ -112,15 +112,20 @@ export default {
   width: 50%;
   display: flex;
   margin-bottom: 20px;
+  padding: 5px 20px;
+  background-color: #fff;
 }
 .tags-oprete-btn{
   margin-left: 10px;
 }
-.el-tag+.el-tag{
-  margin-left: 10px;
+.tags-wp{
+  background-color: #fff;
+  padding: 20px;
 }
 .el-tag{
   cursor: pointer;
+  margin-bottom: 10px;
+  margin-left: 10px;
 }
 .el-tag:hover, .el-tag.is-selected{
   border-color: #00BCD4;

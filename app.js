@@ -78,7 +78,6 @@ app.use(function (req, res, next) {
       } else {
         payload = JSON.parse(jws.decode(signature).payload);
       }
-      console.log(payload.userid);
       req.userId = payload.userid;
       next();
     }

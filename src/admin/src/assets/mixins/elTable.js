@@ -16,7 +16,7 @@ export default {
   },
   methods: {
     tableRowClass({ row, rowIndex }) {
-      return row.selected ? 'light-primary-color' : '';
+      return row.selected ? 'light-primary-color text-primary-color' : '';
     },
     tableRowClick(row, e, col) {
       let curIdx = -1;

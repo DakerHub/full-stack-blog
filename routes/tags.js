@@ -1,6 +1,8 @@
 const express = require('express');
 const { Tags } = require('./../lib/models/tags');
+const { Posts } = require('./../lib/models/posts');
 const { deleteByIds } = require('./../lib/controllers/crud');
+const { intersection } = require('./../lib/util/util');
 const logger = require('./../lib/util/log');
 
 const router = express.Router();
@@ -262,10 +264,22 @@ router.delete('/', function (req, res, next) {
   const { ids } = req.query;
   const tagIds = ids && typeof ids === 'string' ? ids.split(',') : [];
   deleteByIds(Tags, tagIds).then(() => {
-    res.send({
-      code: 200,
-      msg: 'success',
-      source: null
+    Posts.find({ tags: { $in: tagIds } }, function (err, docs) {
+      if (err) {
+        throw err;
+      }
+      const promises = [];
+      docs.forEach(doc => {
+        doc.$set('tags', doc.tags.filter(tag => !tagIds.includes(tag.toString())));
+        promises.push(doc.save());
+      });
+      Promise.all(promises).then(() => {
+        res.send({
+          code: 200,
+          msg: 'success',
+          source: null
+        });
+      });
     });
   }).catch(err => {
     logger.reqErr(err, req);

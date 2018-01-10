@@ -1,5 +1,6 @@
 const express = require('express');
 const { Categories } = require('./../lib/models/categories');
+const { Posts } = require('./../lib/models/posts');
 const { deleteByIdsRecursive } = require('./../lib/controllers/crud');
 const logger = require('./../lib/util/log');
 
@@ -72,22 +73,42 @@ router.get('/', function (req, res, next) {
   if (_id) {
     query = { _id };
   }
-  Categories.find(query).select('-__v -createdDate').exec(function (err, rows) {
-    if (err) {
-      logger.reqErr(err, req);
-      res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        sources: null
+  Categories
+    .find(query)
+    .lean()
+    .select('-__v -createdDate')
+    .exec(function (err, rows) {
+      if (err) {
+        logger.reqErr(err, req);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null
+        });
+        return;
+      }
+      const promises = [];
+      rows.forEach(row => {
+        promises.push(Posts.count({ category: row._id }).exec().then(count => {
+          row.relatedPosts = count;
+          console.log(row);
+        }));
       });
-      return;
-    }
-    res.send({
-      code: 200,
-      msg: 'success',
-      sources: rows
+      Promise.all(promises).then(() => {
+        res.send({
+          code: 200,
+          msg: 'success',
+          sources: rows
+        });
+      }).catch(err => {
+        logger.reqErr(err, req);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null
+        });
+      });
     });
-  });
 });
 
 /**
@@ -308,11 +329,24 @@ router.delete('/', function (req, res, next) {
   }
   const { ids } = req.query;
   const idsArr = ids && typeof ids === 'string' ? ids.split(',') : [];
-  deleteByIdsRecursive(Categories, idsArr, 'pId').then(result => {
-    res.send({
-      code: 200,
-      msg: 'success',
-      source: null
+  deleteByIdsRecursive(Categories, idsArr, 'pId').then(({ result, ids }) => {
+    console.log(ids);
+    Posts.find({ category: { $in: ids } }, function (err, docs) {
+      if (err) {
+        throw err;
+      }
+      const promises = [];
+      docs.forEach(doc => {
+        doc.$set('category', []);
+        promises.push(doc.save());
+      });
+      Promise.all(promises).then(() => {
+        res.send({
+          code: 200,
+          msg: 'success',
+          source: null
+        });
+      });
     });
   }).catch(err => {
     logger.reqErr(err, req);

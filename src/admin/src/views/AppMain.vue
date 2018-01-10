@@ -47,7 +47,7 @@
             <span class="tab-label" slot="label" :title="item.title">{{item.title}}</span>
           </el-tab-pane>
         </el-tabs>
-        <el-main>
+        <el-main class="super-light-primary-color">
           <router-view></router-view>
         </el-main>
       </el-container>

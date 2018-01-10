@@ -1,50 +1,52 @@
 <template>
   <div class="post-new">
-    <div class="vertical-center padding-b-20">
-      <label class="short-label" for="postTitle">标题</label>
-      <el-input
-        id="postTitle"
-        class="post-title"
-        v-model="title"
-        clearable />
-    </div>
-    <div class="vertical-center padding-b-20">
-      <label class="short-label" for="postAbstract">摘要</label>
-      <el-input
-        id="postAbstract"
-        class="post-abstract"
-        v-model="abstract"
-        type="textarea" />
+    <div class="post-top-field-wp">
+      <div class="post-top-field">
+        <label class="short-label" for="postTitle">标题</label>
+        <el-input
+          id="postTitle"
+          class="post-title"
+          v-model="title"
+          clearable />
+      </div>
+      <div class="post-top-field">
+        <label class="short-label" for="postTag">标签</label>
+        <el-select
+          id="postTag"
+          v-model="tagsSelected"
+          multiple
+          placeholder="请选择标签">
+          <el-option
+            v-for="tag in tagList"
+            :key="tag._id"
+            :label="tag.name"
+            :value="tag._id" />
+        </el-select>
+      </div>
+      <div class="post-top-field">
+        <label class="short-label" for="postAbstract">摘要</label>
+        <el-input
+          id="postAbstract"
+          class="post-abstract"
+          v-model="abstract"
+          type="textarea" />
+      </div>
+      <div class="post-top-field">
+        <label class="short-label" for="postCategory">分类</label>
+        <el-cascader
+          id="postCategory"
+          v-model="category"
+          :options="categoryList"
+          :props="{value:'_id','label':'name',children:'children'}"
+          clearable
+          placeholder="请选择分类" />
+      </div>
     </div>
     <div class="padding-b-20">
       <mavon-editor v-model="content" />
     </div>
-    <div class="vertical-center padding-b-20">
-      <label class="short-label" for="postTag">标签</label>
-      <el-select
-        id="postTag"
-        v-model="tagsSelected"
-        multiple
-        placeholder="请选择标签">
-        <el-option
-          v-for="tag in tagList"
-          :key="tag._id"
-          :label="tag.name"
-          :value="tag._id" />
-      </el-select>
-    </div>
-    <div class="vertical-center padding-b-20">
-      <label class="short-label" for="postCategory">分类</label>
-      <el-cascader
-        id="postCategory"
-        v-model="category"
-        :options="categoryList"
-        :props="{value:'_id','label':'name',children:'children'}"
-        clearable
-        placeholder="请选择分类" />
-    </div>
     <el-button
-      class="post-save-btn"
+      class="box-content"
       type="primary"
       :disabled="disabled"
       :loading="submiting"
@@ -174,13 +176,28 @@ export default {
 </script>
 
 <style scoped>
-.post-title, .post-abstract{
-  max-width: 40%;
-}
 .post-new >>> .v-note-wrapper{
-  min-height: 500px;
+  height: 500px;
 }
 .post-new{
   position: relative;
+}
+.post-top-field-wp{
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.post-new >>> .markdown-body.fullscreen{
+  height: 100%;
+}
+.post-top-field{
+  display: flex;
+  align-items: center;
+  width: 40%;
+  padding: 5px 10px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0 0 2px 1px #33419030;
 }
 </style>

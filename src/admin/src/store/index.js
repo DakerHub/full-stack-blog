@@ -54,6 +54,10 @@ export default new Vuex.Store({
       const { tabs } = state;
       state.tabs = tabs.filter(tab => tab.name !== targetName);
     },
+    removeTabsByRoute(state, routes) {
+      const { tabs } = state;
+      state.tabs = tabs.filter(tab => !routes.includes(tab.route));
+    },
     clearTab(state) {
       state.tabs = [];
     }

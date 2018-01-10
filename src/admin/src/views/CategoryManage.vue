@@ -1,6 +1,7 @@
 <template>
   <div class="category-manage">
     <el-tree
+      class="box-content"
       node-key="_id"
       :props="{label: 'name', children: 'children'}"
       :data="categorys"
@@ -60,6 +61,10 @@ export default {
       this.$set(data, 'submiting', false);
       const self = this;
       const inRename = this.editNodeId === data._id;
+      let label = node.label;
+      if (node.level !== 1) {
+        label += '（' + data.relatedPosts + '）';
+      }
       const wrapperClass = data.isNew ? 'tree-node-conent in-rename' : 'tree-node-conent';
 
       const ctrs = [h('i', {
@@ -145,7 +150,7 @@ export default {
           style: {
             display: inRename ? 'none' : 'inline'
           },
-          'class': 'tree-node-label'}, node.label),
+          'class': 'tree-node-label'}, label),
         h('input', {
           'class': 'tree-node-input',
           style: {
@@ -171,7 +176,7 @@ export default {
           },
           attrs: {
             placeholder: '请输入分类名称',
-            maxlength: 10
+            maxlength: 20
           }
         }),
         h('span', {'class': 'tree-node-ctr'}, ctrs)
@@ -184,6 +189,7 @@ export default {
         name: '',
         pId: data._id,
         isNew: true,
+        relatedPosts: 0,
         children: []
       };
       if (node.childNodes && node.childNodes.length > 0) {
@@ -213,7 +219,7 @@ export default {
               try {
                 const res = await this.api.delCategory({ ids: data._id });
                 if (res) {
-                  node.store.remove(data);
+                  this.getList();
                 }
                 instance.confirmButtonLoading = false;
                 done();
@@ -349,5 +355,8 @@ export default {
 }
 .category-manage >>> .el-icon-circle-check-outline.disabled{
   cursor: not-allowed;
+}
+.box-content{
+  padding: 20px;
 }
 </style>
