@@ -28,7 +28,25 @@ export default {
       user: this.$store.state.user
     }
   },
+  created() {
+    if (!this.user._id) {
+      this.getCurUser();
+    }
+  },
   methods: {
+    async getCurUser() {
+      const params = {
+        _id: this.Cookies.get('_id')
+      }
+      try {
+        const { sources } = await this.api.getUsers(params);
+        if (sources && sources.length > 0) {
+          this.$store.commit('updateUser', sources[0]);
+        }
+      } catch (error) {
+        
+      }
+    },
     logout () {
       this.$store.commit('updateUser', {
         _id: '',

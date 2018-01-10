@@ -85,7 +85,7 @@ const router = express.Router();
  *                 $ref: '#/definitions/Post'
  */
 router.get('/', async function (req, res, next) {
-  const { title, _id, category, tag, dateOrder } = req.query;
+  const { title, _id, category, tag, dateOrder, publishStatus } = req.query;
   let { page = '1', size = '10' } = req.query;
   let query = {};
   let field = '-__v -content';
@@ -107,7 +107,11 @@ router.get('/', async function (req, res, next) {
 
   if (tag) {
     query.tags = { $in: [tag] };
-  } 
+  }
+  
+  if (publishStatus) {
+    query.publishStatus = publishStatus;
+  }
 
   if (_id) {
     query = { _id };

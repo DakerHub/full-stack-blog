@@ -31,6 +31,15 @@
 
     <el-select
       class="box-content"
+      v-model="filter.status"
+      clearable
+      placeholder="根据发布状态过滤">
+      <el-option label="公开" value="1" />
+      <el-option label="私有" value="2" />
+    </el-select>
+
+    <el-select
+      class="box-content"
       v-model="filter.tag"
       clearable
       placeholder="根据标签过滤">
@@ -141,7 +150,8 @@ export default {
         tag: '',
         category: [],
         dateOrder: '',
-        title: ''
+        title: '',
+        status: ''
       }
     };
   },
@@ -182,7 +192,7 @@ export default {
   },
   methods: {
     async getList() {
-      const { tag, category, dateOrder, title } = this.filter;
+      const { tag, category, dateOrder, title, status } = this.filter;
       const params = {
         page: this.curPage,
         size: this.pageSize
@@ -193,6 +203,7 @@ export default {
       tag && (params.tag = tag);
       dateOrder && (params.dateOrder = dateOrder);
       title && (params.title = title);
+      status && (params.publishStatus = status);
 
       try {
         const { sources, total } = await this.api.getPost(params);
@@ -305,6 +316,7 @@ export default {
 .el-pagination{
   text-align: right;
   margin-top: 5px;
+  padding: 5px 10px;
   background-color: #fff;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="post-new">
-    <div class="post-top-field-wp">
+    <div class="post-top-field-wp-left">
       <div class="post-top-field">
         <label class="short-label" for="postTitle">标题</label>
         <el-input
@@ -9,6 +9,17 @@
           v-model="title"
           clearable />
       </div>
+      <div class="post-top-field">
+        <label class="short-label" for="postAbstract">摘要</label>
+        <el-input
+          id="postAbstract"
+          class="post-abstract"
+          v-model="abstract"
+          type="textarea" />
+      </div>
+    </div><!--
+      取消间隔
+     --><div class="post-top-field-wp-right">
       <div class="post-top-field">
         <label class="short-label" for="postTag">标签</label>
         <el-select
@@ -24,14 +35,6 @@
         </el-select>
       </div>
       <div class="post-top-field">
-        <label class="short-label" for="postAbstract">摘要</label>
-        <el-input
-          id="postAbstract"
-          class="post-abstract"
-          v-model="abstract"
-          type="textarea" />
-      </div>
-      <div class="post-top-field">
         <label class="short-label" for="postCategory">分类</label>
         <el-cascader
           id="postCategory"
@@ -40,6 +43,13 @@
           :props="{value:'_id','label':'name',children:'children'}"
           clearable
           placeholder="请选择分类" />
+      </div>
+      <div class="post-top-field">
+        <label class="short-label" for="postStatus">状态</label>
+        <el-radio-group id="postStatus" v-model="status">
+          <el-radio-button label="1">发布</el-radio-button>
+          <el-radio-button label="2">私有</el-radio-button>
+        </el-radio-group>
       </div>
     </div>
     <div class="padding-b-20">
@@ -51,6 +61,12 @@
       :disabled="disabled"
       :loading="submiting"
       @click="submit">保存</el-button>
+    <el-button
+      class="box-content"
+      type="primary"
+      :disabled="disabled"
+      :loading="submiting"
+      @click="submit(true)">保存并进入编辑</el-button>
   </div>
 </template>
 
@@ -66,6 +82,7 @@ export default {
       title: '',
       content: '',
       abstract: '',
+      status: '1',
       tagsSelected: [],
       category: [],
 
@@ -128,18 +145,24 @@ export default {
     this.modified = false;
   },
   methods: {
-    async submit() {
+    async submit(goEdit) {
       const params = {
         title: this.title,
         content: this.content,
         abstract: this.abstract,
         tags: this.tagsSelected.join(','),
-        category: this.category.join(',')
+        category: this.category.join(','),
+        publishStatus: this.status
       }
       try {
         this.submiting = true;
-        await this.api.newPost(params);
-        this.modified = false;
+        const { sources } = await this.api.newPost(params);
+        if (sources) {
+          this.modified = false;
+          if (goEdit) {
+            this.$router.push('/post/edit/' + sources._id)
+          }
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -176,28 +199,58 @@ export default {
 </script>
 
 <style scoped>
-.post-new >>> .v-note-wrapper{
-  height: 500px;
-}
 .post-new{
   position: relative;
 }
-.post-top-field-wp{
-  display: flex;
-  justify-content: space-between;
+.post-top-field-wp-left{
+  display: inline-flex;
+  justify-content: flex-start;
   flex-wrap: wrap;
+  width: 40%;
 }
-.post-new >>> .markdown-body.fullscreen{
-  height: 100%;
+.post-top-field-wp-left .post-top-field{
+  width: 100%;
+}
+.post-top-field-wp-right .post-top-field{
+  max-width: 260px;
+}
+.post-top-field-wp-right{
+  display: inline-flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  width: 60%;
 }
 .post-top-field{
   display: flex;
   align-items: center;
-  width: 40%;
   padding: 5px 10px;
+  margin-right: 20px;
   margin-bottom: 15px;
   border-radius: 4px;
   background-color: #fff;
   box-shadow: 0 0 2px 1px #33419030;
+}
+.post-new >>> .v-note-wrapper{
+  height: 500px;
+}
+.post-new >>> .markdown-body.fullscreen{
+  height: 100%;
+}
+.post-new >>> .el-select__tags{
+  height: 28px;
+  padding: 0 5px;
+  overflow: hidden;
+}
+.post-new >>> .el-select__tags>span{
+  white-space: nowrap;
+  display: block;
+  width: 170px;
+  overflow: auto;
+}
+.post-new >>> #postTag{
+  height: 32px !important;
+}
+.post-new >>> .el-select__tags .el-tag{
+  margin: 2px 0 2px 6px;
 }
 </style>

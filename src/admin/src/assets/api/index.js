@@ -6,6 +6,7 @@ import util from './../js/util';
 import { getTags, delTag, newTag, editTag } from './controllerTag';
 import { getPost, delPost, newPost, editPost } from './controllerPost';
 import { getCategory, newCategory, editCategory, delCategory } from './controllerCategory';
+import { getUsers } from './controllerUser';
 
 const { assert } = util;
 const { removeAll, axioswp: axios } = axiosUtil;
@@ -49,5 +50,6 @@ export default {
   getCategory,
   newCategory,
   editCategory,
-  delCategory
+  delCategory,
+  getUsers
 };

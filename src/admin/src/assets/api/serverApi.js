@@ -16,7 +16,8 @@ const APIS = {
   login: 'login',
   post: 'posts',
   tag: 'tags',
-  category: 'categories'
+  category: 'categories',
+  user: 'users'
 };
 
 export default pretendApiRoot(APIS);

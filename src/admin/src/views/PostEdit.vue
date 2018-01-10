@@ -1,6 +1,6 @@
 <template>
   <div class="post-edit">
-    <div class="post-top-field-wp">
+    <div class="post-top-field-wp-left">
       <div class="post-top-field">
         <label class="short-label" for="postTitle">标题</label>
         <el-input
@@ -10,8 +10,20 @@
           clearable />
       </div>
       <div class="post-top-field">
-        <label class="short-label" for="postTitle">标签</label>
+        <label class="short-label" for="postAbstract">摘要</label>
+        <el-input
+          id="postAbstract"
+          class="post-abstract"
+          v-model="abstract"
+          type="textarea" />
+      </div>
+    </div><!--
+      取消间隔
+     --><div class="post-top-field-wp-right">
+      <div class="post-top-field">
+        <label class="short-label" for="postTag">标签</label>
         <el-select
+          id="postTag"
           v-model="tagsSelected"
           multiple
           placeholder="请选择标签">
@@ -19,17 +31,8 @@
             v-for="tag in tagList"
             :key="tag._id"
             :label="tag.name"
-            :value="tag._id">
-          </el-option>
+            :value="tag._id" />
         </el-select>
-      </div>
-      <div class="post-top-field">
-        <label class="short-label" for="postAbstract">摘要</label>
-        <el-input
-          id="postAbstract"
-          class="post-abstract"
-          v-model="abstract"
-          type="textarea" />
       </div>
       <div class="post-top-field">
         <label class="short-label" for="postCategory">分类</label>
@@ -40,6 +43,13 @@
           :props="{value:'_id','label':'name',children:'children'}"
           clearable
           placeholder="请选择分类" />
+      </div>
+      <div class="post-top-field">
+        <label class="short-label" for="postStatus">状态</label>
+        <el-radio-group id="postStatus" v-model="status">
+          <el-radio-button label="1">发布</el-radio-button>
+          <el-radio-button label="2">私有</el-radio-button>
+        </el-radio-group>
       </div>
     </div>
     <div class="padding-b-20">
@@ -66,6 +76,7 @@ export default {
       title: '',
       content: '',
       abstract: '',
+      status: '',
       tagsSelected: [],
       category: [],
       _id: '',
@@ -129,6 +140,7 @@ export default {
         abstract: this.abstract,
         tags: this.tagsSelected.join(','),
         category: this.category.join(','),
+        publishStatus: this.status,
         _id: this._id
       }
       try {
@@ -148,17 +160,9 @@ export default {
       }
       try {
         const { sources } = await this.api.getPost(params);
-        const { title, content, abstract, tags, _id, category } = sources[0];
-        this.title = title;
-        this.content = content;
-        this._id = _id;
-        this.abstract = abstract;
-        this.tagsSelected = tags.map(tag => tag && tag._id).filter(Boolean);
-        this.category = category.map(cate => cate && cate._id).filter(Boolean);
-        this.changeTabTitle(title);
-        this.$nextTick(() => {
-          this.modified = false;
-        });
+        if (sources && sources.length > 0) {
+          this.updatePost(sources[0]);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -187,6 +191,20 @@ export default {
       } catch (error) {
         console.error(error);
       }
+    },
+    updatePost(post) {
+      const { title, content, abstract, tags, _id, category, publishStatus } = post;
+      this.title = title;
+      this.content = content;
+      this._id = _id;
+      this.abstract = abstract;
+      this.status = publishStatus;
+      this.tagsSelected = tags.map(tag => tag && tag._id).filter(Boolean);
+      this.category = category.map(cate => cate && cate._id).filter(Boolean);
+      this.changeTabTitle(title);
+      this.$nextTick(() => {
+        this.modified = false;
+      });
     },
     confirmLeave(to, from, next) {
       if (this.modified) {
@@ -220,28 +238,58 @@ export default {
 </script>
 
 <style scoped>
-.post-edit >>> .v-note-wrapper{
-  height: 500px;
-}
 .post-edit{
   position: relative;
 }
-.post-edit >>> .v-note-wrapper.fullscreen{
-  height: 100%;
-}
-.post-top-field-wp{
-  display: flex;
-  justify-content: space-between;
+.post-top-field-wp-left{
+  display: inline-flex;
+  justify-content: flex-start;
   flex-wrap: wrap;
+  width: 40%;
+}
+.post-top-field-wp-left .post-top-field{
+  width: 100%;
+}
+.post-top-field-wp-right .post-top-field{
+  max-width: 260px;
+}
+.post-top-field-wp-right{
+  display: inline-flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  width: 60%;
 }
 .post-top-field{
   display: flex;
   align-items: center;
-  width: 40%;
   padding: 5px 10px;
+  margin-right: 20px;
   margin-bottom: 15px;
   border-radius: 4px;
   background-color: #fff;
   box-shadow: 0 0 2px 1px #33419030;
+}
+.post-edit >>> .v-note-wrapper{
+  height: 500px;
+}
+.post-edit >>> .v-note-wrapper.fullscreen{
+  height: 100%;
+}
+.post-edit >>> .el-select__tags{
+  height: 28px;
+  padding: 0 5px;
+  overflow: hidden;
+}
+.post-edit >>> .el-select__tags>span{
+  white-space: nowrap;
+  display: block;
+  width: 170px;
+  overflow: auto;
+}
+.post-edit >>> #postTag{
+  height: 32px !important;
+}
+.post-edit >>> .el-select__tags .el-tag{
+  margin: 2px 0 2px 6px;
 }
 </style>

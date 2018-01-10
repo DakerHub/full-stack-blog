@@ -7,8 +7,7 @@ import util from './../js/util';
 const { assert } = util;
 const { removeAll, axioswp: axios } = axiosUtil;
 
-const getTags = function (arg) {
-  const params = qs.stringify(arg);
+const getTags = function (params) {
   return axios.get(APIS.tag, { params }).catch(err => {
     console.error(err);
     Message({
