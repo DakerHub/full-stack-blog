@@ -6,7 +6,8 @@
       width="100"
       trigger="hover">
       <ul>
-        <li class="header-user-operate" @click="logout">退出</li>
+        <li class="header-user-operate" @click="checkMyself"><i class="iconfont icon-ziliao"></i>个人资料</li>
+        <li class="header-user-operate" @click="logout"><i class="iconfont icon-dengchu"></i>退出</li>
       </ul>
     </el-popover>
 
@@ -47,7 +48,18 @@ export default {
         
       }
     },
-    logout () {
+    checkMyself() {
+      const userId = this.$store.state.user._id;
+      if (userId) {
+        this.$router.push('/user/edit/' + userId);
+      } else {
+        this.$message({
+          message: '用户信息获取失败，请刷新页面！',
+          type: 'info'
+        });
+      }
+    },
+    logout() {
       this.$store.commit('updateUser', {
         _id: '',
         userPic: '',

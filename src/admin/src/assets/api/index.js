@@ -4,9 +4,9 @@ import APIS from './serverApi';
 import axiosUtil from './axioswp';
 import util from './../js/util';
 import { getTags, delTag, newTag, editTag } from './controllerTag';
-import { getPost, delPost, newPost, editPost } from './controllerPost';
+import { getPost, delPost, newPost, editPost, updatePostStatus } from './controllerPost';
 import { getCategory, newCategory, editCategory, delCategory } from './controllerCategory';
-import { getUsers } from './controllerUser';
+import { getUsers, newUser, deleteUser, editUser, updateUserPassword, updateUserAvatar } from './controllerUser';
 
 const { assert } = util;
 const { removeAll, axioswp: axios } = axiosUtil;
@@ -43,6 +43,7 @@ export default {
   delPost,
   newPost,
   editPost,
+  updatePostStatus,
   getTags,
   delTag,
   newTag,
@@ -51,5 +52,10 @@ export default {
   newCategory,
   editCategory,
   delCategory,
-  getUsers
+  getUsers,
+  newUser,
+  deleteUser,
+  editUser,
+  updateUserPassword,
+  updateUserAvatar
 };

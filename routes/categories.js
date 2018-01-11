@@ -3,6 +3,7 @@ const { Categories } = require('./../lib/models/categories');
 const { Posts } = require('./../lib/models/posts');
 const { deleteByIdsRecursive } = require('./../lib/controllers/crud');
 const logger = require('./../lib/util/log');
+const { formatDate } = require('./../lib/util/util');
 
 const router = express.Router();
 
@@ -163,7 +164,8 @@ router.post('/', function (req, res, next) {
   const category = {
     name,
     pId,
-    status
+    status,
+    createdDate: Date.now()
   };
   const saveCate = function (category, res) {
     Categories.init().then(function () {

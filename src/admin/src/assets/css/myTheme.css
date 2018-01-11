@@ -2,17 +2,27 @@
 .el-table__row.light-primary-color:hover > td{
   background: #C5CAE9 !important;
 }
-.el-button--primary.is-disabled, .el-button--primary.is-disabled:active, .el-button--primary.is-disabled:focus, .el-button--primary.is-disabled:hover{
+.el-button.el-button--primary.is-disabled,
+.el-button.el-button--primary.is-disabled:active,
+.el-button.el-button--primary.is-disabled:focus,
+.el-button.el-button--primary.is-disabled:hover{
   background-color: #C5CAE9;
   border-color: #C5CAE9;
 }
-.el-button--primary{
+.el-button.el-button--primary{
   background-color: #3F51B5;
   border-color: #3F51B5;
+  color: #fff;
 }
-.el-button--primary:focus, .el-button--primary:hover{
+.el-button.el-button--primary:focus,.el-button.el-button--primary:hover{
   background-color: #586ee8;
   border-color: #586ee8;
+  color: #fff;
+}
+.el-button:focus, .el-button:hover{
+  color: #00BCD4;
+  border-color: #9ee4ec;
+  background-color: #e6f9fb;
 }
 .el-input.is-active .el-input__inner,
 .el-input__inner:focus, .el-textarea__inner:focus,
@@ -74,4 +84,37 @@ textarea{
   border-radius: 4px;
   box-shadow: 0 0 2px 1px #b0b8e64f;
 }
+/* 弹窗begin */
+.popup-box{
+  width: 590px;
+  height: 522px;
+  background-color: #fff;
+  padding: 20px;
+  font-size: 14px;
+  border-radius: 5px;
+  position: fixed;
+  box-sizing: border-box;
+  z-index: 1010;
+}
+.popup-box-outer{
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, .5);
+  z-index: 1009;
+}
+.popup-header{
+  font-size: 14px;
+  color: #1f2d3d;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+.popup-btns{
+  width: 100%;
+  padding: 5px 0;
+  height: 36px;
+}
+/* 弹窗end */
 /* 全局样式end */

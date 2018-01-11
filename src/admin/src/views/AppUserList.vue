@@ -4,8 +4,8 @@
       <el-button
         type="primary"
         icon="el-icon-circle-plus-outline"
-        @click="$router.push('/post/new')">
-        写文章
+        @click="userNewShow = true">
+        新建
       </el-button>
       <el-button
         :disabled="disabled.edit"
@@ -29,46 +29,17 @@
       </el-button>
     </el-button-group>
 
-    <el-select
-      class="box-content"
-      v-model="filter.status"
-      clearable
-      placeholder="根据发布状态过滤">
-      <el-option label="公开" value="1" />
-      <el-option label="私有" value="2" />
-    </el-select>
-
-    <el-select
-      class="box-content"
-      v-model="filter.tag"
-      clearable
-      placeholder="根据标签过滤">
-      <el-option
-        v-for="tag in tagList"
-        :key="tag._id"
-        :label="tag.name"
-        :value="tag._id" />
-    </el-select>
-
-    <el-cascader
-      class="box-content"
-      v-model="filter.category"
-      :options="categoryList"
-      :props="{value:'_id','label':'name',children:'children'}"
-      clearable
-      placeholder="根据分类过滤" />
-
     <el-input
       class="box-content filter-input"
-      :value="filter.title"
+      :value="filter.username"
       prefix-icon="el-icon-search"
-      placeholder="输入标题关键词"
-      @change="val => filter.title = val">
+      placeholder="输入用户名查找"
+      @change="val => filter.username = val">
       <i
         class="el-input__icon el-icon-circle-close"
         slot="suffix"
-        v-show="filter.title !== ''"
-        @click="filter.title = ''" />
+        v-show="filter.username !== ''"
+        @click="filter.username = ''" />
     </el-input>
     
     <el-table
@@ -81,39 +52,22 @@
       @row-click="tableRowClick"
       @sort-change="tabelSortChange">
       <el-table-column
-        prop="title"
-        label="标题"
+        prop="username"
+        label="用户名"
         width="180">
       </el-table-column>
       <el-table-column
-        label="发布状态"
-        width="120">
-        <template slot-scope="scoped">
-          {{{'1': '公开', '2': '私有'}[scoped.row.publishStatus]}}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="标签"
+        prop="type"
+        label="用户类型"
         width="180">
         <template slot-scope="scoped">
-          <el-tag
-            v-for="item in scoped.row.tags.filter(Boolean)"
-            :key="item.id"
-            color="rgba(210, 250, 255, 0.5)"
-            size="small">{{item.name}}</el-tag>
+          {{userTypeMap[scoped.row.userType]}}
         </template>
       </el-table-column>
       <el-table-column
-        label="分类"
-        width="180">
-        <template slot-scope="scoped">
-          {{scoped.row.category.map(item => item.name).join('/')}}
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="date"
+        prop="regDate"
         sortable="custom"
-        label="创建日期">
+        label="注册日期">
       </el-table-column>
     </el-table>
 
@@ -127,7 +81,11 @@
       @current-change="currentPageChange"
       @size-change="sizeChange">
     </el-pagination>
-
+    
+    <UserNew
+      v-if="userNewShow"
+      :show.sync="userNewShow"
+      @update-list="getList"/>
   </div>
 </template>
 
@@ -136,9 +94,10 @@ import elTab from './../assets/mixins/elTab.js';
 import elPage from './../assets/mixins/elPage.js';
 import elTable from './../assets/mixins/elTable.js';
 import util from './../assets/js/util.js';
+import UserNew from './ModelUserNew';
 
 export default {
-  name: 'PostList',
+  name: 'UserList',
   mixins: [elTab, elPage, elTable],
   data () {
     return {
@@ -147,12 +106,14 @@ export default {
       categoryList: [],
 
       filter: {
-        tag: '',
-        category: [],
         dateOrder: '',
-        title: '',
-        status: ''
-      }
+        username: ''
+      },
+      userTypeMap: {
+        '1': '管理员',
+        '2': '普通用户'
+      },
+      userNewShow: false
     };
   },
   computed: {
@@ -176,6 +137,9 @@ export default {
       return result;
     }
   },
+  components: {
+    UserNew
+  },
   watch: {
     filter: {
       deep: true,
@@ -185,62 +149,26 @@ export default {
     }
   },
   created () {
-    this.addTab('文章列表', '/post');
+    this.addTab('用户列表', '/user');
     this.getList();
-    this.getTags();
-    this.getCategories();
   },
   methods: {
     async getList() {
-      const { tag, category, dateOrder, title, status } = this.filter;
+      const { username, dateOrder } = this.filter;
       const params = {
         page: this.curPage,
         size: this.pageSize
       }
-      if (category.length > 0) {
-        params.category = category[category.length - 1]
-      }
-      tag && (params.tag = tag);
+      
+      username && (params.username = username);
       dateOrder && (params.dateOrder = dateOrder);
-      title && (params.title = title);
-      status && (params.publishStatus = status);
 
       try {
-        const { sources, total } = await this.api.getPost(params);
+        const { sources, total } = await this.api.getUsers(params);
         this.list = sources;
         this.total = total;
       } catch (error) {
         console.log(error);
-      }
-    },
-    async getTags() {
-      try {
-        const { sources } = await this.api.getTags();
-        this.tagList = sources;
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    async getCategories() {
-      try {
-        const { sources } = await this.api.getCategory();
-        sources.push({
-          _id: '0',
-          pId: '-1',
-          name: '全部'
-        });
-        this.categoryList = util.list2tree(sources, '0', {
-          id: '_id',
-          pId: 'pId',
-          label: 'name'
-        })[0].children || [];
-        this.categoryList.push({
-          _id: 'nocategory',
-          pId: '0',
-          name: '未分类'
-        });
-      } catch (error) {
-        console.error(error);
       }
     },
     delItem() {
@@ -248,11 +176,11 @@ export default {
       const names = [];
       this.curSelect.forEach(element => {
         ids.push(element._id);
-        names.push('“' + element.title + '”');
+        names.push('“' + element.username + '”');
       });
       this.$msgbox({
         title: '提示',
-        message: '确认删除以下文章：' + names.join('、') + '？',
+        message: '确认删除以下用户：' + names.join('、') + '？',
         showCancelButton: true,
         confirmButtonText: '确认',
         cancelButtonText: '取消',
@@ -260,10 +188,10 @@ export default {
           if (action === 'confirm') {
             instance.confirmButtonLoading = true;
             try {
-              await this.api.delPost(ids.join(','));
+              await this.api.deleteUser({ ids: ids.join(',') });
               this.getList();
               this.clearRowSelect();
-              this.removePostTab(ids);
+              this.removeUserTab(ids);
               instance.confirmButtonLoading = false;
               done();
             } catch (error) {
@@ -282,13 +210,13 @@ export default {
         }
       }).catch(() => {});
     },
-    removePostTab(ids) {
-      const routes = ids.map(id => '/post/edit/' + id);
+    removeUserTab(ids) {
+      const routes = ids.map(id => '/user/edit/' + id);
       this.$store.commit('removeTabsByRoute', routes);
     },
     editItem() {
       const id = this.curSelect[0]._id;
-      this.$router.push('/post/edit/' + id);
+      this.$router.push('/user/edit/' + id);
     },
     tabelSortChange({ order }) {
       console.log(order);
@@ -318,5 +246,13 @@ export default {
   margin-top: 5px;
   padding: 5px 10px;
   background-color: #fff;
+}
+.icon-fabu{
+  height: 12px;
+  font-size: 12px;
+  line-height: 1;
+  vertical-align: baseline;
+  display: inline-block;
+  -webkit-font-smoothing: antialiased;
 }
 </style>

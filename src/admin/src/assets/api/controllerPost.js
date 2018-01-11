@@ -103,9 +103,41 @@ const editPost = function (arg) {
   });
 };
 
+const updatePostStatus = function (arg) {
+  assert(arg, [{
+    field: 'ids',
+    required: true,
+    type: 'string'
+  }, {
+    field: 'publishStatus',
+    required: true,
+    type: 'string'
+  }]);
+  const params = qs.stringify(arg);
+  const operateName = {
+    1: '发布',
+    2: '撤回'
+  }[arg.publishStatus];
+
+  return axios.patch(APIS.postStatus, params).then(res => {
+    Message({
+      message: operateName + '文章成功!',
+      type: 'success'
+    });
+    return res;
+  }).catch(err => {
+    console.error(err);
+    Message({
+      message: operateName + '文章失败!',
+      type: 'error'
+    });
+  });
+};
+
 export {
   getPost,
   delPost,
   newPost,
-  editPost
+  editPost,
+  updatePostStatus
 };

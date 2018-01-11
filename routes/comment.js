@@ -3,7 +3,7 @@ const { Comments } = require('./../lib/models/comment');
 const { Users } = require('./../lib/models/users');
 const { Posts } = require('./../lib/models/posts');
 const { deleteByIdsRecursive, findByIds } = require('./../lib/controllers/crud');
-const { hasMissing } = require('./../lib/util/util');
+const { hasMissing, formatDate } = require('./../lib/util/util');
 const logger = require('./../lib/util/log');
 
 const router = express.Router();
@@ -200,7 +200,8 @@ router.post('/', function (req, res, next) {
     postId,
     authorId,
     pId,
-    status
+    status,
+    createdDate: Date.now()
   };
   const saveCate = function (comment, res) {
     Comments.create(comment, function (err, newComment) {

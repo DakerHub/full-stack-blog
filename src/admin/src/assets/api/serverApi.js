@@ -15,9 +15,12 @@ function pretendApiRoot(obj) {
 const APIS = {
   login: 'login',
   post: 'posts',
+  postStatus: 'posts/publishStatus',
   tag: 'tags',
   category: 'categories',
-  user: 'users'
+  user: 'users',
+  userPassword: 'users/password',
+  userAvatar: 'users/avatar'
 };
 
 export default pretendApiRoot(APIS);

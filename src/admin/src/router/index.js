@@ -3,11 +3,13 @@ import Router from 'vue-router';
 import TheLogin from '@/views/TheLogin.vue';
 import TheHome from '@/views/TheHome.vue';
 import AppMain from '@/views/AppMain.vue';
-import PostList from '@/views/PostList.vue';
-import PostNew from '@/views/PostNew.vue';
-import PostEdit from '@/views/PostEdit.vue';
-import TagManage from '@/views/TagManage.vue';
-import CategoryManage from '@/views/CategoryManage.vue';
+import PostList from '@/views/AppPostList.vue';
+import PostNew from '@/views/AppPostNew.vue';
+import PostEdit from '@/views/AppPostEdit.vue';
+import TagManage from '@/views/AppTagManage.vue';
+import CategoryManage from '@/views/AppCategoryManage.vue';
+import UserList from '@/views/AppUserList.vue';
+import UserEdit from '@/views/AppUserEdit.vue';
 
 Vue.use(Router);
 
@@ -56,6 +58,16 @@ export default new Router({
           path: 'category',
           name: 'CategoryManage',
           component: CategoryManage
+        },
+        {
+          path: 'user',
+          name: 'UserList',
+          component: UserList
+        },
+        {
+          path: 'user/edit/:id',
+          name: 'UserEdit',
+          component: UserEdit
         }
       ]
     }

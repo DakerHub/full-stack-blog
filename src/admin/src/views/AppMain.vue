@@ -26,7 +26,7 @@
             <i class="iconfont icon-fenlei"></i>
             <span slot="title">分类管理</span>
           </el-menu-item>
-          <el-menu-item index="5">
+          <el-menu-item index="/user">
             <i class="iconfont icon-yonghu"></i>
             <span slot="title">用户管理</span>
           </el-menu-item>
@@ -44,7 +44,11 @@
             v-for="item in $store.state.tabs"
             :key="item.name"
             :name="item.name">
-            <span class="tab-label" slot="label" :title="item.title">{{item.title}}</span>
+            <span class="tab-label" slot="label" :title="item.title">
+              <i v-if="item.iconClass" :class="item.iconClass"></i><!-- 
+                取消间隔
+               --><span>{{item.title}}</span>
+            </span>
           </el-tab-pane>
         </el-tabs>
         <el-main class="super-light-primary-color">
@@ -116,5 +120,8 @@ export default {
   vertical-align: middle;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.tab-label .iconfont{
+  width: auto;
 }
 </style>

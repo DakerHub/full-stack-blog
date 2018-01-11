@@ -1,6 +1,6 @@
 export default {
   methods: {
-    addTab(targetName, route) {
+    addTab(targetName, route, iconClass) {
       const store = this.$store;
       const { tabs } = store.state;
       let sameTab = false;
@@ -21,6 +21,7 @@ export default {
           title: targetName,
           name: newTabName,
           route,
+          iconClass,
           closable: true
         });
         store.commit('setActivedTab', newTabName);

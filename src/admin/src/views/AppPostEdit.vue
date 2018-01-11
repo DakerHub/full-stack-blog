@@ -121,14 +121,13 @@ export default {
     })
   },
   beforeRouteUpdate(to, from, next) {
-    console.log(111);
     this.confirmLeave(to, from, next);
   },
   beforeRouteLeave(to, from, next) {
     this.confirmLeave(to, from, next);
   },
   created() {
-    this.addTab('编辑文章', this.$route.fullPath);
+    this.addTab('编辑文章', this.$route.fullPath, 'iconfont icon-wenzhang');
     this.getTags();
     this.getCategories();
   },
@@ -230,7 +229,7 @@ export default {
     changeTabTitle(title) {
       this.$store.commit('setTagNameByRoute', {
         route: this.$route.path,
-        label: '>' + title + '<'
+        label: title
       });
     }
   }

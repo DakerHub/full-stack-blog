@@ -2,7 +2,7 @@ const express = require('express');
 const { Tags } = require('./../lib/models/tags');
 const { Posts } = require('./../lib/models/posts');
 const { deleteByIds } = require('./../lib/controllers/crud');
-const { intersection } = require('./../lib/util/util');
+const { formatDate } = require('./../lib/util/util');
 const logger = require('./../lib/util/log');
 
 const router = express.Router();
@@ -128,7 +128,8 @@ router.get('/', function (req, res, next) {
 router.post('/', function (req, res, next) {
   const { name } = req.body;
   const tag = {
-    name
+    name,
+    createdDate: Date.now()
   };
   Tags.init().then(function () {
     Tags.create(tag, function (err, newTag) {

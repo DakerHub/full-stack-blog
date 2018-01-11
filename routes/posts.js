@@ -132,8 +132,8 @@ router.get('/', async function (req, res, next) {
   }
 
   Posts.find(query)
-    .sort(sort)
     .lean()
+    .sort(sort)
     .skip((page - 1) * size)
     .limit(size)
     .select(field)
@@ -252,6 +252,7 @@ router.post('/', function (req, res, next) {
   const { title, abstract, content, date = Date.now(), publishStatus = '1', tags, category } = req.body;
   const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
   const categoryIds = category && typeof category === 'string' ? category.split(',') : [];
+
   const post = {
     title,
     abstract,
@@ -259,8 +260,13 @@ router.post('/', function (req, res, next) {
     date,
     publishStatus,
     category: categoryIds,
-    tags: tagIds
+    tags: tagIds,
+    publishDate
   };
+  if (publishStatus === '1') {
+    post.publishDate = date;
+  }
+
   const savePost = function (res, post) {
     Posts.create(post, function (err, newPost) {
       if (err) {
@@ -472,5 +478,79 @@ router.delete('/', function (req, res, next) {
     });
   });
 });
+
+/**
+ * @swagger
+ * /posts/publishStatus:
+ *   patch:
+ *     description: 更新文章发布状态
+ *     tags:
+ *       - 文章
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: token
+ *         description: token
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: _id
+ *         description: 文章id
+ *         in: query
+ *         required: true
+ *         type: string
+ *       - name: publishStatus
+ *         description: 文章发布状态
+ *         in: query
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK
+ *         schema:
+ *           type: object
+ *           properties:
+ *             code:
+ *               type: integer
+ *               description: 返回结果状态.
+ *             msg:
+ *               type: string
+ *               description: 返回结果文本.
+ *             source:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/Post'
+ */
+router.patch('/publishStatus', async function (req, res, next) {
+  const { ids, publishStatus } = req.body;
+  const postIds = ids && typeof ids === 'string' ? ids.split(',') : [];
+  
+  try {
+    const postDocs = await findByIds(Posts, postIds);
+    const promises = [];
+    postDocs.forEach(doc => {
+      doc.$set('publishStatus', publishStatus);
+      if (publishStatus === '1') {
+        doc.$set('publishDate', Date.now());
+      }
+      promises.push(doc.save());
+    });
+    const newPosts = await Promise.all(promises);
+    res.send({
+      code: 200,
+      msg: 'success',
+      sources: newPosts
+    });
+  } catch (err) {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message,
+      source: null
+    });
+  }
+});
+
+
 
 module.exports = router;
