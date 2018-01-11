@@ -19,6 +19,7 @@ const APIS = {
   tag: 'tags',
   category: 'categories',
   user: 'users',
+  comment: 'comments',
   userPassword: 'users/password',
   userAvatar: 'users/avatar'
 };

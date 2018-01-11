@@ -4,17 +4,28 @@
       <TheHeader/>
     </el-header>
     <el-container>
-      <el-aside width="160px">
-        <el-menu :default-active="initPath" ref="elMenu" router active-text-color="#00BCD4">
+      <el-aside :style="{width:sideBarWidth}">
+        <el-button
+          class="menu-collapse-btn"
+          :style="{width:sideBarWidth}"
+          @click="isCollapse=!isCollapse">
+            <i :class="menuBtnIcon" :title="menuBtnTitle"></i>
+        </el-button>
+        <el-menu
+          :default-active="initPath"
+          :collapse="isCollapse"
+          ref="elMenu"
+          router
+          active-text-color="#00BCD4">
           <el-menu-item index="/home">
-            <i class="iconfont icon-wenzhang"></i>
+            <i class="iconfont icon-zhuye"></i>
             <span slot="title">概览</span>
           </el-menu-item>
           <el-menu-item index="/post">
             <i class="iconfont icon-wenzhang"></i>
             <span slot="title">文章管理</span>
           </el-menu-item>
-          <el-menu-item index="2">
+          <el-menu-item index="/commont">
             <i class="iconfont icon-pinglun"></i>
             <span slot="title">评论管理</span>
           </el-menu-item>
@@ -71,6 +82,7 @@ export default {
   mixins: [elTab],
   data () {
     return {
+      isCollapse: false
     }
   },
   computed: {
@@ -87,6 +99,15 @@ export default {
         this.$refs.elMenu && (this.$refs.elMenu.activeIndex = result);
       });
       return result;
+    },
+    sideBarWidth() {
+      return this.isCollapse ? '65px' : '160px';
+    },
+    menuBtnIcon() {
+      return this.isCollapse ? 'iconfont icon-shouqi reverse' : 'iconfont icon-shouqi';
+    },
+    menuBtnTitle() {
+      return this.isCollapse ? '展开' : '收起';
     }
   },
   methods: {
@@ -104,8 +125,14 @@ export default {
 .main-container{
   height: 100%;
 }
+.el-aside{
+  position: relative;
+  overflow-x: hidden;
+  background-color: transparent;
+}
 .el-menu{
-  height: 100%;
+  padding-top: 30px;
+  height: calc(100% - 30px);
 }
 .el-tabs{
   padding: 10px 10px 0 10px;
@@ -123,5 +150,21 @@ export default {
 }
 .tab-label .iconfont{
   width: auto;
+}
+.menu-collapse-btn{
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 30px;
+  z-index: 1;
+  text-align: center;
+  border: none;
+  background-color: transparent;
+}
+.icon-shouqi{
+  transition: transform .3s ease-out;
+}
+.icon-shouqi.reverse{
+  transform: rotateY(180deg);
 }
 </style>

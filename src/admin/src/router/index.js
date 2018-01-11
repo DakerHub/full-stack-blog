@@ -10,6 +10,7 @@ import TagManage from '@/views/AppTagManage.vue';
 import CategoryManage from '@/views/AppCategoryManage.vue';
 import UserList from '@/views/AppUserList.vue';
 import UserEdit from '@/views/AppUserEdit.vue';
+import CommentList from '@/views/AppCommentList.vue';
 
 Vue.use(Router);
 
@@ -68,6 +69,11 @@ export default new Router({
           path: 'user/edit/:id',
           name: 'UserEdit',
           component: UserEdit
+        },
+        {
+          path: '/commont',
+          name: 'CommentList',
+          component: CommentList
         }
       ]
     }

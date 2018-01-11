@@ -260,8 +260,7 @@ router.post('/', function (req, res, next) {
     date,
     publishStatus,
     category: categoryIds,
-    tags: tagIds,
-    publishDate
+    tags: tagIds
   };
   if (publishStatus === '1') {
     post.publishDate = date;

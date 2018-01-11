@@ -104,6 +104,7 @@ router.get('/', async function (req, res, next) {
 
   Comments
     .find(query)
+    .lean()
     .skip((page - 1) * size)
     .limit(size)
     .select('-__v')
@@ -118,11 +119,54 @@ router.get('/', async function (req, res, next) {
         });
         return;
       }
-      res.send({
-        code: 200,
-        msg: 'success',
-        sources: rows,
-        total
+      const promises = [];
+      rows.forEach(row => {
+        row.createdDate = formatDate(row.createdDate, 'YYYY-MM-DD hh:mm:ss');
+        promises.push(Posts
+          .findById(row.postId)
+          .lean()
+          .select('_id title')
+          .exec()
+          .then(post => {
+            row.post = post;
+          }));
+        promises.push(Users
+          .findById(row.authorId)
+          .lean()
+          .select('-__v -password')
+          .exec()
+          .then(user => {
+            row.author = user;
+          }));
+        if (row.replyTo) {
+          promises.push(Users
+            .findById(row.replyTo)
+            .lean()
+            .select('-__v -password')
+            .exec()
+            .then(user => {
+              row.replyTo = user || {
+                _id: row.replyTo,
+                username: '未知用户'
+              };
+            }));
+        }
+      });
+      Promise.all(promises).then(() => {
+        res.send({
+          code: 200,
+          msg: 'success',
+          sources: rows,
+          total
+        });
+      }).catch(err => {
+        logger.reqErr(err, req);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null,
+          total
+        });
       });
     });
 });

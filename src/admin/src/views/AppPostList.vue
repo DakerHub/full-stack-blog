@@ -83,6 +83,7 @@
       :data="list"
       :height="500"
       :row-class-name="tableRowClass"
+      :show-overflow-tooltip="true"
       size="small"
       style="width: 100%"
       @row-click="tableRowClick"
@@ -94,7 +95,7 @@
       </el-table-column>
       <el-table-column
         label="发布状态"
-        width="120">
+        width="80">
         <template slot-scope="scoped">
           {{{'1': '公开', '2': '私有'}[scoped.row.publishStatus]}}
         </template>

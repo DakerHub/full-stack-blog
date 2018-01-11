@@ -12,7 +12,7 @@
     </el-popover>
 
     <div class="header-avatar-wp">
-      <span class="text-primary-color header-username">Hi,{{user.username}}</span>
+      <span class="text-primary-color header-username">Hi，{{user.username}}</span>
       <div class="header-avatar-shade" v-popover:popover>
         <img :src="user.userPic" v-if="user.userPic" alt="avatar" class="header-avatar">
         <img v-else src="/static/imgs/avatar-boy.png" alt="avatar">
