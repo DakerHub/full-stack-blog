@@ -60,7 +60,7 @@
       type="primary"
       :disabled="disabled"
       :loading="submiting"
-      @click="submit">保存</el-button>
+      @click="submit(false)">保存</el-button>
     <el-button
       class="box-content"
       type="primary"

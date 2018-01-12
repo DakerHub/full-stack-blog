@@ -164,7 +164,6 @@ export default {
       }
     },
     async updateAvatar(arg) {
-      this.submiting = true;
       const params = {
         _id: this.editUser._id,
         avatar: arg.file
@@ -179,7 +178,6 @@ export default {
         }
       } catch (error) {
       } finally {
-        this.submiting = true;
       }
       console.log(arguments);
     },

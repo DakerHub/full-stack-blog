@@ -7,8 +7,9 @@ import util from './../js/util';
 const { assert } = util;
 const { removeAll, axioswp: axios } = axiosUtil;
 
-const getComment = function () {
-  return axios.get(APIS.comment).catch(err => {
+const getComment = function (params) {
+  console.log(params);
+  return axios.get(APIS.comment, { params }).catch(err => {
     console.log(err);
     Message({
       message: '获取文章评论失败!',
@@ -19,7 +20,15 @@ const getComment = function () {
 
 const newComment = function (arg) {
   assert(arg, [{
-    field: 'name',
+    field: 'content',
+    required: true,
+    type: 'string'
+  }, {
+    field: 'postId',
+    required: true,
+    type: 'string'
+  }, {
+    field: 'authorId',
     required: true,
     type: 'string'
   }]);
@@ -32,42 +41,8 @@ const newComment = function (arg) {
     return res;
   }).catch(err => {
     console.error(err);
-    let errMsg = '新建评论失败!';
-    if (err.msg && err.msg.includes('duplicate key error')) {
-      errMsg = '存在相同的评论名!';
-    }
     Message({
-      message: errMsg,
-      type: 'error'
-    });
-  });
-};
-
-const editComment = function (arg) {
-  assert(arg, [{
-    field: 'name',
-    required: true,
-    type: 'string'
-  }, {
-    field: '_id',
-    required: true,
-    type: 'string'
-  }]);
-  const params = qs.stringify(arg);
-  return axios.put(APIS.comment, params).then(res => {
-    Message({
-      message: '修改评论成功!',
-      type: 'success'
-    });
-    return res;
-  }).catch(err => {
-    console.error(err);
-    let errMsg = '修改评论失败!';
-    if (err.msg && err.msg.includes('duplicate key error')) {
-      errMsg = '存在相同的评论名!';
-    }
-    Message({
-      message: errMsg,
+      message: '新建评论失败!',
       type: 'error'
     });
   });
@@ -97,6 +72,5 @@ const delComment = function (arg) {
 export {
   getComment,
   newComment,
-  editComment,
   delComment
 };

@@ -85,15 +85,21 @@ const router = express.Router();
  *                 $ref: '#/definitions/Comment'
  */
 router.get('/', async function (req, res, next) {
-  const { pId, postId } = req.query;
+  const { pId, postId, dateOrder, content } = req.query;
   let { page = '1', size = '10' } = req.query;
   let query = {};
   let total = 0;
-  
+  const sort = {
+    createdDate: Number.parseInt(dateOrder, 10) || -1
+  };
+
   page = Number.parseInt(page, 10);
   size = Number.parseInt(size, 10);
   if (postId) {
     query.postId = postId;
+  }
+  if (content) {
+    query.content = new RegExp(content);
   }
   if (pId) {
     // 如果有pId,则不管其他条件
@@ -105,6 +111,7 @@ router.get('/', async function (req, res, next) {
   Comments
     .find(query)
     .lean()
+    .sort(sort)
     .skip((page - 1) * size)
     .limit(size)
     .select('-__v')
@@ -229,7 +236,7 @@ router.get('/', async function (req, res, next) {
  *                 $ref: '#/definitions/Comment'
  */
 router.post('/', function (req, res, next) {
-  const { content, postId, authorId, pId = '0', status = '1' } = req.query;
+  const { content, postId, authorId, pId = '0', status = '1', replyTo } = req.body;
   const missing = hasMissing({ content, postId, authorId });
   if (missing) {
     logger.reqErr(missing, req);
@@ -243,6 +250,7 @@ router.post('/', function (req, res, next) {
     content,
     postId,
     authorId,
+    replyTo,
     pId,
     status,
     createdDate: Date.now()
@@ -340,23 +348,10 @@ router.post('/', function (req, res, next) {
 router.delete('/', async function (req, res, next) {
   const { userId, query } = req;
   const { ids } = query;
-  console.log(userId);
   if (!ids) {
     return res.sendStatus(400);
   }
-  if (userId !== 'admin') {
-    const comment = await Comments.findById({ _id: ids }).exec();
-    if (comment.authorId !== userId) {
-      /* 请求接口的用户不是评论者或者管理员 */
-      logger.reqErr('no access!', req);
-      res.send({
-        code: 401,
-        msg: 'no access!',
-        source: null
-      });
-      return;
-    }
-  }
+  
   const idsArr = ids && typeof ids === 'string' ? ids.split(',') : [];
   deleteByIdsRecursive(Comments, idsArr, 'pId').then(result => {
     res.send({

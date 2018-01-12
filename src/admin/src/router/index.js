@@ -71,7 +71,7 @@ export default new Router({
           component: UserEdit
         },
         {
-          path: '/commont',
+          path: '/comment',
           name: 'CommentList',
           component: CommentList
         }

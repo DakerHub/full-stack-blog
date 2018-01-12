@@ -7,7 +7,7 @@ import { getTags, delTag, newTag, editTag } from './controllerTag';
 import { getPost, delPost, newPost, editPost, updatePostStatus } from './controllerPost';
 import { getCategory, newCategory, editCategory, delCategory } from './controllerCategory';
 import { getUsers, newUser, deleteUser, editUser, updateUserPassword, updateUserAvatar } from './controllerUser';
-import { getComment, newComment, editComment, delComment } from './controllerComment';
+import { getComment, newComment, delComment } from './controllerComment';
 
 const { assert } = util;
 const { removeAll, axioswp: axios } = axiosUtil;
@@ -61,6 +61,5 @@ export default {
   updateUserAvatar,
   getComment,
   newComment,
-  editComment,
   delComment
 };

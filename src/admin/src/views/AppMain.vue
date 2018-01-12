@@ -25,7 +25,7 @@
             <i class="iconfont icon-wenzhang"></i>
             <span slot="title">文章管理</span>
           </el-menu-item>
-          <el-menu-item index="/commont">
+          <el-menu-item index="/comment">
             <i class="iconfont icon-pinglun"></i>
             <span slot="title">评论管理</span>
           </el-menu-item>
@@ -162,6 +162,7 @@ export default {
   background-color: transparent;
 }
 .icon-shouqi{
+  margin: 0;
   transition: transform .3s ease-out;
 }
 .icon-shouqi.reverse{

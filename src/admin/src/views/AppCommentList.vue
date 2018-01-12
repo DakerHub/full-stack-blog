@@ -4,7 +4,7 @@
       <el-button
         :disabled="disabled.reply"
         type="primary"
-        @click="">
+        @click="commentReplyShow = true">
         <i class="iconfont icon-huifu"></i>
         回复
       </el-button>
@@ -49,7 +49,7 @@
       <el-table-column
         prop="post.title"
         label="评论主题"
-        width="120">
+        width="180">
       </el-table-column>
       <el-table-column
         prop="author.username"
@@ -59,6 +59,11 @@
       <el-table-column
         prop="content"
         label="评论内容"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="replyTo.username"
+        label="回复给"
         width="180">
       </el-table-column>
       <el-table-column
@@ -79,6 +84,11 @@
       @size-change="sizeChange">
     </el-pagination>
 
+    <CommentReply
+      v-if="commentReplyShow"
+      :target-comment="curSelect[0]"
+      :show.sync="commentReplyShow"
+      @update-list="getList"></CommentReply>
   </div>
 </template>
 
@@ -87,6 +97,7 @@ import elTab from './../assets/mixins/elTab.js';
 import elPage from './../assets/mixins/elPage.js';
 import elTable from './../assets/mixins/elTable.js';
 import util from './../assets/js/util.js';
+import CommentReply from './ModelCommentReply';
 
 export default {
   name: 'CommentList',
@@ -101,8 +112,12 @@ export default {
         dateOrder: '',
         content: '',
         status: ''
-      }
+      },
+      commentReplyShow: false
     };
+  },
+  components: {
+    CommentReply
   },
   computed: {
     disabled() {
@@ -134,16 +149,20 @@ export default {
     }
   },
   created () {
-    this.addTab('评论列表', '/commont');
+    this.addTab('评论列表', '/comment');
     this.getList();
   },
   methods: {
     async getList() {
+      this.clearRowSelect();
+      const { dateOrder, content } = this.filter;
       const params = {
         page: this.curPage,
         size: this.pageSize
       }
-
+      dateOrder && (params.dateOrder = dateOrder);
+      content && (params.content = content);
+      
       try {
         const { sources, total } = await this.api.getComment(params);
         this.list = sources;
@@ -153,15 +172,10 @@ export default {
       }
     },
     delItem() {
-      const ids = [];
-      const names = [];
-      this.curSelect.forEach(element => {
-        ids.push(element._id);
-        names.push('“' + element.title + '”');
-      });
+      const ids = this.curSelect.map(item => item._id).join(',');
       this.$msgbox({
         title: '提示',
-        message: '确认删除以下文章：' + names.join('、') + '？',
+        message: '删除评论可能会删除相关评论，确认删除？',
         showCancelButton: true,
         confirmButtonText: '确认',
         cancelButtonText: '取消',
@@ -169,9 +183,8 @@ export default {
           if (action === 'confirm') {
             instance.confirmButtonLoading = true;
             try {
-              await this.api.delPost(ids.join(','));
+              await this.api.delComment({ ids });
               this.getList();
-              this.clearRowSelect();
               instance.confirmButtonLoading = false;
               done();
             } catch (error) {
