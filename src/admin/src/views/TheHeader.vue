@@ -13,20 +13,28 @@
 
     <div class="header-avatar-wp">
       <span class="text-primary-color header-username">Hi，{{user.username}}</span>
-      <div class="header-avatar-shade" v-popover:popover>
-        <img :src="user.userPic" v-if="user.userPic" alt="avatar" class="header-avatar">
-        <img v-else src="/static/imgs/avatar-boy.png" alt="avatar">
+      <div class="header-avatar-shade" :style="avatarBg" v-popover:popover>
+        <img :src="user.userPic" v-show="user.userPic" alt="avatar" class="header-avatar">
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import config from './../assets/js/config.js';
 export default {
   name: 'TheHeader',
   data () {
     return {
       user: this.$store.state.user
+    }
+  },
+  computed: {
+    avatarBg() {
+      const backgroundImage = 'url(' + config.staticDir + 'imgs/avatar-' + (this.user.sex === '2' ? 'girl' : 'boy') + '.png)';
+      return {
+        backgroundImage
+      }
     }
   },
   created() {
@@ -89,6 +97,7 @@ export default {
   width: 50px;
   border-radius: 50%;
   overflow: hidden;
+  background-size: contain;
 }
 .header-avatar{
   width: 100%;

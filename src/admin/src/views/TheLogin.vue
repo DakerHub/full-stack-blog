@@ -8,7 +8,7 @@
           prop="username"
           :rules="[
             { required: true, message: '用户名不能为空'},
-            { type: 'string', pattern: /^\w+$/, max: 18, message: '请输入正确的用户名'}
+            { type: 'string', max: 18, message: '请输入正确的用户名'}
           ]">
           <el-input v-model="user.username" placeholder="username" @keyup.native.enter="submit"></el-input>
         </el-form-item>
@@ -54,9 +54,8 @@ export default {
     },
     async submit () {
       const valid = this.validateUser();
-      this.submiting = true;
-
       if (valid) {
+        this.submiting = true;
         try {
           const res = await this.api.login(this.user);
           this.isError = false;

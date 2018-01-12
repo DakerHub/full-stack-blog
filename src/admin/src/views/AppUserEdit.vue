@@ -53,16 +53,13 @@
       </el-upload>
     </div>
 
-    <AvatarUpload
-      v-if="avatarEditShow"
-      :show.sync="avatarEditShow" />
   </div>
 </template>
 
 <script>
 import elTab from './../assets/mixins/elTab.js';
 import util from './../assets/js/util.js';
-import AvatarUpload from './../components/AvatarUpload';
+import config from './../assets/js/config.js';
 
 export default {
   name: 'PostEdit',
@@ -84,11 +81,7 @@ export default {
       newPw: '',
       confirmPw: '',
       submiting: false,
-      avatarEditShow: false
     };
-  },
-  components: {
-    AvatarUpload
   },
   computed: {
     userId() {
@@ -96,7 +89,7 @@ export default {
     },
     avatarBg() {
       const sexName = this.editUser.sex === '2' ? 'girl' : 'boy';
-      return { backgroundImage: 'url(./static/imgs/avatar-' + sexName + '.png)' };
+      return { backgroundImage: 'url(' + config.staticDir + 'imgs/avatar-' + sexName + '.png)' };
     },
     editPwDisabled() {
       return !(this.oldPw && this.newPw && this.confirmPw)

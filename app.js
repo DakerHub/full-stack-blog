@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var swaggerJSDoc = require('swagger-jsdoc');
+var compression = require('compression');
 var jws = require('jws');
 var { SECRET, whiteList } = require('./config/config')
 
@@ -30,6 +31,9 @@ var options = {
 
 // Initialize swagger-jsdoc -> returns validated swagger spec in json format
 var swaggerSpec = swaggerJSDoc(options);
+
+// compress all responses
+app.use(compression());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -85,7 +89,9 @@ app.use(function (req, res, next) {
     return res.sendStatus(401);
   }
 });
+// app.use('/admin', function (req, res, next) {
 
+// });
 app.use('/', index);
 app.use('/login', login);
 app.use('/users', users);
