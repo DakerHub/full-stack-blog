@@ -1,3 +1,4 @@
+var Vue = require('vue');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -18,6 +19,8 @@ var categories = require('./routes/categories');
 var comments = require('./routes/comment')
 
 var app = express();
+
+var renderer = require('vue-server-renderer').createRenderer();
 
 var options = {
   swaggerDefinition: {
@@ -65,6 +68,28 @@ app.use(function (req, res, next) {
   next();
 });
 
+app.use('/blog', (req, res) => {
+  const app = new Vue({
+    data: {
+      url: req.url
+    },
+    template: `<div>访问的 URL 是： {{ url }}</div>`
+  });
+  renderer.renderToString(app, (err, html) => {
+    if (err) {
+      res.status(500).end('Internal Server Error', 'utf-8');
+      return
+    }
+    res.end(`
+      <!DOCTYPE html>
+      <html lang="en">
+        <head><meta charset="utf-8"><title>Hello</title></head>
+        <body>${html}</body>
+      </html>
+    `, 'utf-8');
+  });
+});
+
 app.use(function (req, res, next) {
   var signature = req.headers.authorization;
   if (whiteList.includes(req._parsedUrl.pathname)) {
@@ -89,9 +114,7 @@ app.use(function (req, res, next) {
     return res.sendStatus(401);
   }
 });
-// app.use('/admin', function (req, res, next) {
 
-// });
 app.use('/', index);
 app.use('/login', login);
 app.use('/users', users);

@@ -9,6 +9,7 @@ src/node_modules/
 src/build/
 src/config/
 src/test/
+public/admin/*
 selenium-debug.log
 
 # Editor directories and files
