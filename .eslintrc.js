@@ -37,6 +37,7 @@ module.exports = {
         'valid-typeof': 0,
         'object-shorthand': 0,
         'prefer-destructuring': 0,
-        'no-unused-expressions': 0
+        'no-unused-expressions': 0,
+        'import/prefer-default-export': 0
       }
 };

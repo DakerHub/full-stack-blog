@@ -3,6 +3,17 @@ import Router from 'vue-router';
 
 Vue.use(Router);
 
-export default new Router({
-  routes: []
-});
+const TheHome = () => import('../views/TheHome.vue');
+
+export function createRouter() {
+  return new Router({
+    fallback: false,
+    scrollBehavior: () => ({ y: 0 }),
+    routes: [
+      {
+        path: '/',
+        component: TheHome
+      }
+    ]
+  });
+}
