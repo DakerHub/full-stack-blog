@@ -38,6 +38,7 @@ module.exports = {
         'object-shorthand': 0,
         'prefer-destructuring': 0,
         'no-unused-expressions': 0,
-        'import/prefer-default-export': 0
+        'import/prefer-default-export': 0,
+        'global-require': 0
       }
 };
