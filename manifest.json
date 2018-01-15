@@ -1,0 +1,9 @@
+{
+  "name": "Fcc's Blog",
+  "short_name": "FBlog",
+  "icons": [],
+  "start_url": "/",
+  "background_color": "#f2f3f5",
+  "display": "standalone",
+  "theme_color": "#512DA8"
+}

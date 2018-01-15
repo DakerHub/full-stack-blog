@@ -22,6 +22,7 @@ var posts = require('./routes/posts');
 var tags = require('./routes/tags');
 var categories = require('./routes/categories');
 var comments = require('./routes/comment');
+var blogPageApi = require('./routes/blogPageApi');
 
 var app = express();
 
@@ -71,7 +72,7 @@ function render(req, res) {
 
   const context = {
     title: 'Fcc\'s Blog', // default title
-    url: req.url
+    url: req.originalUrl
   };
   renderer.renderToString(context, (err, html) => {
     if (err) {
@@ -145,9 +146,11 @@ app.use(function (req, res, next) {
 });
 
 // 对博客页面使用服务器端渲染
-app.use('/blog', isProd ? render : (req, res) => {
+app.use(['/blog', '/blog/*'], isProd ? render : (req, res) => {
   readyPromise.then(() => render(req, res));
 });
+
+app.use('/api/blog', blogPageApi);
 
 app.use(function (req, res, next) {
   var signature = req.headers.authorization;

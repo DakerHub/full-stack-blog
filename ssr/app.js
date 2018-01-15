@@ -4,6 +4,7 @@ import { createRouter } from './router';
 import { createStore } from './store';
 import { sync } from 'vuex-router-sync';
 import './assets/css/reset.css';
+import './assets/icon/iconfont.css';
 
 
 export function createApp () {
