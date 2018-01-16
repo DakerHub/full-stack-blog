@@ -115,6 +115,7 @@ export default {
     }
   },
   beforeRouteEnter(to, from, next) {
+    console.log(1);
     next(vm => {
       vm.getPost();
       vm.modified = false;

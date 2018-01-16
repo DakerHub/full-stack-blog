@@ -1,8 +1,8 @@
 <template>
   <div class="fcc-main">
-    <header class="fcc-header"></header>
+    <header class="fcc-header default-primary-color"></header>
     <transition name="fade">
-      <router-view class="fcc-view" />
+      <router-view class="fcc-view primary-text-color light-2-primary-color" />
     </transition>
   </div>
 </template>
@@ -13,18 +13,13 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .fcc-main{
   height: 100%;
 }
 .fcc-header{
   height: 4em;
   width: 100%;
-  background-color: #673AB7;
-}
-.fcc-view{
-  color: #212121;
-  background-color: #f6f0ff;
 }
 .fade-enter-active, .fade-leave-active{
   transition: all .5s ease;
