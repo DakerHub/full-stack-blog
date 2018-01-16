@@ -22,9 +22,11 @@
         </li>
       </ul>
       <BasePagination
-        :total="100"
-        :current-page="1"
-        :page-size="10"></BasePagination>
+        :total="postsTotal"
+        :current-page="currentPage"
+        :page-size="pageSize"
+        @current-change="changeCurrent">
+      </BasePagination>
     </section>
 
   </div>
@@ -43,11 +45,31 @@ export default {
     BasePagination
   },
   asyncData ({ store, route }) {
-    return store.dispatch('getRecentPost');
+    const currentPage = Number.parseInt(route.query && route.query.page || 1);
+    const pageSize = Number.parseInt(route.query && route.query.size || 2);
+    const params = {
+      page: currentPage,
+      size: pageSize
+    };
+    return store.dispatch('getPosts', params);
   },
   computed: {
     posts () {
-      return this.$store.state.posts
+      return this.$store.state.posts;
+    },
+    postsTotal () {
+      return this.$store.state.postsTotal;
+    },
+    pageSize() {
+      return Number.parseInt(this.$route.query && this.$route.query.size || 2);
+    },
+    currentPage() {
+      return Number.parseInt(this.$route.query && this.$route.query.page || 1);
+    }
+  },
+  methods: {
+    changeCurrent(val) {
+      this.$router.push(`/blog?page=${val}`);
     }
   }
 }

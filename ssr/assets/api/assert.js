@@ -3,10 +3,10 @@ export default function assert(params, conditions) {
     const { field, required, type, children } = condition;
     const value = params[field];
     if (required && typeof value === 'undefined') {
-      throw new Error('The argument `' + field + '` is required');
+      throw new Error('assert: The argument `' + field + '` is required');
     }
     if (type && typeof value !== type) {
-      throw new Error('The argument `' + field + '` must be ' + type);
+      throw new Error('assert: The argument `' + field + '` must be ' + type);
     }
     if (value && Array.isArray(children)) {
       assert(value, children);

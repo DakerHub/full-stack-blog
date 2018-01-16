@@ -86,7 +86,7 @@ const router = express.Router();
  */
 router.get('/posts', async function (req, res, next) {
   let { page = '1', size = '10' } = req.query;
-  let field = '-__v -content';
+  const field = '-__v -content';
   const sort = {
     date: -1
   };

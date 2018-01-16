@@ -6,11 +6,12 @@
           'base-pagination-single': true,
           'is-disabled': currentPageCopy === 1
         }"
+        v-show="false"
         @click="changeCurrent('prev')">&lt;</li>
       <li
         :class="{
           'base-pagination-single': true,
-          'active-color': n === currentPageCopy
+          'active-bg-color text-primary-color': n === currentPageCopy
         }"
         v-for="(n, index) in pageTotal"
         :key="index+n"
@@ -20,6 +21,7 @@
           'base-pagination-single': true,
           'is-disabled': currentPageCopy === pageTotal
         }"
+        v-show="false"
         @click="changeCurrent('next')">&gt;</li>
     </ul>
     <span
@@ -72,10 +74,22 @@ export default {
         const n = this.frontNum;
         if (n === 1) {
           pageTotal = [1, 2, 3, 4, 5, 6, '...', pageNum];
+          if (this.currentPageCopy > 6) {
+            this.currentPageCopy = 6;
+          }
         } else if (n > 1 && n + 4 < pageNum - 1) {
           pageTotal = [1, '...', n, n + 1, n + 2, n + 3, n + 4, '...', pageNum];
+          if (this.currentPageCopy < n) {
+            this.currentPageCopy = n;
+          }
+          if (this.currentPageCopy > n + 4) {
+            this.currentPageCopy = n + 4;
+          }
         } else if (n + 4 === pageNum - 1) {
           pageTotal = [1, '...', n, n + 1, n + 2, n + 3, n + 4, pageNum];
+          if (this.currentPageCopy < n) {
+            this.currentPageCopy = n;
+          }
         }
       }
       return pageTotal;
@@ -85,82 +99,61 @@ export default {
     },
     hasNextEllipsis() {
       return this.longPage && this.pageTotal[this.pageTotal.length - 2] === '...';
-    },
-    reachFront() {
-      if (this.hasPrevEllipsis && this.pageTotal[2] === this.currentPageCopy) {
-        return true;
-      }
-      if (!this.hasPrevEllipsis && this.pageTotal[0] === this.currentPageCopy) {
-        return true;
-      }
-      return false;
-    },
-    reachEnd() {
-       if (this.hasNextEllipsis && this.pageTotal[this.pageTotal.length - 3] === this.currentPageCopy) {
-        return true;
-      }
-      if (!this.hasNextEllipsis && this.pageTotal[this.pageTotal.length - 1] === this.currentPageCopy) {
-        return true;
-      }
-      return false;
+    }
+  },
+  watch: {
+    currentPageCopy(val) {
+      this.$emit('current-change', val)
     }
   },
   methods: {
     changeCurrent(which, index) {
-      let hasChange = false;
       switch (which) {
         case '...':
-          hasChange = this.checkMorePage(index === 1);
+          this.checkMorePage(index === 1);
           break;
         
         case 'next':
           if (this.currentPageCopy < this.pageNum) {
             this.currentPageCopy++;
-            hasChange = true;
           }
           break;
         
         case 'prev':
           if (this.currentPageCopy > 1) {
             this.currentPageCopy--;
-            hasChange = true;
           }
           break;
       
         default:
           if (this.currentPageCopy !== which) {
+            if (which === 1) {
+              this.frontNum = 1;
+            }
+            if (which === this.pageNum) {
+              this.frontNum = this.pageNum - 5;
+            }
             this.currentPageCopy = which;
-            hasChange = true;
           }
           break;
       }
-      hasChange && this.$emit('current-change', this.currentPageCopy);
     },
     checkMorePage(isPrev) {
       let hasChange = false;
       if (isPrev) {
-        if (this.reachFront) {
-          if (this.frontNum === 3) {
-            this.frontNum = 1;
-          } else {
-            this.frontNum--;
-          }
-          hasChange = true;
+        if (this.frontNum === 3) {
+          this.frontNum = 1;
         } else {
-          this.currentPageCopy--;
+          this.frontNum--;
         }
       } else {
-        if (this.reachEnd) {
-          if (!this.hasPrevEllipsis) {
-            this.frontNum = 3;
-          } else {
-            this.frontNum++;
-          }
-          hasChange = true;
+        if (!this.hasPrevEllipsis) {
+          this.frontNum = 3;
         } else {
-          this.currentPageCopy++;
+          this.frontNum++;
         }
       }
+      return hasChange;
     }
   }
 }
