@@ -71,7 +71,6 @@ export default {
     transform () {
       const activeLi = document.querySelector('.i-tab.is-active');
       const activeBar = document.querySelector('.i-tabs .i-tabs__active-bar');
-      console.log(activeLi);
       const w = activeLi.clientWidth;
       const left = activeLi.offsetLeft;
       if (typeof w !== 'undefined' && typeof left !== 'undefined') {

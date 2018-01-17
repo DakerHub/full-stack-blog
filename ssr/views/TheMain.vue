@@ -1,30 +1,35 @@
 <template>
   <div class="fcc-page light-2-primary-color">
     <header class="fcc-header default-primary-color">
-      <div class="fcc-header-avatar" @click="sidebarShow = true"></div>
+      <i class="iconfont icon-weibiaoti12 fcc-header-menu-trigger light-footer-color" @click="sidebarShow = true"></i>
+      <transition name="slide-right">
+        <section class="fcc-nav" v-show="sidebarShow">
+          <div class="fcc-nav-avatar"></div>
+          <p class="fcc-nav-login">
+            <router-link to="">登录</router-link>
+             / 
+            <router-link to="">注册</router-link>
+          </p>
+          <nav class="fcc-nav-list">
+            <ul>
+              <li v-for="route in routes" :key="route.name">
+                <router-link
+                  :class="{'active-color':activeRoute === route.route}"
+                  :to="route.route">
+                  {{route.name}}
+                  <span class="active-bg-color"></span>
+                </router-link>
+              </li>
+            </ul>
+            <ul class="fcc-nav-outlink">
+              <li><a href=""><i class="iconfont icon-github"></i></a></li>
+              <li><i class="iconfont icon-mail"></i></li>
+            </ul>
+          </nav>
+        </section>
+      </transition>
     </header>
 
-    <transition name="slide-right">
-      <aside class="fcc-sidebar" v-show="sidebarShow">
-        <div class="fcc-sidebar-avatar"></div>
-        <nav class="fcc-sidebar-nav">
-          <ul>
-            <li v-for="route in routes" :key="route.name">
-              <router-link
-                :class="{'active-color':activeRoute === route.route}"
-                :to="route.route">
-                {{route.name}}
-                <span class="active-bg-color"></span>
-              </router-link>
-            </li>
-          </ul>
-          <ul class="fcc-sidebar-outlink">
-            <li><a href=""><i class="iconfont icon-github"></i></a></li>
-            <li><i class="iconfont icon-mail"></i></li>
-          </ul>
-        </nav>
-      </aside>
-    </transition>
 
     <main class="fcc-main">
       <transition name="fade" mode="out-in">
@@ -115,22 +120,13 @@ export default {
   height: 4em;
   width: 100%;
 }
-.fcc-header-avatar{
-  height: 3em;
-  width: 3em;
-  margin: .5em 1em;
-  border-radius: 50%;
-  background-color: #fff;
+.fcc-header-menu-trigger{
+  font-size: 2em;
+  margin: .5em;
   float: right;
+  cursor: pointer;
 }
-.fcc-sidebar-avatar{
-  height: 6em;
-  width: 6em;
-  margin: 2em auto;
-  border-radius: 50%;
-  background-color: #673AB7;
-}
-.fcc-sidebar{
+.fcc-nav{
   position: fixed;
   top: 0px;
   right: 0px;
@@ -139,35 +135,96 @@ export default {
   background-color: #fff;
   z-index: 999;
 }
-@media screen and (min-width: 520px) {
-  .fcc-sidebar{
+@media screen and (min-width: 520px) and (max-width: 1024px) {
+  .fcc-nav{
     width: 300px;
   }
 }
-.fcc-sidebar-nav{
+.fcc-nav-avatar{
+  height: 6em;
+  width: 6em;
+  margin: 1em auto;
+  border: 4px solid #673AB7;
+  border-radius: 50%;
+  background-color: #fff;
+  background-image: url('/static/avatar/default_avatar.png');
+  background-size: contain;
+}
+.fcc-nav-login{
+  text-align: center;
+  margin-bottom: 1em;
+}
+.fcc-nav-login a {
+  text-decoration: none;
+}
+.fcc-nav-list{
   height: calc(100% - 8em);
   padding-top: 2em;
   background-color: #673AB7;
 }
-.fcc-sidebar-nav a{
+.fcc-nav-list a{
   color: #fff;
   text-decoration: none;
 }
-.fcc-sidebar-nav li{
+.fcc-nav-list li{
   height: 4em;
   line-height: 4em;
   text-align: center;
 }
-.fcc-sidebar-outlink{
+.fcc-nav-outlink{
   position: absolute;
   width: 100%;
   bottom: 0px;
   color: #fff;
   text-align: center;
 }
-.fcc-sidebar-outlink li{
+.fcc-nav-outlink li{
   display: inline-block;
   padding: 0 20px;
+}
+@media screen and (min-width: 1024px) {
+  .fcc-nav{
+    position: relative;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    background-color: transparent;
+  }
+  .fcc-nav-avatar{
+    height: 3em;
+    width: 3em;
+    margin: 0;
+    order: 2;
+  }
+  .fcc-nav-list{
+    height: 100%;
+    padding: 0;
+    margin-right: 40px;
+    text-align: center;
+    flex-grow: 1;
+    order: 1;
+  }
+  .fcc-nav-list li{
+    display: inline-block;
+    position: relative;
+    padding: 0 20px;
+  }
+  .fcc-nav-outlink{
+    display: none;
+  }
+  .fcc-nav-login{
+    margin: 0 20px;
+    font-size: .6em;
+    color: #fff;
+    order: 3;
+  }
+  .fcc-nav-login a {
+    color: #fff;
+  }
+  .fcc-header-menu-trigger{
+    display: none;
+  }
 }
 .fcc-view{
   box-sizing: border-box;
@@ -190,7 +247,6 @@ export default {
     width: calc(100% - 400px);
   }
 }
-
 .fcc-mask{
   position: fixed;
   top: 0px;
@@ -204,6 +260,16 @@ export default {
   height: 100%;
   display: block;
   float: right;
+}
+@media screen and (min-width: 1024px) {
+  .active-color .active-bg-color{
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    display: block;
+    width: 100%;
+    height: .3em;
+  }
 }
 </style>
 

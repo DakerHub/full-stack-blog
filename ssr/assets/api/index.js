@@ -19,7 +19,7 @@ const getPosts = function (params) {
 };
 
 const getTags = function () {
-  return axios.get('http://192.168.17.150:3000/tags').catch(err => {
+  return axios.get('http://192.168.1.103:3000/tags').catch(err => {
     alert(err);
   });
 };
