@@ -135,6 +135,7 @@ export default {
   background-color: #fff;
   background-image: url('/static/img/avatar_bg.jpg');
   background-size: 100%;
+  box-shadow: rgba(30, 10, 64, 0.4) 0px 0px 11px 5px;
   overflow: hidden;
   z-index: 999;
 }
