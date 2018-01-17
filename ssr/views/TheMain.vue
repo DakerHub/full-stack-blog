@@ -133,6 +133,9 @@ export default {
   height: 100%;
   width: 80%;
   background-color: #fff;
+  background-image: url('/static/img/avatar_bg.jpg');
+  background-size: 100%;
+  overflow: hidden;
   z-index: 999;
 }
 @media screen and (min-width: 520px) and (max-width: 1024px) {
@@ -152,9 +155,11 @@ export default {
 }
 .fcc-nav-login{
   text-align: center;
+  color: #fff;
   margin-bottom: 1em;
 }
 .fcc-nav-login a {
+  color: #fff;
   text-decoration: none;
 }
 .fcc-nav-list{
@@ -190,6 +195,7 @@ export default {
     justify-content: flex-end;
     width: 100%;
     background-color: transparent;
+    background-image: none;
   }
   .fcc-nav-avatar{
     height: 3em;
@@ -202,6 +208,7 @@ export default {
     padding: 0;
     margin-right: 40px;
     text-align: center;
+    background-color: transparent;
     flex-grow: 1;
     order: 1;
   }
