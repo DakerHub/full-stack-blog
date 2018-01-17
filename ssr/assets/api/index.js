@@ -18,6 +18,13 @@ const getPosts = function (params) {
   });
 };
 
+const getTags = function () {
+  return axios.get('http://192.168.17.150:3000/tags').catch(err => {
+    alert(err);
+  });
+};
+
 export {
-  getPosts
+  getPosts,
+  getTags
 };

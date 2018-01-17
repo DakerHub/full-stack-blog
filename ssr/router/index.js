@@ -7,6 +7,8 @@ const TheMain = () => import('../views/TheMain.vue');
 const TheHome = () => import('../views/TheHome.vue');
 const Other = () => import('../views/Other.vue');
 const TheLogin = () => import('../views/TheLogin.vue');
+const TheGallery = () => import('../views/TheGallery.vue');
+const TheAbout = () => import('../views/TheAbout.vue');
 
 export function createRouter() {
   return new Router({
@@ -29,6 +31,14 @@ export function createRouter() {
           {
             path: 'Other',
             component: Other
+          },
+          {
+            path: 'gallery',
+            component: TheGallery
+          },
+          {
+            path: 'about',
+            component: TheAbout
           }
         ]
       },

@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { getPosts } from './../assets/api/index';
+import { getPosts, getTags } from './../assets/api/index';
 
 Vue.use(Vuex);
 
@@ -8,7 +8,8 @@ export function createStore() {
   return new Vuex.Store({
     state: {
       posts: [],
-      postsTotal: 0
+      postsTotal: 0,
+      tags: []
     },
     actions: {
       getPosts({ commit }, currentPage) {
@@ -18,6 +19,12 @@ export function createStore() {
           commit('setPosts', posts);
           commit('setPostsTotal', total);
         });
+      },
+      getTags({ commit }) {
+        return getTags().then(res => {
+          const tags = res.data.sources;
+          commit('setTags', tags);
+        });
       }
     },
     mutations: {
@@ -26,6 +33,9 @@ export function createStore() {
       },
       setPostsTotal(state, total) {
         state.postsTotal = total;
+      },
+      setTags(state, tags) {
+        state.tags = tags;
       }
     }
   });
