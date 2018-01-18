@@ -10,14 +10,16 @@
             <img src="" alt="">
           </div>
           <div class="fcc-home-post-wp">
-            <h2 class="fcc-home-post-title p1em primary-text-color">{{post.title}}</h2>
+            <h2 class="fcc-home-post-title p1em">
+              <router-link to="" class="primary-text-color">{{post.title}}</router-link>
+            </h2>
             <p class="fcc-home-post-abs p1em">{{post.abstract}}</p>
             <ul class="fcc-home-post-tag p1em active-color">
               <li
                 v-for="tag in post.tags"
                 :key="tag._id">
                 <i class="iconfont icon-tag"></i>
-                {{tag.name}}
+                <router-link to="" class="active-color fcc-home-post-tag-link">{{tag.name}}</router-link>
               </li>
             </ul>
             <span class="fcc-home-post-date p1em">
@@ -122,6 +124,14 @@ export default {
   white-space: nowrap;
   overflow: hidden;
 }
+.fcc-home-post-title a{
+  font-weight: bold;
+  text-decoration: none;
+  transition: color .3s ease;
+}
+.fcc-home-post-title a:hover{
+  color: #00BCD4 !important;
+}
 .fcc-home-post-abs{
   font-size: .9em;
 }
@@ -144,12 +154,18 @@ export default {
   display: inline-flex;
   margin-right: 10px;
 }
+.fcc-home-post-tag-link{
+  text-decoration: none;
+}
+.fcc-home-post-tag-link:hover{
+  text-decoration: underline;
+}
 .fcc-home-post-tag .iconfont, .fcc-home-post-date .iconfont{
   margin-right: 5px;
   font-size: .8em;
 }
 .p1em{
-  margin-top: 1em;
+  margin-bottom: 1em;
 }
 </style>
 

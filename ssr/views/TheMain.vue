@@ -1,20 +1,26 @@
 <template>
   <div class="fcc-page light-2-primary-color">
     <header class="fcc-header default-primary-color">
-      <i class="iconfont icon-weibiaoti12 fcc-header-menu-trigger light-footer-color" @click="sidebarShow = true"></i>
+      <i class="iconfont icon-sousuo fcc-header-search light-text-color" title="搜索" @click="searchShow=true"></i>
+      <i class="iconfont icon-weibiaoti12 fcc-header-menu-trigger light-text-color" @click="sidebarShow = true"></i>
       <transition name="slide-right">
         <section class="fcc-nav" v-show="sidebarShow">
-          <div class="fcc-nav-avatar"></div>
-          <p class="fcc-nav-login">
-            <router-link to="">登录</router-link>
-             / 
-            <router-link to="">注册</router-link>
-          </p>
+          <div class="fcc-nav-user-info">
+            <div class="fcc-nav-avatar"></div>
+            <p class="fcc-nav-login light-text-color">
+              <router-link class="light-text-color" to="">登录</router-link>
+              / 
+              <router-link class="light-text-color" to="">注册</router-link>
+            </p>
+          </div>
           <nav class="fcc-nav-list">
             <ul>
               <li v-for="route in routes" :key="route.name">
                 <router-link
-                  :class="{'active-color':activeRoute === route.route}"
+                  :class="{
+                    'active-color':activeRoute === route.route,
+                    'light-text-color': true
+                  }"
                   :to="route.route">
                   {{route.name}}
                   <span class="active-bg-color"></span>
@@ -30,6 +36,14 @@
       </transition>
     </header>
 
+    <transition name="zoom-in">
+      <div class="fcc-search-wp" v-show="searchShow">
+        <input class="fcc-search-input" type="text" placeholder="输入关键词">
+        <i
+        class="fcc-search-close light-text-color"
+        @click="searchShow=false">X</i>
+      </div>
+    </transition>
 
     <main class="fcc-main">
       <transition name="fade" mode="out-in">
@@ -64,6 +78,7 @@ export default {
   data() {
     return {
       sidebarShow: false,
+      searchShow: false,
       routes: [
         {
           name: 'BLOG',
@@ -117,6 +132,7 @@ export default {
   margin: 0 auto;
 }
 .fcc-header{
+  position: relative;
   height: 4em;
   width: 100%;
 }
@@ -125,6 +141,65 @@ export default {
   margin: .5em;
   float: right;
   cursor: pointer;
+}
+.fcc-header-search{
+  position: absolute;
+  right: 2em;
+  display: flex;
+  font-size: 2em;
+  margin: .5em 0;
+  align-items: center;
+  color: #fff;
+  cursor: pointer;
+  transition: color .3s ease;
+}
+.fcc-header-search:hover{
+  color: #fff !important;
+}
+.fcc-search-input{
+  outline: none;
+}
+.fcc-search-wp{
+  position: relative;
+  width: 100%;
+  height: 4em;
+  z-index: 1;
+}
+.fcc-search-wp input{
+  width: 100%;
+  height: 100%;
+  font-size: 2em;
+  padding-left: 2em;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: 2px solid #673ab7;
+  color: #fff;
+  background-color: #2b155d;
+}
+.fcc-search-close{
+  position: absolute;
+  display: flex;
+  align-items: center;
+  right: 1em;
+  top: 0;
+  color: #fff;
+  font-size: 2em;
+  margin: .5em 0;
+  cursor: pointer;
+  transition: color .3s ease;
+}
+.fcc-search-close:hover{
+  color: #fff !important;
+}
+@media screen and (min-width: 1024px) {
+  .fcc-header-search{
+    right: 220px;
+    font-size: .8em;
+    margin: 2em 0;
+  }
+  .fcc-search-wp input{
+    padding-left: 4em;
+  }
 }
 .fcc-nav{
   position: fixed;
@@ -159,9 +234,13 @@ export default {
   color: #fff;
   margin-bottom: 1em;
 }
-.fcc-nav-login a {
+.fcc-nav-login a{
   color: #fff;
   text-decoration: none;
+  transition: color .3s ease;
+}
+.fcc-nav-login a:hover{
+  color: #fff !important;
 }
 .fcc-nav-list{
   height: calc(100% - 8em);
@@ -171,6 +250,10 @@ export default {
 .fcc-nav-list a{
   color: #fff;
   text-decoration: none;
+  transition: color .3s ease;
+}
+.fcc-nav-list a:hover{
+  color: #fff !important;
 }
 .fcc-nav-list li{
   height: 4em;
@@ -191,27 +274,32 @@ export default {
 @media screen and (min-width: 1024px) {
   .fcc-nav{
     position: relative;
-    display: flex !important;
-    align-items: center;
-    justify-content: flex-end;
+    display: block !important;
     width: 100%;
     background-color: transparent;
     background-image: none;
+  }
+  .fcc-header-search{
+    z-index: 1000;
+  }
+  .fcc-nav-user-info{
+    position: absolute;
+    right: 0px;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 200px;
   }
   .fcc-nav-avatar{
     height: 3em;
     width: 3em;
     margin: 0;
-    order: 2;
   }
   .fcc-nav-list{
     height: 100%;
     padding: 0;
-    margin-right: 40px;
     text-align: center;
     background-color: transparent;
-    flex-grow: 1;
-    order: 1;
   }
   .fcc-nav-list li{
     display: inline-block;
@@ -222,10 +310,9 @@ export default {
     display: none;
   }
   .fcc-nav-login{
-    margin: 0 20px;
+    margin: 0 10px;
     font-size: .6em;
     color: #fff;
-    order: 3;
   }
   .fcc-nav-login a {
     color: #fff;
@@ -263,18 +350,21 @@ export default {
   width: 100%;
   background-color: rgba(0, 0, 0, .2);
 }
-.active-color .active-bg-color{
+.fcc-nav-list .active-bg-color{
+  width: 0;
+  display: block;
+  transition: width .3s ease;
+}
+.fcc-nav-list .active-color .active-bg-color{
   width: .5em;
   height: 100%;
-  display: block;
   float: right;
 }
 @media screen and (min-width: 1024px) {
-  .active-color .active-bg-color{
+  .fcc-nav-list .active-color .active-bg-color{
     position: absolute;
     bottom: 0px;
     left: 0px;
-    display: block;
     width: 100%;
     height: .3em;
   }

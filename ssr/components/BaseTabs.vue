@@ -98,6 +98,7 @@ export default {
   width: 33.3%;
   text-align: center;
   line-height: 36px;
+  transition: color .3s ease;
 }
 .i-tabs li:hover{
   color: #1f2d3d;

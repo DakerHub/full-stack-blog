@@ -6,7 +6,7 @@
 #app .light-primary-color   { background: #D1C4E9; }
 #app .light-2-primary-color { background: #f2eff5; }
 #app .light-footer-bg-color { background: #a178ea; }
-#app .light-footer-color    { color: #a178ea; }
+#app .light-text-color      { color: #d2bef7; }
 #app .text-primary-color    { color: #FFFFFF; }
 #app .accent-color          { background: #00BCD4; }
 #app .active-color          { color: #00BCD4; }
@@ -28,4 +28,16 @@
 .slide-right-enter, .slide-right-leave-active{
   transform: translate(100%);
   opacity: 0;
+}
+.zoom-in-enter-active, .zoom-in-leave-active{
+  transform-origin: top;
+  transition: all .3s ease;
+}
+.zoom-in-enter, .zoom-in-leave-active{
+  transform: scaleY(0);
+  opacity: 0;
+}
+
+.iconfont{
+  margin-right: 5px;
 }

@@ -11,7 +11,9 @@
             <img src="" alt="">
           </div>
           <div class="aside-list-detail">
-            <h3 class="aside-list-title">asfsafa</h3>
+            <h3 class="aside-list-title">
+              <router-link to="" class="primary-text-color">asfsafa</router-link>
+            </h3>
             <span class="aside-list-meta secondary-text-color"><i class="iconfont icon-timefull"></i>2012.1.2</span>
           </div>
         </li>
@@ -70,9 +72,16 @@ export default {
   display: flex;
   align-items: center;
 }
+.aside-list-title a{
+  text-decoration: none;
+  transition: color .3s ease;
+}
+.aside-list-title a:hover{
+  color: #00BCD4 !important;
+}
 .aside-list-poster{
   height: 60px;
-  width: 60px;
+  width: 91.76px;
   background-color: tomato;
   margin: 0 10px;
 }
