@@ -73,6 +73,7 @@
   width: 60px;
   color: #909399;
   font-size: 14px;
+  flex-shrink: 0;
 }
 .overflow-hidden{
   overflow: hidden;

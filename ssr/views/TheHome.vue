@@ -6,8 +6,11 @@
           class="fcc-home-post secondary-text-color" 
           v-for="post in posts"
           :key="post._id">
-          <div class="fcc-home-post-poster">
-            <img src="" alt="">
+          <div
+            class="fcc-home-post-poster light-2-primary-color"
+            :style="{
+              backgroundImage: `url(${post.poster})`
+            }">
           </div>
           <div class="fcc-home-post-wp">
             <h2 class="fcc-home-post-title p1em">
@@ -97,13 +100,21 @@ export default {
   /* box-shadow: 0 0 7px 0px rgba(36, 0, 101, 0.2); */
 }
 .fcc-home-post-poster{
+  height: 0px;
   width: 100%;
-  padding-top: 65%;
+  padding-bottom: 60%;
   background-color: #ccc;
+  background-position: center top;
+  background-repeat: no-repeat;
+  -webkit-background-size:cover;
+  -moz-background-size:cover;
+  background-size:cover;
+  text-align: center;
+  overflow: hidden;
 }
 @media screen and (min-width: 520px) {
   .fcc-home-post-poster{
-    display: inline-block;
+    display: inline-flex;
     vertical-align: top;
     width: 260px;
     height: 170px;
@@ -134,6 +145,7 @@ export default {
 }
 .fcc-home-post-abs{
   font-size: .9em;
+  text-indent: 2em;
 }
 @media screen and (max-width: 375px) {
   .fcc-home-post-abs{

@@ -96,7 +96,11 @@ export default {
     };
   },
   asyncData ({ store, route }) {
-    return store.dispatch('getTags');
+    return Promise.all([
+      store.dispatch('getNewestPosts'),
+      store.dispatch('getTags'),
+      store.dispatch('getNewestComments')
+    ]);
   },
   components: {
     AsideTabsRecent,

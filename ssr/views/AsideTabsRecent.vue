@@ -5,20 +5,38 @@
         :tabs="tabs"
         :activeTab="activeTab"
         @active-change="changeTag" />
-      <ul class="aside-recent-list">
-        <li v-for="i in 5">
-          <div class="aside-list-poster">
-            <img src="" alt="">
+      <ul class="aside-recent-list" v-show="activeTab === '1'">
+        <li v-for="post in newestPosts">
+          <div class="aside-list-poster light-2-primary-color">
+            <img :src="post.poster" alt="">
           </div>
           <div class="aside-list-detail">
             <h3 class="aside-list-title">
-              <router-link to="" class="primary-text-color">asfsafa</router-link>
+              <router-link to="" class="primary-text-color">{{post.title}}</router-link>
             </h3>
-            <span class="aside-list-meta secondary-text-color"><i class="iconfont icon-timefull"></i>2012.1.2</span>
+            <span class="aside-list-meta secondary-text-color"><i class="iconfont icon-timefull"></i>{{post.date}}</span>
           </div>
         </li>
       </ul>
-
+      <ul class="aside-recent-list" v-show="activeTab === '3'">
+        <li v-for="item in newestComments">
+          <div class="aside-list-avatar light-2-primary-color">
+            <img :src="item.author.userPic" alt="">
+          </div>
+          <div class="aside-list-detail">
+            <p class="aside-list-comment-title">
+              <span
+                class="aside-list-comment-username"
+                :title="item.author.username">{{item.author.username}}</span>
+              <span class="aside-list-comment-post secondary-text-color">
+                at <router-link class="active-color" to="" :title="item.post.title">{{item.post.title}}</router-link>
+              </span>
+            </p>
+            <p class="aside-list-comment">{{item.content}}</p>
+            <p class="aside-list-comment-date secondary-text-color"><i class="iconfont icon-timefull"></i>{{item.createdDate}}</p>
+          </div>
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -49,9 +67,17 @@ export default {
   components: {
     BaseTabs
   },
+  computed: {
+    newestPosts() {
+      return this.$store.state.newestPosts;
+    },
+    newestComments() {
+      return this.$store.state.newestComments;
+    }
+  },
   methods: {
     changeTag(tab) {
-
+      this.activeTab = tab.id;
     }
   }
 }
@@ -68,9 +94,12 @@ export default {
   margin-top: 1em;
 }
 .aside-recent-list li{
-  height: 70px;
   display: flex;
   align-items: center;
+  margin: 10px 0;
+}
+.aside-list-detail{
+  margin-right: 5px;
 }
 .aside-list-title a{
   text-decoration: none;
@@ -82,15 +111,23 @@ export default {
 .aside-list-poster{
   height: 60px;
   width: 91.76px;
-  background-color: tomato;
   margin: 0 10px;
+  text-align: center;
+  overflow: hidden;
 }
-.aside-list-detail{
-  height: 60px;
+.aside-list-poster img{
+  width: 100%;
 }
-.aside-list-detail h3{
+.aside-list-title{
   padding: .3em 0 1em;
   font-size: 1em;
+}
+.aside-list-title a{
+  display: block;
+  max-width: 10em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .aside-list-meta{
   font-size: .8em;
@@ -100,5 +137,68 @@ export default {
 .aside-list-meta .iconfont{
   font-size: .8em;
   margin-right: 5px;
+}
+.aside-list-avatar{
+  width: 40px;
+  height: 40px;
+  margin: 0 10px;
+  border: 2px solid #673AB7;
+  border-radius: 50%;
+  overflow: hidden;
+  background-image: url('/static/avatar/default_avatar.png');
+  background-size: contain;
+  flex-shrink: 0;
+}
+.aside-list-avatar img{
+  height: 100%;
+  width: 100%;
+}
+.aside-list-comment-title{
+  font-size: 1em;
+  line-height: 1.4em;
+  margin-bottom: 6px;
+}
+.aside-list-comment-username{
+  display: inline-block;
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.aside-list-comment-post{
+  display: inline-block;
+  max-width: 140px;
+  font-size: .8em;
+  margin-left: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  vertical-align: middle;
+}
+.aside-list-comment-post a{
+  line-height: 1.4em;
+  text-decoration: none;
+}
+.aside-list-comment-post a:hover{
+  text-decoration: underline;
+}
+.aside-list-comment-date{
+  font-size: .8em;
+  margin-top: 5px;
+}
+.aside-list-comment-date i{
+  font-size: 1em;
+}
+.aside-list-comment{
+  font-size: .8em;
+  display: block;
+  word-break: break-all;
+  max-height: 2.5em;
+  line-height: 1.2em;
+  text-overflow: ellipsis;
+  text-indent: 2em;
+  overflow: hidden;
 }
 </style>

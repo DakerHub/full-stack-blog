@@ -17,6 +17,23 @@
           v-model="abstract"
           type="textarea" />
       </div>
+      <div class="post-top-field">
+        <label class="short-label" for="postPoster">海报</label>
+        <div>
+          <el-upload
+            id="postPoster"
+            class="post-poster"
+            action=""
+            list-type="picture-card"
+            :auto-upload="false"
+            :file-list="poster"
+            :on-change="changePoster"
+            :on-remove="changePoster"
+            >
+          Poster
+          </el-upload>
+        </div>
+      </div>
     </div><!--
       取消间隔
      --><div class="post-top-field-wp-right">
@@ -85,6 +102,7 @@ export default {
       status: '1',
       tagsSelected: [],
       category: [],
+      poster: [],
 
       tagList: [],
       categoryList: [],
@@ -95,7 +113,7 @@ export default {
   },
   computed: {
     disabled() {
-      return !(this.title && this.content && this.abstract);
+      return !(this.title && this.content && this.abstract && this.poster.length > 0);
     }
   },
    watch: {
@@ -149,6 +167,7 @@ export default {
       const params = {
         title: this.title,
         content: this.content,
+        poster: this.poster[0].raw,
         abstract: this.abstract,
         tags: this.tagsSelected.join(','),
         category: this.category.join(','),
@@ -193,6 +212,13 @@ export default {
       } catch (error) {
         console.error(error);
       }
+    },
+    changePoster(file, fileList) {
+      if (fileList.length > 1) {
+        fileList.shift();
+      }
+      console.log(fileList);
+      this.poster = fileList;
     }
   }
 }
@@ -252,5 +278,9 @@ export default {
 }
 .post-new >>> .el-select__tags .el-tag{
   margin: 2px 0 2px 6px;
+}
+.post-new >>> .el-upload--picture-card {
+  height: 36px;
+  line-height: 34px;
 }
 </style>

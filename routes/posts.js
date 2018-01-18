@@ -1,4 +1,6 @@
 const express = require('express');
+const multer = require('multer');
+const { STATIC_PATH, SITE_PATH, STATIC_URL, POSTER_PATH } = require('./../config/config');
 const { Posts } = require('./../lib/models/posts');
 const { Tags } = require('./../lib/models/tags');
 const { Categories } = require('./../lib/models/categories');
@@ -7,6 +9,34 @@ const { formatDate } = require('./../lib/util/util');
 const logger = require('./../lib/util/log');
 
 const router = express.Router();
+
+const storage = multer.diskStorage({
+  // 文件存储路径为设置里的STATIC路径
+  destination: (req, file, cb) => {
+    cb(null, SITE_PATH + STATIC_PATH + POSTER_PATH);
+  },
+  // 在文件名后加上时间戳
+  filename: (req, file, cb) => {
+    const fileName = file.originalname.split('.');
+    const extention = fileName.pop();
+    const newName = fileName.join('.') + Date.now() + '.' + extention;
+    cb(null, newName);
+  }
+});
+const upload = multer({ storage }).single('poster');
+const uploadMid = function (req, res, next) {
+  upload(req, res, function (err) {
+    if (err) {
+      logger.reqErr(err, req);
+      res.send({
+        code: 500,
+        msg: err.errmsg || err.message
+      });
+      return;
+    }
+    next();
+  });
+};
 
 /**
  * @swagger
@@ -248,7 +278,8 @@ router.get('/', async function (req, res, next) {
  *               items:
  *                 $ref: '#/definitions/Post'
  */
-router.post('/', function (req, res, next) {
+router.post('/', uploadMid, function (req, res, next) {
+  const poster = STATIC_URL + POSTER_PATH + req.file.filename;
   const { title, abstract, content, date = Date.now(), publishStatus = '1', tags, category } = req.body;
   const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
   const categoryIds = category && typeof category === 'string' ? category.split(',') : [];
@@ -256,6 +287,7 @@ router.post('/', function (req, res, next) {
   const post = {
     title,
     abstract,
+    poster,
     content,
     date,
     publishStatus,
@@ -370,7 +402,8 @@ router.post('/', function (req, res, next) {
  *               items:
  *                 $ref: '#/definitions/Post'
  */
-router.put('/', function (req, res, next) {
+router.put('/', uploadMid, function (req, res, next) {
+  
   const { _id, title, abstract, content, date, publishStatus, tags, category } = req.body;
   const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
   const categoryIds = category && typeof category === 'string' ? category.split(',') : [];
@@ -386,6 +419,10 @@ router.put('/', function (req, res, next) {
   }
   updatedPost.tags = tagIds;
   updatedPost.category = categoryIds;
+
+  if (req.file && req.file.filename) {
+    updatedPost.poster = STATIC_URL + POSTER_PATH + req.file.filename;
+  }
 
   if (!_id) {
     res.sendStatus(400);

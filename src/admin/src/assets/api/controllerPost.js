@@ -52,8 +52,16 @@ const newPost = function (arg) {
     field: 'content',
     required: true,
     type: 'string'
+  }, {
+    field: 'poster',
+    required: true
   }]);
-  const params = qs.stringify(arg);
+  const params = new FormData();
+  for (const key in arg) {
+    if (arg.hasOwnProperty(key)) {
+      params.append(key, arg[key]);
+    }
+  }
   return axios.post(APIS.post, params).then(res => {
     Message({
       message: '添加文章成功!',
@@ -87,7 +95,12 @@ const editPost = function (arg) {
     required: true,
     type: 'string'
   }]);
-  const params = qs.stringify(arg);
+  const params = new FormData();
+  for (const key in arg) {
+    if (arg.hasOwnProperty(key)) {
+      params.append(key, arg[key]);
+    }
+  }
   return axios.put(APIS.post, params).then(res => {
     Message({
       message: '修改文章成功!',

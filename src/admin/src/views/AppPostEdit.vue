@@ -17,6 +17,23 @@
           v-model="abstract"
           type="textarea" />
       </div>
+      <div class="post-top-field">
+        <label class="short-label" for="postPoster">海报</label>
+        <div>
+          <el-upload
+            id="postPoster"
+            class="post-poster"
+            action=""
+            list-type="picture-card"
+            :auto-upload="false"
+            :file-list="poster"
+            :on-change="changePoster"
+            :on-remove="changePoster"
+            >
+          Poster
+          </el-upload>
+        </div>
+      </div>
     </div><!--
       取消间隔
      --><div class="post-top-field-wp-right">
@@ -79,6 +96,7 @@ export default {
       status: '',
       tagsSelected: [],
       category: [],
+      poster: [],
       _id: '',
 
       tagList: [],
@@ -143,6 +161,9 @@ export default {
         publishStatus: this.status,
         _id: this._id
       }
+      if (this.poster.length > 0 && this.poster[0].raw) {
+        params.poster = this.poster[0].raw;
+      }
       try {
         this.submiting = true;
         await this.api.editPost(params);
@@ -193,7 +214,7 @@ export default {
       }
     },
     updatePost(post) {
-      const { title, content, abstract, tags, _id, category, publishStatus } = post;
+      const { title, content, abstract, tags, _id, category, publishStatus, poster } = post;
       this.title = title;
       this.content = content;
       this._id = _id;
@@ -201,10 +222,23 @@ export default {
       this.status = publishStatus;
       this.tagsSelected = tags.map(tag => tag && tag._id).filter(Boolean);
       this.category = category.map(cate => cate && cate._id).filter(Boolean);
+      if (poster) {
+        this.poster = [{
+          name: 'poster',
+          url: poster
+        }]
+      };
       this.changeTabTitle(title);
       this.$nextTick(() => {
         this.modified = false;
       });
+    },
+    changePoster(file, fileList) {
+      if (fileList.length > 1) {
+        fileList.shift();
+      }
+      console.log(fileList);
+      this.poster = fileList;
     },
     confirmLeave(to, from, next) {
       if (this.modified) {
@@ -291,5 +325,9 @@ export default {
 }
 .post-edit >>> .el-select__tags .el-tag{
   margin: 2px 0 2px 6px;
+}
+.post-edit >>> .el-upload--picture-card {
+  height: 36px;
+  line-height: 34px;
 }
 </style>

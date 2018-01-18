@@ -18,13 +18,33 @@ const getPosts = function (params) {
   });
 };
 
+const getNewestPosts = function () {
+  const params = {
+    size: 5
+  };
+  return axios.get(APIS.posts, { params }).catch(err => {
+    console.log(err);
+  });
+};
+
+const getNewestComments = function () {
+  const params = {
+    size: 5
+  };
+  return axios.get(APIS.comments, { params }).catch(err => {
+    console.log(err);
+  });
+};
+
 const getTags = function () {
   return axios.get('http://192.168.17.150:3000/tags').catch(err => {
-    alert(err);
+    console.log(err);
   });
 };
 
 export {
   getPosts,
-  getTags
+  getTags,
+  getNewestPosts,
+  getNewestComments
 };

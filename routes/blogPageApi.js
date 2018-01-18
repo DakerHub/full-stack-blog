@@ -1,6 +1,8 @@
 const express = require('express');
 const { Posts } = require('./../lib/models/posts');
 const { Tags } = require('./../lib/models/tags');
+const { Comments } = require('./../lib/models/comment');
+const { Users } = require('./../lib/models/users');
 const { Categories } = require('./../lib/models/categories');
 const { findByIds, deleteByIds } = require('./../lib/controllers/crud');
 const { formatDate } = require('./../lib/util/util');
@@ -8,82 +10,6 @@ const logger = require('./../lib/util/log');
 
 const router = express.Router();
 
-/**
- * @swagger
- * definitions:
- *   Post:
- *     type: object
- *     properties:
- *       title:
- *         type: string
- *       date:
- *         type: string
- *       publishStatus:
- *         type: string
- *       _id:
- *         type: string
- */
-
-/**
- * @swagger
- * /posts:
- *   get:
- *     description: 获取文章列表
- *     tags:
- *       - 文章
- *     produces:
- *       - application/json
- *     parameters:
- *       - name: token
- *         description: token
- *         in: query
- *         required: true
- *         type: string
- *       - name: title
- *         description: 通过文章名进行查找
- *         in: query
- *         required: false
- *         type: string
- *       - name: _id
- *         description: 通过文章id进行查找
- *         in: query
- *         required: false
- *         type: string
- *       - name: categoryId
- *         description: 通过分类id进行查找
- *         in: query
- *         required: false
- *         type: string
- *       - name: page
- *         description: 分页页数
- *         in: query
- *         required: false
- *         type: string
- *       - name: size
- *         description: 每页的数据量
- *         in: query
- *         required: false
- *         type: string
- *     responses:
- *       200:
- *         description: OK
- *         schema:
- *           type: object
- *           properties:
- *             code:
- *               type: integer
- *               description: 返回结果状态.
- *             msg:
- *               type: string
- *               description: 返回结果文本.
- *             total:
- *               type: number
- *               description: 查询结果的总量.
- *             source:
- *               type: array
- *               items:
- *                 $ref: '#/definitions/Post'
- */
 router.get('/posts', async function (req, res, next) {
   let { page = '1', size = '10' } = req.query;
   const field = '-__v -content';
@@ -152,6 +78,100 @@ router.get('/posts', async function (req, res, next) {
         res.send({
           code: 500,
           msg: err.errmsg || err.message || err,
+          sources: null,
+          total
+        });
+      });
+    });
+});
+
+router.get('/comments', async function (req, res, next) {
+  const { pId, postId, dateOrder, content } = req.query;
+  let { page = '1', size = '10' } = req.query;
+  let query = {};
+  let total = 0;
+  const sort = {
+    createdDate: Number.parseInt(dateOrder, 10) || -1
+  };
+
+  page = Number.parseInt(page, 10);
+  size = Number.parseInt(size, 10);
+  if (postId) {
+    query.postId = postId;
+  }
+  if (content) {
+    query.content = new RegExp(content);
+  }
+  if (pId) {
+    // 如果有pId,则不管其他条件
+    query = { pId };
+  }
+
+  total = await Comments.find(query).count().exec();
+
+  Comments
+    .find(query)
+    .lean()
+    .sort(sort)
+    .skip((page - 1) * size)
+    .limit(size)
+    .select('-__v')
+    .exec(function (err, rows) {
+      if (err) {
+        logger.reqErr(err, req);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null,
+          total
+        });
+        return;
+      }
+      const promises = [];
+      rows.forEach(row => {
+        row.createdDate = formatDate(row.createdDate, 'YYYY-MM-DD hh:mm:ss');
+        promises.push(Posts
+          .findById(row.postId)
+          .lean()
+          .select('_id title')
+          .exec()
+          .then(post => {
+            row.post = post;
+          }));
+        promises.push(Users
+          .findById(row.authorId)
+          .lean()
+          .select('-__v -password')
+          .exec()
+          .then(user => {
+            row.author = user;
+          }));
+        if (row.replyTo) {
+          promises.push(Users
+            .findById(row.replyTo)
+            .lean()
+            .select('-__v -password')
+            .exec()
+            .then(user => {
+              row.replyTo = user || {
+                _id: row.replyTo,
+                username: '未知用户'
+              };
+            }));
+        }
+      });
+      Promise.all(promises).then(() => {
+        res.send({
+          code: 200,
+          msg: 'success',
+          sources: rows,
+          total
+        });
+      }).catch(err => {
+        logger.reqErr(err, req);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
           sources: null,
           total
         });

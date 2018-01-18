@@ -54,7 +54,6 @@ function list2tree(list, rootId, alias) {
     }
     return false;
   }, this);
-  console.log(result);
   addChildren(result, listCopy, alias);
   return result;
 }
