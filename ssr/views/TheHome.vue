@@ -14,7 +14,7 @@
           </div>
           <div class="fcc-home-post-wp">
             <h2 class="fcc-home-post-title p1em">
-              <router-link to="" class="primary-text-color">{{post.title}}</router-link>
+              <router-link :to="`/blog/post/${post._id}`" class="primary-text-color">{{post.title}}</router-link>
             </h2>
             <p class="fcc-home-post-abs p1em">{{post.abstract}}</p>
             <ul class="fcc-home-post-tag p1em active-color">
@@ -43,15 +43,13 @@
 
 <script>
 import BasePagination from './../components/BasePagination.vue';
+import titleMixin from '../assets/util/title.mixin.js';
 
 export default {
   name: 'TheHome',
-  data() {
-    return {
-    }
-  },
-  components: {
-    BasePagination
+  mixins: [titleMixin],
+  title () {
+    return 'FBLOG';
   },
   asyncData ({ store, route }) {
     const currentPage = Number.parseInt(route.query && route.query.page || 1);
@@ -61,6 +59,13 @@ export default {
       size: pageSize
     };
     return store.dispatch('getPosts', params);
+  },
+  data() {
+    return {
+    }
+  },
+  components: {
+    BasePagination
   },
   computed: {
     posts () {
@@ -76,6 +81,14 @@ export default {
       return Number.parseInt(this.$route.query && this.$route.query.page || 1);
     }
   },
+  beforeRouteEnter: (to, from, next) => {
+    next(vm => {
+      vm.$store.commit('setPosition', [{
+        title: 'BLOG',
+        route: '/blog'
+      }]);
+    })
+  },
   methods: {
     changeCurrent(val) {
       this.$router.push(`/blog?page=${val}`);
@@ -86,7 +99,8 @@ export default {
 
 <style scoped>
 .fcc-home{
-  padding: 1em;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 .fcc-home-post-list{
   max-width: 800px;
@@ -145,7 +159,7 @@ export default {
 }
 .fcc-home-post-abs{
   font-size: .9em;
-  text-indent: 2em;
+  line-height: 1.4em;
 }
 @media screen and (max-width: 375px) {
   .fcc-home-post-abs{

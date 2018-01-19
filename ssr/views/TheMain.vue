@@ -40,18 +40,21 @@
       <div class="fcc-search-wp" v-show="searchShow">
         <input class="fcc-search-input" type="text" placeholder="输入关键词">
         <i
-        class="fcc-search-close light-text-color"
-        @click="searchShow=false">X</i>
+          class="iconfont icon-close fcc-search-close light-text-color"
+          @click="searchShow=false"></i>
       </div>
     </transition>
 
     <main class="fcc-main">
+
+      <MainBreadcrumb />
+
       <transition name="fade" mode="out-in">
         <router-view class="fcc-view primary-text-color" />
       </transition>
 
       <aside class="fcc-right">
-        <AsideTabsRecent></AsideTabsRecent>
+        <RecentTabs />
       </aside>
     </main>
 
@@ -69,7 +72,8 @@
 </template>
 
 <script>
-import AsideTabsRecent from './AsideTabsRecent.vue';
+import RecentTabs from './MainAsideRecentTabs.vue';
+import MainBreadcrumb from './MainBreadcrumb.vue';
 import TheLabelFooter from './TheLabelFooter.vue';
 import TheFooter from './TheFooter.vue';
 
@@ -95,7 +99,7 @@ export default {
       ]
     };
   },
-  asyncData ({ store, route }) {
+  asyncData({ store, route }) {
     return Promise.all([
       store.dispatch('getNewestPosts'),
       store.dispatch('getTags'),
@@ -103,13 +107,21 @@ export default {
     ]);
   },
   components: {
-    AsideTabsRecent,
+    RecentTabs,
+    MainBreadcrumb,
     TheLabelFooter,
     TheFooter
   },
   computed: {
     activeRoute() {
-      return this.$route.path;
+      let activeRoute;
+      const path = this.$route.path.split('/').filter(Boolean);
+      if (path.length === 1 || (path[1] !== 'gallery' && path[1] !== 'gallery')) {
+        activeRoute = '/blog';
+      } else {
+        activeRoute = `/${path[0]}/${path[1]}`
+      }
+      return activeRoute;
     }
   },
   watch: {
@@ -153,15 +165,12 @@ export default {
   font-size: 2em;
   margin: .5em 0;
   align-items: center;
-  color: #fff;
+  color: rgba(255, 255, 255, .7);
   cursor: pointer;
   transition: color .3s ease;
 }
 .fcc-header-search:hover{
   color: #fff !important;
-}
-.fcc-search-input{
-  outline: none;
 }
 .fcc-search-wp{
   position: relative;
@@ -169,7 +178,9 @@ export default {
   height: 4em;
   z-index: 1;
 }
-.fcc-search-wp input{
+.fcc-search-input{
+  position: absolute;
+  top: 0;
   width: 100%;
   height: 100%;
   font-size: 2em;
@@ -177,8 +188,12 @@ export default {
   box-sizing: border-box;
   border: none;
   border-bottom: 2px solid #673ab7;
-  color: #fff;
   background-color: #2b155d;
+  outline: none;
+  color: rgba(255, 255, 255, .7);
+}
+.fcc-search-input::-webkit-input-placeholder{
+  color: rgba(255, 255, 255, .7);
 }
 .fcc-search-close{
   position: absolute;
@@ -201,7 +216,7 @@ export default {
     font-size: .8em;
     margin: 2em 0;
   }
-  .fcc-search-wp input{
+  .fcc-search-input{
     padding-left: 4em;
   }
 }
@@ -327,6 +342,8 @@ export default {
 }
 .fcc-view{
   box-sizing: border-box;
+  padding: 1em;
+  margin: 1em 0;
   width: 100%;
 }
 .fcc-right{
@@ -337,13 +354,14 @@ export default {
 @media screen and (min-width: 1024px) {
   .fcc-right{
     display: inline-block;
+    padding-right: 0;
     vertical-align: top;
     width: 360px;
   }
   .fcc-view{
     display: inline-block;
     vertical-align: top;
-    width: calc(100% - 400px);
+    width: calc(100% - 360px);
   }
 }
 .fcc-mask{

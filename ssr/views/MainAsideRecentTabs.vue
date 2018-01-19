@@ -12,7 +12,7 @@
           </div>
           <div class="aside-list-detail">
             <h3 class="aside-list-title">
-              <router-link to="" class="primary-text-color">{{post.title}}</router-link>
+              <router-link class="primary-text-color" :to="`/blog/post/${post._id}`">{{post.title}}</router-link>
             </h3>
             <span class="aside-list-meta secondary-text-color"><i class="iconfont icon-timefull"></i>{{post.date}}</span>
           </div>
@@ -29,10 +29,13 @@
                 class="aside-list-comment-username"
                 :title="item.author.username">{{item.author.username}}</span>
               <span class="aside-list-comment-post secondary-text-color">
-                at <router-link class="active-color" to="" :title="item.post.title">{{item.post.title}}</router-link>
+                at <router-link class="active-color" :to="`/blog/post/${item.post._id}`" :title="item.post.title">{{item.post.title}}</router-link>
               </span>
             </p>
-            <p class="aside-list-comment">{{item.content}}</p>
+            <div class="aside-list-comment-wp">
+              <i class="iconfont icon-triangle-left"></i>
+              <p class="aside-list-comment">{{item.content}}</p>
+            </div>
             <p class="aside-list-comment-date secondary-text-color"><i class="iconfont icon-timefull"></i>{{item.createdDate}}</p>
           </div>
         </li>
@@ -156,7 +159,7 @@ export default {
 .aside-list-comment-title{
   font-size: 1em;
   line-height: 1.4em;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 .aside-list-comment-username{
   display: inline-block;
@@ -195,10 +198,22 @@ export default {
   font-size: .8em;
   display: block;
   word-break: break-all;
-  max-height: 2.5em;
-  line-height: 1.2em;
+  max-height: 2.8em;
+  line-height: 1.4em;
   text-overflow: ellipsis;
-  text-indent: 2em;
+  color: #fff;
   overflow: hidden;
+}
+.aside-list-comment-wp{
+  position: relative;
+  background-color: #361179;
+  padding: .5em;
+  border-radius: 4px;
+}
+.aside-list-comment-wp .icon-triangle-left{
+  position: absolute;
+  left: -.7em;
+  top: 4px;
+  color: #361179;
 }
 </style>

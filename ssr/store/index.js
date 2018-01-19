@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { getPosts, getTags, getNewestPosts, getNewestComments } from './../assets/api/index';
+import { getPosts, getTags, getNewestPosts, getNewestComments, getPostDetail } from './../assets/api/index';
 
 Vue.use(Vuex);
 
@@ -11,13 +11,22 @@ export function createStore() {
       postsTotal: 0,
       tags: [],
       newestPosts: [],
-      newestComments: []
+      newestComments: [],
+      postDetail: {
+        title: '',
+        content: '',
+        date: ''
+      },
+      position: []
     },
     actions: {
       getPosts({ commit }, currentPage) {
         return getPosts(currentPage).then(res => {
           const posts = res.data.sources;
           const total = res.data.total;
+          posts.forEach(element => {
+            element.date = element.date.split(' ')[0];
+          });
           commit('setPosts', posts);
           commit('setPostsTotal', total);
         });
@@ -31,13 +40,27 @@ export function createStore() {
       getNewestPosts({ commit }) {
         return getNewestPosts().then(res => {
           const newestPosts = res.data.sources;
+          newestPosts.forEach(element => {
+            element.date = element.date.split(' ')[0];
+          });
           commit('setNewestPosts', newestPosts);
         });
       },
       getNewestComments({ commit }) {
         return getNewestComments().then(res => {
           const newestComments = res.data.sources;
+          newestComments.forEach(element => {
+            element.createdDate = element.createdDate.split(' ')[0];
+          });
           commit('setNewestComments', newestComments);
+        });
+      },
+      getPostDetail({ commit }, id) {
+        return getPostDetail(id).then(res => {
+          const posts = res.data.sources;
+          if (posts.length === 1) {
+            commit('setPostDetail', posts[0]);
+          }
         });
       }
     },
@@ -56,6 +79,12 @@ export function createStore() {
       },
       setNewestComments(state, newestComments) {
         state.newestComments = newestComments;
+      },
+      setPostDetail(state, post) {
+        state.postDetail = post;
+      },
+      setPosition(state, position) {
+        state.position = position;
       }
     }
   });

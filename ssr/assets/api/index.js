@@ -42,9 +42,19 @@ const getTags = function () {
   });
 };
 
+const getPostDetail = function (id) {
+  const params = {
+    _id: id
+  };
+  return axios.get(APIS.posts, { params }).catch(err => {
+    console.log(err);
+  });
+};
+
 export {
   getPosts,
   getTags,
   getNewestPosts,
-  getNewestComments
+  getNewestComments,
+  getPostDetail
 };

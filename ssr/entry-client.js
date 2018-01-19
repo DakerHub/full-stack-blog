@@ -4,7 +4,7 @@ import { createApp } from './app';
 
 Vue.mixin({
   beforeRouteUpdate(to, from, next) {
-    console.log(1);
+    console.log('======route-updated=========');
     const { asyncData } = this.$options;
     if (asyncData) {
       asyncData({

@@ -9,6 +9,7 @@ const Other = () => import('../views/Other.vue');
 const TheLogin = () => import('../views/TheLogin.vue');
 const TheGallery = () => import('../views/TheGallery.vue');
 const TheAbout = () => import('../views/TheAbout.vue');
+const PostDetail = () => import('../views/PostDetail.vue');
 
 export function createRouter() {
   return new Router({
@@ -27,6 +28,10 @@ export function createRouter() {
           {
             path: '',
             component: TheHome
+          },
+          {
+            path: 'post/:id',
+            component: PostDetail
           },
           {
             path: 'Other',

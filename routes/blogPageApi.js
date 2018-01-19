@@ -11,11 +11,20 @@ const logger = require('./../lib/util/log');
 const router = express.Router();
 
 router.get('/posts', async function (req, res, next) {
+  const { _id } = req.query;
   let { page = '1', size = '10' } = req.query;
-  const field = '-__v -content';
+  let query;
+  let field = '-__v -content';
   const sort = {
     date: -1
   };
+
+  if (_id) {
+    query = {
+      _id
+    };
+    field = '-__v';
+  }
 
   let total = 0;
   
@@ -23,7 +32,7 @@ router.get('/posts', async function (req, res, next) {
   size = Number.parseInt(size, 10);
 
   try {
-    total = await Posts.find().count().exec();
+    total = await Posts.find(query).count().exec();
   } catch (err) {
     logger.reqErr(err, req);
     res.send({
@@ -35,7 +44,7 @@ router.get('/posts', async function (req, res, next) {
     return;
   }
 
-  Posts.find()
+  Posts.find(query)
     .lean()
     .sort(sort)
     .skip((page - 1) * size)
