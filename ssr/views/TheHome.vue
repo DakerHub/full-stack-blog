@@ -9,7 +9,7 @@
           <div
             class="fcc-home-post-poster light-2-primary-color"
             :style="{
-              backgroundImage: `url(${post.poster})`
+              backgroundImage: `url(${post.poster||''})`
             }">
           </div>
           <div class="fcc-home-post-wp">

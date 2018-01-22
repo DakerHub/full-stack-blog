@@ -342,7 +342,6 @@ export default {
 }
 .fcc-view{
   box-sizing: border-box;
-  padding: 1em;
   margin: 1em 0;
   width: 100%;
 }

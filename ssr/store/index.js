@@ -57,10 +57,8 @@ export function createStore() {
       },
       getPostDetail({ commit }, id) {
         return getPostDetail(id).then(res => {
-          const posts = res.data.sources;
-          if (posts.length === 1) {
-            commit('setPostDetail', posts[0]);
-          }
+          const post = res.data.source;
+          commit('setPostDetail', post);
         });
       }
     },

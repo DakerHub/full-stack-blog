@@ -40,7 +40,7 @@
 
     <div class="user-info-right">
       <div class="user-info-avatar" :style="avatarBg">
-        <img id="userPic" v-show="editUser.userPic" :src="editUser.userPic" alt="">
+        <img id="userPic" v-show="editUser.userPic" :src="editUser.userPic || ''" alt="">
       </div>
       <el-upload
         ref="upload"

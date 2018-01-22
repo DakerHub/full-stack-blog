@@ -94,6 +94,44 @@ router.get('/posts', async function (req, res, next) {
     });
 });
 
+router.get('/post/:id', async function (req, res, next) {
+  const id = req.params.id;
+  const promises = [];
+  try {
+    const post = await Posts.findById(id).lean().select('-__v').exec();
+    
+    const tagsRaw = Array.isArray(post.tags) ? post.tags : [];
+    const cateRaw = Array.isArray(post.category) ? post.category : [];
+    promises.push(findByIds(Tags, tagsRaw, '-__v').then(tags => {
+      post.tags = tags;
+    }));
+    promises.push(findByIds(Categories, cateRaw, '-__v').then(category => {
+      post.category = category;
+    }));
+    
+    await Promise.all(promises);
+    const nextPost = await Posts.find().sort('date').findOne({ date: { $gt: post.date } }).select('_id title').exec();
+    const prevPost = await Posts.find().sort('-date').findOne({ date: { $lt: post.date } }).select('_id title').exec();
+
+    post.date = formatDate(post.date, 'YYYY-MM-DD hh:mm:ss');
+    post.prevPost = prevPost;
+    post.nextPost = nextPost;
+
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: post
+    });
+  } catch (err) {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message || err,
+      sources: null
+    });
+  }
+});
+
 router.get('/comments', async function (req, res, next) {
   const { pId, postId, dateOrder, content } = req.query;
   let { page = '1', size = '10' } = req.query;
@@ -186,6 +224,35 @@ router.get('/comments', async function (req, res, next) {
         });
       });
     });
+});
+
+router.get('/tags', function (req, res, next) {
+  Tags.find().lean().select('-__v').exec(function (err, rows) {
+    if (err) {
+      logger.reqErr(err, req);
+      res.send({
+        code: 500,
+        msg: err.errmsg || err.message,
+        sources: null
+      });
+      return;
+    }
+    Promise
+      .all(rows.map(row => 
+        Posts
+          .count({ tags: { $in: [row._id] } })
+          .exec()
+          .then(count => {
+            row.postCount = count;
+          })))
+      .then(() => {
+        res.send({
+          code: 200,
+          msg: 'success',
+          sources: rows
+        });
+      });
+  });
 });
 
 module.exports = router;

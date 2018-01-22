@@ -37,16 +37,13 @@ const getNewestComments = function () {
 };
 
 const getTags = function () {
-  return axios.get('http://192.168.17.150:3000/tags').catch(err => {
+  return axios.get(APIS.tags).catch(err => {
     console.log(err);
   });
 };
 
 const getPostDetail = function (id) {
-  const params = {
-    _id: id
-  };
-  return axios.get(APIS.posts, { params }).catch(err => {
+  return axios.get(`${APIS.post}/${id}`).catch(err => {
     console.log(err);
   });
 };

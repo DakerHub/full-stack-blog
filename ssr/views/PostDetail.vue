@@ -89,6 +89,7 @@ export default {
 
 <style scoped>
 .post-detail{
+  padding: 1em;
   background-color: #fff;
   box-sizing: border-box;
 }
