@@ -4,7 +4,7 @@
       <h2 class="the-label-footer-title">LABEL</h2>
       <span class="the-label-footer-split light-footer-bg-color"></span>
       <ul class="the-label-footer-list light-text-color">
-        <li v-for="tag in tags" :key="tag._id">{{tag.name}}{{`(${tag.postCount})`}}</li>
+        <li v-for="tag in tags" :key="tag._id">{{tag.name}}&nbsp;{{`（${tag.postCount}）`}}</li>
       </ul>
     </div>
   </section>

@@ -6,11 +6,18 @@
       <transition name="slide-right">
         <section class="fcc-nav" v-show="sidebarShow">
           <div class="fcc-nav-user-info">
-            <div class="fcc-nav-avatar"></div>
-            <p class="fcc-nav-login light-text-color">
-              <router-link class="light-text-color" to="">登录</router-link>
+            <div class="fcc-nav-avatar">
+              <img :src="user.userPic" alt="">
+            </div>
+            <p class="fcc-nav-login light-text-color" v-if="hasLogin">
+              <span>{{user.username}}</span>
+              ,
+              <a class="fcc-nav-login-btn" @click.prevent="logout">退出</a>
+            </p>
+            <p class="fcc-nav-login light-text-color" v-else>
+              <a class="fcc-nav-login-btn" @click.prevent="$store.commit('showLogin', 'login')">登录</a>
               / 
-              <router-link class="light-text-color" to="">注册</router-link>
+              <a class="fcc-nav-login-btn" @click.prevent="$store.commit('showLogin', 'signup')">注册</a>
             </p>
           </div>
           <nav class="fcc-nav-list">
@@ -58,10 +65,11 @@
       </aside>
     </main>
 
-    <TheLabelFooter></TheLabelFooter>
-
     <TheFooter></TheFooter>
     
+    <TheLogin
+      :show.sync="loginShow"></TheLogin>
+
     <transition name="fade">
       <div
         class="fcc-mask"
@@ -72,10 +80,12 @@
 </template>
 
 <script>
+import Cookies from 'js-cookie';
 import RecentTabs from './MainAsideRecentTabs.vue';
 import MainBreadcrumb from './MainBreadcrumb.vue';
-import TheLabelFooter from './TheLabelFooter.vue';
 import TheFooter from './TheFooter.vue';
+import TheLogin from './TheLogin.vue';
+import { getUserInfo } from './../assets/api';
 
 export default {
   name: 'TheMain',
@@ -109,8 +119,8 @@ export default {
   components: {
     RecentTabs,
     MainBreadcrumb,
-    TheLabelFooter,
-    TheFooter
+    TheFooter,
+    TheLogin
   },
   computed: {
     activeRoute() {
@@ -122,6 +132,15 @@ export default {
         activeRoute = `/${path[0]}/${path[1]}`
       }
       return activeRoute;
+    },
+    loginShow() {
+      return this.$store.state.loginShow;
+    },
+    user() {
+      return this.$store.state.user;
+    },
+    hasLogin() {
+      return this.user.id;
     }
   },
   watch: {
@@ -134,6 +153,36 @@ export default {
       } else {
         document.querySelector('body').style.overflow = 'auto';
       }
+    }
+  },
+  mounted() {
+    const id = Cookies.get('blogUserId');
+    if (id) {
+      getUserInfo(id).then(({ data }) => {
+        if (data.code !== 200) {
+          throw new Error(data.msg);
+          return;
+        }
+        const { _id, username, userPic } = data.source;
+        this.$store.commit('updateUser', {
+          id: _id,
+          username,
+          userPic
+        });
+      }).catch(err => {
+        console.error(err);
+      });
+    }
+  },
+  methods: {
+    logout() {
+      Cookies.remove('blogUserId');
+      Cookies.remove('blogToken');
+      this.$store.commit('updateUser', {
+        id: '',
+        username: '',
+        userPic: ''
+      });
     }
   }
 }
@@ -211,6 +260,9 @@ export default {
   color: #fff !important;
 }
 @media screen and (min-width: 1024px) {
+  .fcc-main{
+    padding: 0 1em;
+  }
   .fcc-header-search{
     right: 220px;
     font-size: .8em;
@@ -244,21 +296,26 @@ export default {
   margin: 1em auto;
   border: 4px solid #673AB7;
   border-radius: 50%;
+  overflow: hidden;
   background-color: #fff;
   background-image: url('/static/avatar/default_avatar.png');
   background-size: contain;
+}
+.fcc-nav-avatar img{
+  width: 100%;
+  height: 100%;
 }
 .fcc-nav-login{
   text-align: center;
   color: #fff;
   margin-bottom: 1em;
 }
-.fcc-nav-login a{
-  color: #fff;
+.fcc-nav-login-btn{
+  cursor: pointer;
   text-decoration: none;
   transition: color .3s ease;
 }
-.fcc-nav-login a:hover{
+.fcc-nav-login-btn:hover{
   color: #fff !important;
 }
 .fcc-nav-list{
@@ -331,9 +388,6 @@ export default {
   .fcc-nav-login{
     margin: 0 10px;
     font-size: .6em;
-    color: #fff;
-  }
-  .fcc-nav-login a {
     color: #fff;
   }
   .fcc-header-menu-trigger{

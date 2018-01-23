@@ -1,10 +1,18 @@
 <template>
-  <footer class="the-footer deep-dark-primary-color">Created By <span class="author">PaDaker</span></footer>
+  <div>
+    <TheFooterLabel></TheFooterLabel>
+    <footer class="the-footer deep-dark-primary-color">Created By <span class="author">PaDaker</span></footer>
+  </div>
 </template>
 
 <script>
+import TheFooterLabel from './TheFooterLabel.vue';
+
 export default {
-  name: 'TheFooter'
+  name: 'TheFooter',
+  components: {
+    TheFooterLabel
+  }
 }
 </script>
 

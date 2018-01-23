@@ -20,6 +20,30 @@
         <VueMarkdown :source='postDetail.content' />
       </div>
     </div>
+    <div class="post-detail-near">
+      <router-link
+        :class="{
+          'post-detail-near-prev': true,
+          'is-disabled': !prevPost.route
+        }"
+        :to="prevPost.route"
+        title="上一篇">
+          <i class="iconfont icon-triangle-left"></i>
+          <span>{{prevPost.title}}</span></router-link>
+      <router-link
+        :class="{
+          'post-detail-near-next': true,
+          'is-disabled': !nextPost.route
+        }"
+        :to="nextPost.route"
+        title="下一篇">
+          <span>{{nextPost.title}}</span>
+          <i class="iconfont icon-triangle-right"></i></router-link>
+    </div>
+
+    <PostComment
+      :post-id="postId"></PostComment>
+
   </article>
 </template>
 
@@ -27,6 +51,7 @@
 import VueMarkdown from 'vue-markdown';
 import Prism  from 'prismjs';
 import titleMixin from '../assets/util/title.mixin.js';
+import PostComment from './PostDetailComment.vue';
 import '../assets/css/prism.css';
 
 export default {
@@ -39,7 +64,8 @@ export default {
     return store.dispatch('getPostDetail', route.params.id);
   },
   components: {
-    VueMarkdown
+    VueMarkdown,
+    PostComment
   },
   computed: {
     postId() {
@@ -47,13 +73,34 @@ export default {
     },
     postDetail() {
       return this.$store.state.postDetail;
+    },
+    prevPost() {
+      if (this.postDetail.prevPost) {
+        return {
+          title: this.postDetail.prevPost.title,
+          route: `/blog/post/${this.postDetail.prevPost._id}`
+        }
+      }
+      return {
+        title: '没有啦！',
+        route: ''
+      }
+    },
+    nextPost() {
+      if (this.postDetail.nextPost) {
+        return {
+          title: this.postDetail.nextPost.title,
+          route: `/blog/post/${this.postDetail.nextPost._id}`
+        }
+      }
+      return {
+        title: '没有啦！',
+        route: ''
+      }
     }
   },
   mounted() {
     this.highlightCode();
-  },
-  updated() {
-    console.log(11111111);
   },
   beforeRouteEnter: (to, from, next) => {
     next(vm => {
@@ -122,6 +169,30 @@ export default {
 }
 .post-detail-tag>span{
   margin-right: 5px;
+}
+.post-detail-near{
+  width: 100%;
+  padding-top: 1em;
+  border-top: thin solid #ccc;
+  display: flex;
+  justify-content: space-between;
+}
+.post-detail-near a{
+  display: flex;
+  max-width: 50%;
+  color: #212121;
+  text-decoration: none;
+  transition: color .3s;
+}
+.post-detail-near a:not(.is-disabled):hover{
+  color: #00BCD4;
+}
+.post-detail-near-prev.is-disabled,.post-detail-near-next.is-disabled{
+  color: #b0aeb5;
+  cursor: not-allowed;
+}
+.post-comment{
+  margin-top: 2em;
 }
 /* vue-markdown在组件复用时没有渲染pre的类名 */
 .post-detail-content >>> pre{

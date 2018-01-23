@@ -48,10 +48,67 @@ const getPostDetail = function (id) {
   });
 };
 
+const getUserInfo = function (id) {
+  return axios.get(APIS.user, {
+    needAuth: true
+  }).catch(err => {
+    console.log(err);
+  });
+};
+
+const login = function (params) {
+  assert(params, [{
+    field: 'username',
+    required: true,
+    type: 'string'
+  }, {
+    field: 'password',
+    required: true,
+    type: 'string'
+  }]);
+  return axios.post(APIS.login, params);
+};
+
+const newCommment = function (params) {
+  assert(params, [{
+    field: 'content',
+    required: true,
+    type: 'string'
+  }, {
+    field: 'postId',
+    required: true,
+    type: 'string'
+  }, {
+    field: 'authorId',
+    required: true,
+    type: 'string'
+  }]);
+  return axios.post(APIS.comment, params, {
+    needAuth: true
+  });
+};
+
+const getPostComments = function (postId) {
+  const params = {
+    postId,
+    pId: '0'
+  };
+  assert(params, [{
+    field: 'postId',
+    required: true,
+    type: 'string'
+  }]);
+  return axios.get(APIS.comments, { params });
+};
+
 export {
   getPosts,
   getTags,
   getNewestPosts,
   getNewestComments,
-  getPostDetail
+  getPostDetail,
+  getUserInfo,
+  login,
+  newCommment,
+  getPostComments
 };

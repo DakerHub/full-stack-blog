@@ -1,30 +1,54 @@
 const express = require('express');
+const login = require('./login');
+const jwtDecode = require('./../lib/util/jwsDecode');
 const { Posts } = require('./../lib/models/posts');
 const { Tags } = require('./../lib/models/tags');
 const { Comments } = require('./../lib/models/comment');
 const { Users } = require('./../lib/models/users');
 const { Categories } = require('./../lib/models/categories');
 const { findByIds, deleteByIds } = require('./../lib/controllers/crud');
-const { formatDate } = require('./../lib/util/util');
+const { hasMissing, formatDate } = require('./../lib/util/util');
 const logger = require('./../lib/util/log');
 
 const router = express.Router();
 
+router.use(['/comment', '/user'], jwtDecode);
+
+router.use('/login', login);
+
+router.get('/user', async function (req, res, next) {
+  const id = req.userId;
+  const query = {
+    _id: id
+  };
+  try {
+    const user = await Users.findById(id).lean().select('-__v -password').exec();
+    user.regDate = formatDate(user.regDate, 'YYYY-MM-DD hh:mm:ss');
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: user
+    });
+  } catch (err) {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message,
+      sources: null,
+      total
+    });
+  }
+});
+
 router.get('/posts', async function (req, res, next) {
-  const { _id } = req.query;
   let { page = '1', size = '10' } = req.query;
-  let query;
-  let field = '-__v -content';
+  const query = {
+    publishStatus: '1'
+  };
+  const field = '-__v -content';
   const sort = {
     date: -1
   };
-
-  if (_id) {
-    query = {
-      _id
-    };
-    field = '-__v';
-  }
 
   let total = 0;
   
@@ -145,12 +169,17 @@ router.get('/comments', async function (req, res, next) {
   size = Number.parseInt(size, 10);
   if (postId) {
     query.postId = postId;
+    if (pId === '0') {
+      // 既有postId,又传入pId='0',表示获取文章的第一层评论列表.
+      query.pId = '0';
+    }
   }
   if (content) {
+    // 根据内容过滤.
     query.content = new RegExp(content);
   }
-  if (pId) {
-    // 如果有pId,则不管其他条件
+  if (pId && pId !== '0') {
+    // 如果有pId,且不是第一层,则不管其他条件
     query = { pId };
   }
 
@@ -224,6 +253,77 @@ router.get('/comments', async function (req, res, next) {
         });
       });
     });
+});
+
+router.post('/comment', function (req, res, next) {
+  const { content, postId, authorId, pId = '0', status = '1', replyTo } = req.body;
+  const missing = hasMissing({ content, postId, authorId });
+  if (missing) {
+    logger.reqErr(missing, req);
+    res.send({
+      code: 500,
+      msg: missing,
+      sources: null
+    });
+  }
+  const comment = {
+    content,
+    postId,
+    authorId,
+    replyTo,
+    pId,
+    status,
+    createdDate: Date.now()
+  };
+  const saveComment = function (comment, res) {
+    Comments.create(comment, function (err, newComment) {
+      const { _id } = newComment;
+      if (err) {
+        logger.reqErr(err, req);
+        res.send({
+          code: 500,
+          msg: err.errmsg || err.message,
+          sources: null
+        });
+        return;
+      }
+      res.send({
+        code: 200,
+        msg: 'success',
+        sources: { _id }
+      });
+    });
+  };
+
+  const promises = [
+    Posts.findById(postId).exec().then(post => {
+      if (!post) {
+        throw Error('there is no such post whose id is ' + postId);
+      }
+    }),
+    Users.findById(authorId).exec().then(user => {
+      if (!user) {
+        throw Error('there is no such user whose id is ' + authorId);
+      }
+    })
+  ];
+  if (pId && pId !== '0') {
+    promises.push(Comments.findById(pId).exec().then(comment => {
+      if (!comment) {
+        throw Error('there is no such comment whose id is ' + pId);
+      }
+    }));
+  }
+  Promise.all(promises).then(result => {
+    saveComment(comment, res);
+  }).catch(err => {
+    logger.reqErr(err, req);
+    res.send({
+      code: 400,
+      msg: err.errmsg || err.message || err,
+      sources: null
+    });
+  });
 });
 
 router.get('/tags', function (req, res, next) {

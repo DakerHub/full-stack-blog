@@ -7,6 +7,11 @@ Vue.use(Vuex);
 export function createStore() {
   return new Vuex.Store({
     state: {
+      user: {
+        id: '',
+        username: '',
+        userPic: ''
+      },
       posts: [],
       postsTotal: 0,
       tags: [],
@@ -17,7 +22,9 @@ export function createStore() {
         content: '',
         date: ''
       },
-      position: []
+      position: [],
+      loginShow: false,
+      loginAction: 'login'
     },
     actions: {
       getPosts({ commit }, currentPage) {
@@ -83,6 +90,21 @@ export function createStore() {
       },
       setPosition(state, position) {
         state.position = position;
+      },
+      showLogin(state, initAction) {
+        state.loginShow = true;
+        state.loginAction = initAction;
+      },
+      hideLogin(state) {
+        state.loginShow = false;
+      },
+      changeLoginAction(state, action) {
+        state.loginAction = action;
+      },
+      updateUser(state, { id, username, userPic }) {
+        state.user.id = id;
+        state.user.username = username;
+        state.user.userPic = userPic;
       }
     }
   });

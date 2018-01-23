@@ -6,12 +6,11 @@ const axioswp = axios.create({
 });
 
 axioswp.interceptors.request.use(function (config) {
-  const { noAuth } = config;
+  const { needAuth } = config;
   // 在所有需鉴权接口,都需要加上`Authorization`请求头
-  // if (!noAuth) {
-  // config.headers.Authorization = Cookies.get('blog-token');
-  config.headers.Authorization = 'TOKEN001';
-  // }
+  if (needAuth) {
+    config.headers.Authorization = Cookies.get('blogToken');
+  }
   return config;
 }, function (error) {
   return Promise.reject(error);
