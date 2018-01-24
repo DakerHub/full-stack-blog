@@ -235,6 +235,15 @@ router.get('/comments', async function (req, res, next) {
               };
             }));
         }
+        if (row.pId === '0') {
+          promises.push(Comments
+            .find({ pId: row._id })
+            .count()
+            .exec()
+            .then(count => {
+              row.replyCount = count;
+            }));
+        }
       });
       Promise.all(promises).then(() => {
         res.send({

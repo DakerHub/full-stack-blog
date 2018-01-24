@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { getPosts, getTags, getNewestPosts, getNewestComments, getPostDetail } from './../assets/api/index';
+import { date2text } from './../assets/util/util.js';
 
 Vue.use(Vuex);
 
@@ -48,7 +49,7 @@ export function createStore() {
         return getNewestPosts().then(res => {
           const newestPosts = res.data.sources;
           newestPosts.forEach(element => {
-            element.date = element.date.split(' ')[0];
+            element.date = date2text(element.date);
           });
           commit('setNewestPosts', newestPosts);
         });
@@ -57,7 +58,7 @@ export function createStore() {
         return getNewestComments().then(res => {
           const newestComments = res.data.sources;
           newestComments.forEach(element => {
-            element.createdDate = element.createdDate.split(' ')[0];
+            element.createdDate = date2text(element.createdDate);
           });
           commit('setNewestComments', newestComments);
         });

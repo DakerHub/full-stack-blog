@@ -36,7 +36,7 @@
               <i class="iconfont icon-triangle-left"></i>
               <p class="aside-list-comment">{{item.content}}</p>
             </div>
-            <p class="aside-list-comment-date secondary-text-color"><i class="iconfont icon-timefull"></i>{{item.createdDate}}</p>
+            <p class="aside-list-comment-date secondary-text-color"><i class="iconfont icon-shijian"></i>{{item.createdDate}}</p>
           </div>
         </li>
       </ul>

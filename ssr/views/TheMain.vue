@@ -29,6 +29,7 @@
                     'light-text-color': true
                   }"
                   :to="route.route">
+                  <i :class="route.icon"></i>
                   {{route.name}}
                   <span class="active-bg-color"></span>
                 </router-link>
@@ -96,15 +97,18 @@ export default {
       routes: [
         {
           name: 'BLOG',
-          route: '/blog'
+          route: '/blog',
+          icon: 'iconfont icon-iconfont-momarticle'
         },
         {
           name: '画廊',
-          route: '/blog/gallery'
+          route: '/blog/gallery',
+          icon: 'iconfont icon-pictureo'
         },
         {
           name: '关于',
-          route: '/blog/about'
+          route: '/blog/about',
+          icon: 'iconfont icon-about'
         }
       ]
     };

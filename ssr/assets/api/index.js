@@ -101,6 +101,19 @@ const getPostComments = function (postId) {
   return axios.get(APIS.comments, { params });
 };
 
+const getSubComments = function (params) {
+  assert(params, [{
+    field: 'postId',
+    required: true,
+    type: 'string'
+  }, {
+    field: 'pId',
+    required: true,
+    type: 'string'
+  }]);
+  return axios.get(APIS.comments, { params });
+};
+
 export {
   getPosts,
   getTags,
@@ -110,5 +123,6 @@ export {
   getUserInfo,
   login,
   newCommment,
-  getPostComments
+  getPostComments,
+  getSubComments
 };

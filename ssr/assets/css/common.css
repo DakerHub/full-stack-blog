@@ -20,7 +20,7 @@ textarea, input{
 }
 textarea, input{
   width: 100%;
-  padding: 1em;
+  padding: .8em;
   resize: none;
   outline: none;
   border-radius: 4px;
@@ -62,6 +62,14 @@ button:focus{
 }
 button:active{
   background-color: #0a9db1;
+}
+button[data-type="text"]{
+  border: none;
+  padding: 0 .5em;
+}
+button[data-type="text"]:hover{
+  color: #00BCD4;
+  background-color: transparent;
 }
 
 .fade-enter-active, .fade-leave-active{
