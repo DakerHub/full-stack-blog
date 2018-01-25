@@ -19,6 +19,7 @@ const APIS = {
   comment: 'comment',
   comments: 'comments',
   tags: 'tags',
+  tag: 'tag',
   login: 'login'
 };
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="base-pagination">
+  <div class="base-pagination" v-show="!(hideOnlyOne && pageNum === 1)">
     <ul class="base-pagination-inner">
       <li
         :class="{
@@ -48,8 +48,11 @@ export default {
         return 10;
       }
     },
-    showTotal: {
-
+    hideOnlyOne: {
+      type: Boolean,
+      default() {
+        return false;
+      }
     }
   },
   data() {

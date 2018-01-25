@@ -1,3 +1,7 @@
+import _throttle from 'lodash.throttle';
+
+export const throttle = _throttle;
+
 export function date2text(dateLike) {
   const timestamp = new Date(dateLike).getTime();
   const now = Date.now();

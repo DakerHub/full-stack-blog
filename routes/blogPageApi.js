@@ -6,7 +6,7 @@ const { Tags } = require('./../lib/models/tags');
 const { Comments } = require('./../lib/models/comment');
 const { Users } = require('./../lib/models/users');
 const { Categories } = require('./../lib/models/categories');
-const { findByIds, deleteByIds } = require('./../lib/controllers/crud');
+const { findByIds, deleteByIds, deleteByIdsRecursive } = require('./../lib/controllers/crud');
 const { hasMissing, formatDate } = require('./../lib/util/util');
 const logger = require('./../lib/util/log');
 
@@ -42,6 +42,7 @@ router.get('/user', async function (req, res, next) {
 
 router.get('/posts', async function (req, res, next) {
   let { page = '1', size = '10' } = req.query;
+  const { tag } = req.query;
   const query = {
     publishStatus: '1'
   };
@@ -49,9 +50,11 @@ router.get('/posts', async function (req, res, next) {
   const sort = {
     date: -1
   };
-
   let total = 0;
-  
+
+  if (tag) {
+    query.tags = { $in: [tag] };
+  }
   page = Number.parseInt(page, 10);
   size = Number.parseInt(size, 10);
 
@@ -96,6 +99,9 @@ router.get('/posts', async function (req, res, next) {
         promises.push(findByIds(Categories, cateRaw, '-__v').then(category => {
           row.category = category;
         }));
+        promises.push(Comments.count({ postId: row._id }).exec().then(count => {
+          row.commentCount = count;
+        }));
         row.date = formatDate(row.date, 'YYYY-MM-DD hh:mm:ss');
       });
       Promise.all(promises).then((tagsMap) => {
@@ -134,8 +140,8 @@ router.get('/post/:id', async function (req, res, next) {
     }));
     
     await Promise.all(promises);
-    const nextPost = await Posts.find().sort('date').findOne({ date: { $gt: post.date } }).select('_id title').exec();
-    const prevPost = await Posts.find().sort('-date').findOne({ date: { $lt: post.date } }).select('_id title').exec();
+    const nextPost = await Posts.find({ publishStatus: '1' }).sort('date').findOne({ date: { $gt: post.date } }).select('_id title').exec();
+    const prevPost = await Posts.find({ publishStatus: '1' }).sort('-date').findOne({ date: { $lt: post.date } }).select('_id title').exec();
 
     post.date = formatDate(post.date, 'YYYY-MM-DD hh:mm:ss');
     post.prevPost = prevPost;
@@ -349,7 +355,7 @@ router.get('/tags', function (req, res, next) {
     Promise
       .all(rows.map(row => 
         Posts
-          .count({ tags: { $in: [row._id] } })
+          .count({ publishStatus: '1', tags: { $in: [row._id] } })
           .exec()
           .then(count => {
             row.postCount = count;
@@ -362,6 +368,59 @@ router.get('/tags', function (req, res, next) {
         });
       });
   });
+});
+
+router.get('/tag', async function (req, res, next) {
+  const { id } = req.query;
+
+  try {
+    const tag = await Tags.findById(id).lean().select('-__v').exec();
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: tag
+    });
+  } catch (err) {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message,
+      source: null
+    });
+  }
+});
+
+router.delete('/comment', async function (req, res, next) {
+  const { userId, query } = req;
+  const { id } = query;
+  console.log(userId);
+  if (!userId) {
+    return res.sendStatus(401);
+  }
+  if (!id) {
+    return res.sendStatus(400);
+  }
+
+  try {
+    const comment = await Comments.findById(id).lean().exec();
+    if (userId !== comment.authorId) {
+      console.log(userId, comment.authorId);
+      return res.sendStatus(401);
+    }
+    await deleteByIdsRecursive(Comments, [id], 'pId');
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: null
+    });
+  } catch (err) {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message || err,
+      source: null
+    });
+  }
 });
 
 module.exports = router;

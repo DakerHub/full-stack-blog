@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { getPosts, getTags, getNewestPosts, getNewestComments, getPostDetail } from './../assets/api/index';
+import { getPosts, getTags, getNewestPosts, getNewestComments, getPostDetail, getTagById } from './../assets/api/index';
 import { date2text } from './../assets/util/util.js';
 
 Vue.use(Vuex);
@@ -15,6 +15,7 @@ export function createStore() {
       },
       posts: [],
       postsTotal: 0,
+      queryTagName: '',
       tags: [],
       newestPosts: [],
       newestComments: [],
@@ -68,6 +69,12 @@ export function createStore() {
           const post = res.data.source;
           commit('setPostDetail', post);
         });
+      },
+      getTagName({ commit }, id) {
+        return getTagById(id).then(res => {
+          const tag = res.data.source;
+          commit('setQueryTagName', tag.name);
+        });
       }
     },
     mutations: {
@@ -106,6 +113,9 @@ export function createStore() {
         state.user.id = id;
         state.user.username = username;
         state.user.userPic = userPic;
+      },
+      setQueryTagName(state, name) {
+        state.queryTagName = name;
       }
     }
   });

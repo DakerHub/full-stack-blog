@@ -11,8 +11,11 @@ export default {
 </script>
 
 <style>
-html,body,#app{
+body,#app{
   height: 100%;
   width: 100%;
+}
+body{
+  overflow: auto;
 }
 </style>

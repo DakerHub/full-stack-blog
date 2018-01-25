@@ -34,10 +34,6 @@ export function createRouter() {
             component: PostDetail
           },
           {
-            path: 'Other',
-            component: Other
-          },
-          {
             path: 'gallery',
             component: TheGallery
           },

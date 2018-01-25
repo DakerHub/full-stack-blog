@@ -42,6 +42,18 @@ const getTags = function () {
   });
 };
 
+const getTagById = function (id) {
+  const params = {
+    id
+  };
+  assert(params, [{
+    field: 'id',
+    required: true,
+    type: 'string'
+  }]);
+  return axios.get(APIS.tag, { params });
+};
+
 const getPostDetail = function (id) {
   return axios.get(`${APIS.post}/${id}`).catch(err => {
     console.log(err);
@@ -88,11 +100,7 @@ const newCommment = function (params) {
   });
 };
 
-const getPostComments = function (postId) {
-  const params = {
-    postId,
-    pId: '0'
-  };
+const getPostComments = function (params) {
   assert(params, [{
     field: 'postId',
     required: true,
@@ -114,9 +122,23 @@ const getSubComments = function (params) {
   return axios.get(APIS.comments, { params });
 };
 
+const deleteComment = function (id) {
+  const params = { id };
+  assert(params, [{
+    field: 'id',
+    required: true,
+    type: 'string'
+  }]);
+  return axios.delete(APIS.comment, {
+    params,
+    needAuth: true
+  });
+};
+
 export {
   getPosts,
   getTags,
+  getTagById,
   getNewestPosts,
   getNewestComments,
   getPostDetail,
@@ -124,5 +146,6 @@ export {
   login,
   newCommment,
   getPostComments,
-  getSubComments
+  getSubComments,
+  deleteComment
 };

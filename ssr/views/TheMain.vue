@@ -66,10 +66,19 @@
       </aside>
     </main>
 
-    <TheFooter></TheFooter>
+    <TheFooter />
     
     <TheLogin
-      :show.sync="loginShow"></TheLogin>
+      :show.sync="loginShow" />
+
+    <button 
+      class="back-to-top"
+      data-type="text"
+      title="回到顶部"
+      v-show="showBackToTop"
+      @click="backToTop">
+      <i class="iconfont icon-triangle-top"></i>
+    </button>
 
     <transition name="fade">
       <div
@@ -87,6 +96,7 @@ import MainBreadcrumb from './MainBreadcrumb.vue';
 import TheFooter from './TheFooter.vue';
 import TheLogin from './TheLogin.vue';
 import { getUserInfo } from './../assets/api';
+import { throttle } from './../assets/util/util';
 
 export default {
   name: 'TheMain',
@@ -94,6 +104,7 @@ export default {
     return {
       sidebarShow: false,
       searchShow: false,
+      showBackToTop: false,
       routes: [
         {
           name: 'BLOG',
@@ -161,6 +172,10 @@ export default {
   },
   mounted() {
     const id = Cookies.get('blogUserId');
+    const scrollTop = function (context) {
+      this.showBackToTop = document.documentElement.scrollTop - window.innerHeight > 0;
+    };
+
     if (id) {
       getUserInfo(id).then(({ data }) => {
         if (data.code !== 200) {
@@ -177,6 +192,7 @@ export default {
         console.error(err);
       });
     }
+    document.addEventListener('scroll', throttle(scrollTop.bind(this), 100));
   },
   methods: {
     logout() {
@@ -187,6 +203,9 @@ export default {
         username: '',
         userPic: ''
       });
+    },
+    backToTop() {
+      document.documentElement.scrollTop = 0;
     }
   }
 }
@@ -447,6 +466,20 @@ export default {
     width: 100%;
     height: .3em;
   }
+}
+.back-to-top{
+  position: fixed;
+  right: 1em;
+  bottom: 2em;
+  height: 3em;
+  width: 3em;
+  border-radius: 50%;
+  color: #757575;
+  background-color: #fff !important;
+  box-shadow: 0 0 10px 0px rgba(0, 0, 0, 0.2);
+}
+.back-to-top .iconfont{
+  margin: 0;
 }
 </style>
 

@@ -12,7 +12,7 @@
         <span class="post-detail-tag active-color">
           <span v-for="tag in postDetail.tags">
             <i class="iconfont icon-tag"></i>
-            <router-link class="active-color" to="">{{tag.name}}</router-link>
+            <router-link class="active-color" :to="`/blog?tag=${tag._id}`">{{tag.name}}</router-link>
           </span>
         </span>
       </div>

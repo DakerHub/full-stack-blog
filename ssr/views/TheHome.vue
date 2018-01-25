@@ -1,5 +1,14 @@
 <template>
   <section class="fcc-home">
+    <div class="fcc-home-post-filter" v-if="queryTag">
+      根据标签过滤：<span class="active-color">{{tagName}}</span>
+      <button
+        class="fcc-home-post-filter-clear"
+        data-type="text"
+        @click="clearTagQuery">
+        <i class="iconfont icon-close"></i>
+      </button>
+    </div>
     <div class="fcc-home-post-list">
       <ul>
         <li
@@ -22,12 +31,17 @@
                 v-for="tag in post.tags"
                 :key="tag._id">
                 <i class="iconfont icon-tag"></i>
-                <router-link to="" class="active-color fcc-home-post-tag-link">{{tag.name}}</router-link>
+                <router-link :to="`/blog?tag=${tag._id}`" class="active-color fcc-home-post-tag-link">{{tag.name}}</router-link>
               </li>
             </ul>
-            <span class="fcc-home-post-date p1em">
-              <i class="iconfont icon-timefull"></i>{{post.date}}
-            </span>
+            <div class="fcc-home-post-mate">
+              <span class="fcc-home-post-date">
+                <i class="iconfont icon-calendar2"></i><span>{{post.date}}</span>
+              </span>
+              <span>
+                <i class="iconfont icon-comment"></i><span>{{post.commentCount}}</span>
+              </span>
+            </div>
           </div>
         </li>
       </ul>
@@ -48,21 +62,29 @@ import titleMixin from '../assets/util/title.mixin.js';
 export default {
   name: 'TheHome',
   mixins: [titleMixin],
+  data() {
+    return {
+    };
+  },
   title () {
     return 'FBLOG';
   },
   asyncData ({ store, route }) {
     const currentPage = Number.parseInt(route.query && route.query.page || 1);
     const pageSize = Number.parseInt(route.query && route.query.size || 10);
+    const tagId = route.query && route.query.tag;
     const params = {
       page: currentPage,
-      size: pageSize
+      size: pageSize,
+      tag: tagId
     };
-    return store.dispatch('getPosts', params);
-  },
-  data() {
-    return {
+    const promises = [store.dispatch('getPosts', params)];
+
+    if (tagId) {
+      promises.push(store.dispatch('getTagName', tagId));
     }
+
+    return Promise.all(promises);
   },
   components: {
     BasePagination
@@ -70,6 +92,9 @@ export default {
   computed: {
     posts () {
       return this.$store.state.posts;
+    },
+    tagName() {
+      return this.$store.state.queryTagName;
     },
     postsTotal () {
       return this.$store.state.postsTotal;
@@ -79,6 +104,9 @@ export default {
     },
     currentPage() {
       return Number.parseInt(this.$route.query && this.$route.query.page || 1);
+    },
+    queryTag() {
+      return this.$route.query && this.$route.query.tag;
     }
   },
   beforeRouteEnter: (to, from, next) => {
@@ -91,7 +119,14 @@ export default {
   },
   methods: {
     changeCurrent(val) {
-      this.$router.push(`/blog?page=${val}`);
+      const query = Object.assign({}, this.$route.query);
+      query.page = val;
+      this.$router.push({ path: 'blog', query });
+    },
+    clearTagQuery() {
+      const query = Object.assign({}, this.$route.query);
+      delete query.tag;
+      this.$router.push({ path: 'blog', query });
     }
   }
 }
@@ -101,6 +136,23 @@ export default {
 .fcc-home{
   padding-top: 0;
   padding-bottom: 0;
+}
+.fcc-home-post-filter{
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1em;
+  margin-bottom: 1em;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+.fcc-home-post-filter-clear{
+  float: right;
+  color: #8c8c8c;
+  transition: color .3s;
+}
+.fcc-home-post-filter-clear:hover{
+  color: #212121;
 }
 .fcc-home-post-list{
   max-width: 800px;
@@ -167,9 +219,7 @@ export default {
   }
 }
 .fcc-home-post-date{
-  display: flex;
-  font-size: .8em;
-  line-height: 1.2em;
+  margin-right: 1em;
 }
 .fcc-home-post-tag{
   display: flex;
@@ -186,12 +236,14 @@ export default {
 .fcc-home-post-tag-link:hover{
   text-decoration: underline;
 }
-.fcc-home-post-tag .iconfont, .fcc-home-post-date .iconfont{
-  margin-right: 5px;
-  font-size: .8em;
-}
 .p1em{
   margin-bottom: 1em;
+}
+.fcc-home-post-mate{
+  display: flex;
+  align-items: center;
+  font-size: .8em;
+  line-height: 1.2em;
 }
 </style>
 

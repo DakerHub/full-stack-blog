@@ -14,7 +14,7 @@
             <h3 class="aside-list-title">
               <router-link class="primary-text-color" :to="`/blog/post/${post._id}`">{{post.title}}</router-link>
             </h3>
-            <span class="aside-list-meta secondary-text-color"><i class="iconfont icon-timefull"></i>{{post.date}}</span>
+            <span class="aside-list-meta secondary-text-color"><i class="iconfont icon-shijian"></i>{{post.date}}</span>
           </div>
         </li>
       </ul>
@@ -134,12 +134,9 @@ export default {
 }
 .aside-list-meta{
   font-size: .8em;
-  display: flex;
-  align-items: center;
 }
 .aside-list-meta .iconfont{
-  font-size: .8em;
-  margin-right: 5px;
+  font-size: 1em;
 }
 .aside-list-avatar{
   width: 40px;

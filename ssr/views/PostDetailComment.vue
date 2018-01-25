@@ -27,7 +27,10 @@
               <i class="iconfont icon-comment"></i>
               {{item.replyCount?`${item.replyCount}条`:''}}回复
             </button>
-            <button v-if="item.authorId===user.id" data-type="text">
+            <button
+              v-if="item.authorId===user.id"
+              data-type="text"
+              @click="deleteComment(item, true)">
               <i class="iconfont icon-shanchu"></i>
               删除
             </button>
@@ -54,7 +57,10 @@
                   <p>{{subComment.content}}</p>
                   <div class="post-comment-mate">
                     <button data-type="text" @click="setReplyTo(item, subComment)"><i class="iconfont icon-comment"></i>回复</button>
-                    <button v-if="subComment.authorId===user.id" data-type="text">
+                    <button
+                      v-if="subComment.authorId===user.id"
+                      data-type="text"
+                      @click="deleteComment(subComment, false)">
                       <i class="iconfont icon-shanchu"></i>
                       删除
                     </button>
@@ -62,6 +68,14 @@
                   </div>
                 </div>
               </div>
+            </div>
+            <div class="post-comment-pagination">
+              <BasePagination
+                :total="item.replyCount"
+                :current-page="item.currentPage"
+                :page-size="5"
+                :hide-only-one="true"
+                @current-change="val => subCommentPageChange(val, item)"></BasePagination>
             </div>
             <div class="post-comment-reply-form">
               <input
@@ -76,8 +90,9 @@
               <button
                 :class="{
                   'post-comment-reply-form-btn': true,
-                  'is-disabled': !item.replyInput
+                  'is-disabled': !item.replyInput&&!item.replyInputTo.id
                 }"
+                :disabled="!item.replyInput&&!item.replyInputTo.id"
                 @click="beforeSubmitSubComment(item)">
                 {{item.replyInputTo.id && !item.replyInput ? '取消' : btnName}}</button>
             </div>
@@ -85,12 +100,21 @@
         </div>
       </div>
     </div>
+    <div class="post-comment-pagination">
+      <BasePagination
+        :total="total"
+        :current-page="currentPage"
+        :page-size="pageSize"
+        :hide-only-one="true"
+        @current-change="commentPageChange"></BasePagination>
+    </div>
   </section>
 </template>
 
 <script>
-import { newCommment, getPostComments, getSubComments } from './../assets/api/index.js';
+import { newCommment, getPostComments, getSubComments, deleteComment } from './../assets/api/index.js';
 import { date2text } from './../assets/util/util.js';
+import BasePagination from './../components/BasePagination.vue';
 
 export default {
   name: 'PostDetailComment',
@@ -103,8 +127,14 @@ export default {
     return {
       comment: '',
       commentList: [],
-      expands: []
+      expands: [],
+      total: 0,
+      currentPage: 1,
+      pageSize: 10
     };
+  },
+  components: {
+    BasePagination
   },
   computed: {
     user() {
@@ -130,17 +160,20 @@ export default {
       this.hasLogin ? this.submitComment() : this.showLogin();
     },
     beforeSubmitSubComment(comment) {
+      if (comment.replyInputTo.id && !comment.replyInput) {
+        comment.replyInputTo = { id: '', name: '' };
+        return;
+      }
       if (!this.hasLogin) {
         return this.showLogin();
       }
-      comment.replyInputTo.id && !comment.replyInput ?
-      comment.replyInputTo = { id: '', name: '' }
-      :
-      this.submitComment({
-        pId: comment._id,
-        replyTo: comment.replyInputTo.id,
-        content: comment.replyInput
-      });
+      if (!(comment.replyInputTo.id && !comment.replyInput)) {
+        this.submitComment({
+          pId: comment._id,
+          replyTo: comment.replyInputTo.id,
+          content: comment.replyInput
+        });
+      }
     },
     submitComment(subComment) {
       const params = {
@@ -159,13 +192,13 @@ export default {
           const pId = subComment.pId;
           this.findAndSet(pId, 'replyInput', '');
           this.findAndSet(pId, 'replyInputTo', {id: '', name: ''});
-          this.increaseCount(pId);
+          this.changeReplyCount(pId, 'increase');
           this.getSubComments(pId);
-          this.$store.dispatch('getNewestComments');
         } else {
           this.comment = '';
-          this.getPostComments();
+          this.getPostComments(this.postId);
         }
+        this.$store.dispatch('getNewestComments');
       }).catch(err => {
         console.log(err);
       });
@@ -175,7 +208,13 @@ export default {
       console.log('login');
     },
     getPostComments(id) {
-      getPostComments(id).then(({ data }) => {
+      const params = {
+        postId: id,
+        pId: '0',
+        page: this.currentPage,
+        size: this.pageSize
+      }
+      getPostComments(params).then(({ data }) => {
         data.sources.forEach(comment => {
           comment.createdDate = date2text(comment.createdDate);
           comment.subComments = [];
@@ -184,8 +223,11 @@ export default {
             id: '',
             name: ''
           };
+          comment.currentPage = 1;
         });
         this.commentList = data.sources;
+        this.total = data.total;
+        this.expands = [];
       }).catch(err => {
         console.error(err);
       });
@@ -193,7 +235,9 @@ export default {
     getSubComments(pId) {
       const params = {
         pId,
-        postId: this.postId
+        postId: this.postId,
+        page: this.findAndSet(pId, 'currentPage'),
+        size: 5
       };
       getSubComments(params).then(({ data }) => {
         data.sources.forEach(comment => {
@@ -203,6 +247,14 @@ export default {
         this.findAndSet(pId, 'subComments', subComments);
       }).catch(err => {
         console.error(err);
+      });
+    },
+    deleteComment(comment, isToPost) {
+      deleteComment(comment._id).then(res => {
+        isToPost ? this.getPostComments(comment.postId) : this.getSubComments(comment.pId);
+        this.changeReplyCount(comment.pId, 'decrease');
+        this.$store.dispatch('getNewestComments');
+      }).catch(err => {
       });
     },
     toggleExpand(item) {
@@ -217,17 +269,29 @@ export default {
       }
     },
     findAndSet(id, field, val) {
+      let result;
       this.commentList.some(comment => {
         if (comment._id === id) {
-          comment[field] = val;
+          if (typeof val !== 'undefined') {
+            comment[field] = val;
+          }
+          result = comment[field];
           return true;
         }
       });
+      return result;
     },
-    increaseCount(id) {
+    changeReplyCount(id, action) {
       this.commentList.some(comment => {
         if (comment._id === id) {
-          comment.replyCount++;
+          switch(action) {
+            case　'increase':
+              comment.replyCount++;
+              break;
+            case　'decrease':
+              comment.replyCount--;
+              break;
+          }
           return true;
         }
       });
@@ -238,6 +302,14 @@ export default {
         name: subComment.author.username
       };
       comment.replyInput = '';
+    },
+    commentPageChange(page) {
+      this.currentPage = page;
+      this.getPostComments(this.postId);
+    },
+    subCommentPageChange(page, comment) {
+      comment.currentPage = page;
+      this.getSubComments(comment._id);
     }
   }
 }
@@ -355,6 +427,9 @@ export default {
 }
 .post-comment-replyto{
   color: #757575;
+}
+.base-pagination{
+  margin: 1em 0;
 }
 @media screen and (max-width: 768px) {
   .post-comment{
