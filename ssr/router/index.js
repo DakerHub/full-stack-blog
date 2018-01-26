@@ -10,6 +10,7 @@ const TheLogin = () => import('../views/TheLogin.vue');
 const TheGallery = () => import('../views/TheGallery.vue');
 const TheAbout = () => import('../views/TheAbout.vue');
 const PostDetail = () => import('../views/PostDetail.vue');
+const UserInfo = () => import('../views/UserInfo.vue');
 
 export function createRouter() {
   return new Router({
@@ -40,6 +41,10 @@ export function createRouter() {
           {
             path: 'about',
             component: TheAbout
+          },
+          {
+            path: 'user/:id',
+            component: UserInfo
           }
         ]
       },

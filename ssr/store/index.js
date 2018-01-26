@@ -8,6 +8,23 @@ Vue.use(Vuex);
 export function createStore() {
   return new Vuex.Store({
     state: {
+      navTabs: [
+        {
+          name: 'BLOG',
+          route: '/blog',
+          icon: 'iconfont icon-iconfont-momarticle'
+        },
+        {
+          name: '画廊',
+          route: '/blog/gallery',
+          icon: 'iconfont icon-pictureo'
+        },
+        {
+          name: '关于',
+          route: '/blog/about',
+          icon: 'iconfont icon-about'
+        }
+      ],
       user: {
         id: '',
         username: '',
@@ -116,6 +133,26 @@ export function createStore() {
       },
       setQueryTagName(state, name) {
         state.queryTagName = name;
+      },
+      addNav(state, nav) {
+        let exist = false;
+        state.navTabs.forEach(tab => {
+          if (tab.route === nav.route) {
+            exist = true;
+          }
+        });
+        !exist && state.navTabs.push(nav);
+      },
+      removeNavByRoute(state, route) {
+        let idx;
+        state.navTabs.some((tab, i) => {
+          if (tab.route === route) {
+            idx = i;
+            return true;
+          }
+          return false;
+        });
+        state.navTabs.splice(idx, 1);
       }
     }
   });

@@ -89,6 +89,11 @@ export default {
           username,
           userPic
         });
+        this.$store.commit('addNav', {
+          name: '我的',
+          route: `/blog/user/${_id}`,
+          icon: 'iconfont icon-touxiang'
+        });
         Cookies.set('blogToken', token);
         Cookies.set('blogUserId', _id);
         this.submiting = false;

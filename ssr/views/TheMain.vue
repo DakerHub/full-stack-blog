@@ -104,24 +104,7 @@ export default {
     return {
       sidebarShow: false,
       searchShow: false,
-      showBackToTop: false,
-      routes: [
-        {
-          name: 'BLOG',
-          route: '/blog',
-          icon: 'iconfont icon-iconfont-momarticle'
-        },
-        {
-          name: '画廊',
-          route: '/blog/gallery',
-          icon: 'iconfont icon-pictureo'
-        },
-        {
-          name: '关于',
-          route: '/blog/about',
-          icon: 'iconfont icon-about'
-        }
-      ]
+      showBackToTop: false
     };
   },
   asyncData({ store, route }) {
@@ -138,13 +121,18 @@ export default {
     TheLogin
   },
   computed: {
+    routes() {
+      return this.$store.state.navTabs;
+    },
     activeRoute() {
       let activeRoute;
       const path = this.$route.path.split('/').filter(Boolean);
-      if (path.length === 1 || (path[1] !== 'gallery' && path[1] !== 'gallery')) {
+      if (path.length === 1 || (path[1] === 'post')) {
         activeRoute = '/blog';
+      } else if (path[1] === 'user') {
+        activeRoute = this.$route.path;
       } else {
-        activeRoute = `/${path[0]}/${path[1]}`
+        activeRoute = `/${path[0]}/${path[1]}`;
       }
       return activeRoute;
     },
@@ -188,6 +176,11 @@ export default {
           username,
           userPic
         });
+        this.$store.commit('addNav', {
+          name: '我的',
+          route: `/blog/user/${_id}`,
+          icon: 'iconfont icon-touxiang'
+        });
       }).catch(err => {
         console.error(err);
       });
@@ -198,11 +191,15 @@ export default {
     logout() {
       Cookies.remove('blogUserId');
       Cookies.remove('blogToken');
+      this.$store.commit('removeNavByRoute', `/blog/user/${this.user.id}`);
       this.$store.commit('updateUser', {
         id: '',
         username: '',
         userPic: ''
       });
+      if (this.$route.path.includes('/blog/user')) {
+        this.$router.push('/blog');
+      }
     },
     backToTop() {
       document.documentElement.scrollTop = 0;
@@ -214,10 +211,14 @@ export default {
 <style scoped>
 .fcc-page{
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 .fcc-main{
+  width: 100%;
   max-width: 1100px;
   margin: 0 auto;
+  flex-grow: 1;
 }
 .fcc-header{
   position: relative;
