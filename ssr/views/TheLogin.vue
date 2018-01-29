@@ -4,7 +4,7 @@
       <div class="the-login-main">
         <h2 class="the-login-title">{{actionName}}</h2>
         <i class="iconfont icon-close" @click="close"></i>
-        <div class="the-login-form">
+        <form class="the-login-form">
           <input
             class="the-login-form-item"
             v-model="username"
@@ -14,6 +14,7 @@
             class="the-login-form-item"
             v-model="password"
             type="password"
+            autocomplete
             placeholder="请输入密码">
           <button
             :class="{
@@ -21,8 +22,8 @@
               'is-disabled': !editable
             }"
             :disabled="!editable"
-            @click="submit"><i class="iconfont icon-loading-out" v-show="submiting"></i>{{actionName}}</button>
-        </div>
+            @click.prevent="submit"><i class="iconfont icon-loading-out" v-show="submiting"></i>{{actionName}}</button>
+        </form>
         <div class="the-login-help">
           <span v-if="action==='login'" @click="changeAction('signup')">没有账号？注册一个</span>
           <span v-if="action==='signup'" @click="changeAction('login')">已有账号？登录</span>
@@ -34,7 +35,8 @@
 
 <script>
 import Cookies from 'js-cookie';
-import { login } from './../assets/api/index';
+import { login, userRegister } from './../assets/api/index';
+
 export default {
   name: 'TheLogin',
   props: {
@@ -65,12 +67,12 @@ export default {
       this.$store.commit('hideLogin');
     },
     submit() {
-      this.action === 'login' ? this.loginSubmit() : this.signup();
-    },
-    loginSubmit() {
       if (this.submiting) {
         return;
       }
+      this.action === 'login' ? this.loginSubmit() : this.signup();
+    },
+    loginSubmit() {
       this.submiting = true;
       login({
         username: this.username,
@@ -103,7 +105,19 @@ export default {
         this.submiting = false;
       });
     },
-    signup() {},
+    signup() {
+      this.submiting = true;
+      userRegister({
+        username: this.username,
+        password: this.password
+      }).then(res => {
+        this.$store.commit('changeLoginAction', 'login');
+        this.password = '';
+        this.submiting = false;
+      }).catch(err => {
+        this.submiting = false;
+      });
+    },
     changeAction(action) {
       this.$store.commit('changeLoginAction', action);
       this.username = '';
@@ -184,12 +198,6 @@ button.the-login-form-item{
   justify-content: center;
   align-items: center;
 }
-.icon-loading-out{
-  display: inline-block;
-  margin: 0 5px 0 0;
-  padding: 0;
-  font-size: 1.6em;
-  animation: rotate .1s infinite;
-}
+
 </style>
 

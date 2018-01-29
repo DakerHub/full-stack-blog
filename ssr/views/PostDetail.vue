@@ -8,7 +8,7 @@
     <div class="post-detail-main">
       <h1 class="post-detail-title">{{postDetail.title}}</h1>
       <div class="post-detail-mate secondary-text-color">
-        <span class="post-detail-date"><i class="iconfont icon-timefull"></i>{{postDetail.date}}</span>
+        <span class="post-detail-date"><i class="iconfont icon-calendar2"></i><time>{{postDetail.date}}</time></span>
         <span class="post-detail-tag active-color">
           <span v-for="tag in postDetail.tags">
             <i class="iconfont icon-tag"></i>

@@ -16,6 +16,8 @@ const APIS = {
   posts: 'posts',
   post: 'post',
   user: 'user',
+  update_avatar: 'user/avatar',
+  update_password: 'user/password',
   comment: 'comment',
   comments: 'comments',
   tags: 'tags',

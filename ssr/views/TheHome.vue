@@ -28,6 +28,7 @@
             <p class="fcc-home-post-abs p1em">{{post.abstract}}</p>
             <ul class="fcc-home-post-tag p1em active-color">
               <li
+                title="标签"
                 v-for="tag in post.tags"
                 :key="tag._id">
                 <i class="iconfont icon-tag"></i>
@@ -35,10 +36,10 @@
               </li>
             </ul>
             <div class="fcc-home-post-mate">
-              <span class="fcc-home-post-date">
-                <i class="iconfont icon-calendar2"></i><span>{{post.date}}</span>
+              <span class="fcc-home-post-date" title="文章发布日期">
+                <i class="iconfont icon-calendar2"></i><time>{{post.date}}</time>
               </span>
-              <span>
+              <span title="评论数">
                 <i class="iconfont icon-comment"></i><span>{{post.commentCount}}</span>
               </span>
             </div>
@@ -158,6 +159,11 @@ export default {
   max-width: 800px;
   margin: 0 auto;
 }
+@media screen and (max-width: 1023px) {
+  .fcc-home-post-list{
+    padding: 0 1em;
+  }
+}
 .fcc-home-post{
   padding: .5em 1em 1em 1em;
   margin-bottom: 1em;
@@ -227,7 +233,6 @@ export default {
   line-height: 1.2em;
 }
 .fcc-home-post-tag li{
-  display: inline-flex;
   margin-right: 10px;
 }
 .fcc-home-post-tag-link{

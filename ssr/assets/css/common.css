@@ -96,8 +96,8 @@ button[data-type="text"]:hover{
 }
 
 .iconfont{
-  font-size: 1rem;
-  margin-right: .3rem;
+  font-size: 1em;
+  margin-right: 5px;
 }
 
 @keyframes rotate{
@@ -107,4 +107,11 @@ button[data-type="text"]:hover{
   100%{
     transform: rotate(20deg);
   }
+}
+
+.icon-loading-out{
+  display: inline-block;
+  padding: 0;
+  font-size: 1em;
+  animation: rotate .1s infinite;
 }

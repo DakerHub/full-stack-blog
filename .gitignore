@@ -10,6 +10,7 @@ src/build/
 src/config/
 src/test/
 public/admin/*
+ssr/assets/config/
 selenium-debug.log
 
 # Editor directories and files

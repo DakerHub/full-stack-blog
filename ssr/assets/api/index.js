@@ -81,6 +81,19 @@ const login = function (params) {
   return axios.post(APIS.login, params);
 };
 
+const userRegister = function (params) {
+  assert(params, [{
+    field: 'username',
+    required: true,
+    type: 'string'
+  }, {
+    field: 'password',
+    required: true,
+    type: 'string'
+  }]);
+  return axios.post(APIS.user, params);
+};
+
 const newCommment = function (params) {
   assert(params, [{
     field: 'content',
@@ -135,6 +148,37 @@ const deleteComment = function (id) {
   });
 };
 
+const uploadAvatar = function (id, avatar) {
+  if (!id) {
+    throw new Error('[uploadAvatar] id is required!');
+  }
+  if (!avatar) {
+    throw new Error('[uploadAvatar] avatar is required!');
+  }
+  const params = new FormData();
+  params.append('id', id);
+  params.append('avatar', avatar);
+  return axios.patch(APIS.update_avatar, params, { needAuth: true });
+};
+
+const updatePassword = function (params) {
+  assert(params, [{
+    field: 'id',
+    required: true,
+    type: 'string'
+  }, {
+    field: 'oldPw',
+    required: true,
+    type: 'string'
+  }, {
+    field: 'newPw',
+    required: true,
+    type: 'string'
+  }]);
+
+  return axios.patch(APIS.update_password, params, { needAuth: true });
+};
+
 export {
   getPosts,
   getTags,
@@ -147,5 +191,8 @@ export {
   newCommment,
   getPostComments,
   getSubComments,
-  deleteComment
+  deleteComment,
+  uploadAvatar,
+  updatePassword,
+  userRegister
 };

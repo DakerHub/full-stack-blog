@@ -13,17 +13,18 @@ export function createStore() {
           name: 'BLOG',
           route: '/blog',
           icon: 'iconfont icon-iconfont-momarticle'
-        },
-        {
-          name: '画廊',
-          route: '/blog/gallery',
-          icon: 'iconfont icon-pictureo'
-        },
-        {
-          name: '关于',
-          route: '/blog/about',
-          icon: 'iconfont icon-about'
         }
+        // ,
+        // {
+        //   name: '画廊',
+        //   route: '/blog/gallery',
+        //   icon: 'iconfont icon-pictureo'
+        // },
+        // {
+        //   name: '关于',
+        //   route: '/blog/about',
+        //   icon: 'iconfont icon-about'
+        // }
       ],
       user: {
         id: '',
@@ -127,9 +128,16 @@ export function createStore() {
         state.loginAction = action;
       },
       updateUser(state, { id, username, userPic }) {
-        state.user.id = id;
-        state.user.username = username;
-        state.user.userPic = userPic;
+        id && (state.user.id = id);
+        username && (state.user.username = username);
+        userPic && (state.user.userPic = userPic);
+      },
+      clearUser(state) {
+        state.user = {
+          id: '',
+          username: '',
+          userPic: ''
+        };
       },
       setQueryTagName(state, name) {
         state.queryTagName = name;

@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const login = require('./login');
 const jwtDecode = require('./../lib/util/jwsDecode');
 const { Posts } = require('./../lib/models/posts');
@@ -8,11 +9,80 @@ const { Users } = require('./../lib/models/users');
 const { Categories } = require('./../lib/models/categories');
 const { findByIds, deleteByIds, deleteByIdsRecursive } = require('./../lib/controllers/crud');
 const { hasMissing, formatDate } = require('./../lib/util/util');
+const { STATIC_PATH, SITE_PATH, STATIC_URL, AVATAR_PATH } = require('./../config/config');
 const logger = require('./../lib/util/log');
+
+const storage = multer.diskStorage({
+  // 文件存储路径为设置里的STATIC路径
+  destination: (req, file, cb) => {
+    cb(null, SITE_PATH + STATIC_PATH + AVATAR_PATH);
+  },
+  // 在文件名后加上时间戳
+  filename: (req, file, cb) => {
+    const fileName = file.originalname.split('.');
+    const extention = fileName.pop();
+    const newName = fileName.join('.') + Date.now() + '.' + extention;
+    cb(null, newName);
+  }
+});
+const upload = multer({ storage }).single('avatar');
+const uploadMid = function (req, res, next) {
+  upload(req, res, function (err) {
+    if (err) {
+      logger.reqErr(err, req);
+      res.send({
+        code: 500,
+        msg: err.errmsg || err.message
+      });
+      return;
+    }
+    next();
+  });
+};
 
 const router = express.Router();
 
-router.use(['/comment', '/user'], jwtDecode);
+router.post('/user', function (req, res, next) {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    res.send({
+      code: 400,
+      msg: '`username` and `password` are both required.'
+    });
+  }
+  const user = {
+    username,
+    password,
+    userPic: '',
+    userType: '2',
+    regDate: Date.now()
+  };
+
+  Users.create(user, function (err, newUser) {
+    if (err) {
+      logger.reqErr(err, req);
+      res.send({
+        code: 500,
+        msg: err.errmsg || err.message,
+        source: null
+      });
+      return;
+    }
+    const { username: name, userPic, regDate, _id } = newUser;
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: {
+        username: name,
+        regDate,
+        userPic: '',
+        _id
+      }
+    });
+  });
+});
+
+router.use(['/comment', '/user', '/user/*'], jwtDecode);
 
 router.use('/login', login);
 
@@ -418,6 +488,56 @@ router.delete('/comment', async function (req, res, next) {
     res.send({
       code: 500,
       msg: err.errmsg || err.message || err,
+      source: null
+    });
+  }
+});
+
+router.patch('/user/avatar', uploadMid, function (req, res, next) {
+  const { id } = req.body;
+  const userPic = STATIC_URL + AVATAR_PATH + req.file.filename;
+  Users.findByIdAndUpdate(id, { userPic }, { new: true, fields: '-__v -password' }, function (err, newUser) {
+    if (err) {
+      logger.reqErr(err, req);
+      res.send({
+        code: 500,
+        msg: err.errmsg || err.message,
+        source: null
+      });
+      return;
+    }
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: newUser
+    });
+  });
+});
+
+router.patch('/user/password', async function (req, res, next) {
+  const { id, oldPw, newPw } = req.body;
+  try {
+    const user = await Users.findById(id).exec();
+    if (user.password === oldPw) {
+      user.$set('password', newPw);
+      await user.save();
+      res.send({
+        code: 200,
+        msg: 'success',
+        source: null
+      });
+    } else {
+      res.send({
+        code: 400,
+        msg: '旧密码不正确!',
+        source: null
+      });
+    }
+  } catch (err) {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message,
       source: null
     });
   }

@@ -34,7 +34,7 @@
               <i class="iconfont icon-shanchu"></i>
               删除
             </button>
-            <span class="post-comment-mate-date">&nbsp;{{item.createdDate}}</span>
+            <time class="post-comment-mate-date">&nbsp;{{item.createdDate}}</time>
           </div>
           <div class="post-comment-reply" v-if="expands.includes(item._id)">
             <span class="post-comment-reply-tri"></span>
@@ -61,10 +61,9 @@
                       v-if="subComment.authorId===user.id"
                       data-type="text"
                       @click="deleteComment(subComment, false)">
-                      <i class="iconfont icon-shanchu"></i>
-                      删除
+                      <i class="iconfont icon-shanchu"></i>删除
                     </button>
-                    <span class="post-comment-mate-date">&nbsp;{{subComment.createdDate}}</span>
+                    <time class="post-comment-mate-date">&nbsp;{{subComment.createdDate}}</time>
                   </div>
                 </div>
               </div>
@@ -378,7 +377,6 @@ export default {
 }
 .post-comment-mate .iconfont{
   padding: 0;
-  margin: 0;
 }
 .post-comment-mate button{
   color: #757575;

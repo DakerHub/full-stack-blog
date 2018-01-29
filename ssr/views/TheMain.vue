@@ -192,11 +192,7 @@ export default {
       Cookies.remove('blogUserId');
       Cookies.remove('blogToken');
       this.$store.commit('removeNavByRoute', `/blog/user/${this.user.id}`);
-      this.$store.commit('updateUser', {
-        id: '',
-        username: '',
-        userPic: ''
-      });
+      this.$store.commit('clearUser');
       if (this.$route.path.includes('/blog/user')) {
         this.$router.push('/blog');
       }
@@ -260,6 +256,7 @@ export default {
   padding-left: 2em;
   box-sizing: border-box;
   border: none;
+  border-radius: 0;
   border-bottom: 2px solid #673ab7;
   background-color: #2b155d;
   outline: none;
@@ -286,6 +283,7 @@ export default {
 @media screen and (min-width: 1024px) {
   .fcc-main{
     padding: 0 1em;
+    box-sizing: border-box;
   }
   .fcc-header-search{
     right: 220px;
