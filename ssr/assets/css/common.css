@@ -85,6 +85,13 @@ button[data-type="text"]:hover{
   transform: translate(100%);
   opacity: 0;
 }
+.slide-down-enter-active, .slide-down-leave-active{
+  transition: all .3s ease;
+}
+.slide-down-enter, .slide-down-leave-active{
+  transform: translateY(-100%);
+  opacity: 0;
+}
 .zoom-in-enter-active, .zoom-in-leave-active{
   transform-origin: top;
   transition: all .3s ease;
@@ -125,9 +132,27 @@ button[data-type="text"]:hover{
   color: #2b155d;
   border: thin solid #caadff;
   background-color: #f1e3ff;
-  /* box-shadow: 0 0 7px rgba(0, 0, 0, 0.3); */
+  box-shadow: 0 0 7px rgba(0, 0, 0, 0.3);
   border-radius: 4px;
   z-index: 1000;
+}
+.base-message--success{
+  color: #67c23a;
+  background-color: #f0f9eb;
+  border-color: #e1f3d8;
+}
+.base-message--error{
+  color: #f56c6c;
+  background-color: #fef0f0;
+  border-color: #fde2e2;
+}
+.base-message--warn{
+  color: #e6a23c;
+  background-color: #fdf6ec;
+  border-color: #faecd8;
+}
+.base-message__content{
+  padding: 0 1em;
 }
 .base-message__close{
   margin-left: 5px;

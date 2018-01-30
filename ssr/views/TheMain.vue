@@ -55,7 +55,10 @@
 
     <main class="fcc-main">
 
-      <button @click="$message({message: 'test'})">message</button>      
+      <button @click="$message({message: 'test', type: 'success'})">success</button>      
+      <button @click="$message({message: 'test', type: 'error'})">error</button>      
+      <button @click="$message({message: 'test', type: 'info'})">info</button>      
+      <button @click="$message({message: 'test', type: 'warn'})">warn</button>      
       <MainBreadcrumb />
 
       <transition name="fade" mode="out-in">
