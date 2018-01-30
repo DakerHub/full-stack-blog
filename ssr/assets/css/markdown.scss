@@ -100,7 +100,12 @@ li p.first {
 //   margin: 0; }
 ul, ol {
   padding-left: 30px; }
-
+ol {
+  list-style-type: decimal;
+}
+ul {
+  list-style-type: disc;
+}
 ul :first-child, ol :first-child {
   margin-top: 0; }
 

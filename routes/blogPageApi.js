@@ -164,7 +164,7 @@ router.get('/posts', async function (req, res, next) {
         const cateRaw = Array.isArray(row.category) ? row.category : [];
         
         promises.push(findByIds(Tags, tagsRaw, '-__v').then(tags => {
-          row.tags = tags;
+          row.tags = tags.filter(Boolean);
         }));
         promises.push(findByIds(Categories, cateRaw, '-__v').then(category => {
           row.category = category;
@@ -175,11 +175,11 @@ router.get('/posts', async function (req, res, next) {
         row.date = formatDate(row.date, 'YYYY-MM-DD hh:mm:ss');
       });
       Promise.all(promises).then((tagsMap) => {
+        console.log(rows);
         res.send({
           code: 200,
           msg: 'success',
           sources: rows,
-
           total
         });
       }).catch(err => {

@@ -115,3 +115,34 @@ button[data-type="text"]:hover{
   font-size: 1em;
   animation: rotate .1s infinite;
 }
+
+.base-message{
+  position: fixed;
+  display: flex;
+  top: 2em;
+  right: 1em;
+  padding: 1rem 0;
+  color: #2b155d;
+  border: thin solid #caadff;
+  background-color: #f1e3ff;
+  /* box-shadow: 0 0 7px rgba(0, 0, 0, 0.3); */
+  border-radius: 4px;
+  z-index: 1000;
+}
+.base-message__close{
+  margin-left: 5px;
+  color: #757575;
+  cursor: pointer;
+}
+.base-message__close:hover{
+  color: #212121;
+}
+
+@media screen and (max-width: 1024px) {
+  .base-message__close{
+    font-size: 2em;
+  }
+  .base-message{
+    line-height: 2em;
+  }
+}

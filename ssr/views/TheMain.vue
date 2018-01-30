@@ -55,6 +55,7 @@
 
     <main class="fcc-main">
 
+      <button @click="$message({message: 'test'})">message</button>      
       <MainBreadcrumb />
 
       <transition name="fade" mode="out-in">
@@ -418,7 +419,7 @@ export default {
 }
 .fcc-view{
   box-sizing: border-box;
-  margin: 1em 0;
+  margin: 1rem 0;
   width: 100%;
 }
 .fcc-right{

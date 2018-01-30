@@ -47,7 +47,7 @@ export function createStore() {
       loginAction: 'login'
     },
     actions: {
-      getPosts({ commit }, currentPage) {
+      getPosts({ commit, state }, currentPage) {
         return getPosts(currentPage).then(res => {
           const posts = res.data.sources;
           const total = res.data.total;
@@ -58,13 +58,19 @@ export function createStore() {
           commit('setPostsTotal', total);
         });
       },
-      getTags({ commit }) {
+      getTags({ commit, state }) {
+        if (state.tags.length) {
+          return Promise.resolve();
+        }
         return getTags().then(res => {
           const tags = res.data.sources;
           commit('setTags', tags);
         });
       },
-      getNewestPosts({ commit }) {
+      getNewestPosts({ commit, state }) {
+        if (state.newestPosts.length) {
+          return Promise.resolve();
+        }
         return getNewestPosts().then(res => {
           const newestPosts = res.data.sources;
           newestPosts.forEach(element => {
@@ -73,7 +79,10 @@ export function createStore() {
           commit('setNewestPosts', newestPosts);
         });
       },
-      getNewestComments({ commit }) {
+      getNewestComments({ commit, state }) {
+        if (state.newestComments.length) {
+          return Promise.resolve();
+        }
         return getNewestComments().then(res => {
           const newestComments = res.data.sources;
           newestComments.forEach(element => {

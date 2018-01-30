@@ -158,6 +158,8 @@ export default {
 }
 .post-detail-content{
   padding: 1em 0;
+  font-size: .9em;
+  line-height: 1.5em;
 }
 .post-detail-date{
   white-space: nowrap;

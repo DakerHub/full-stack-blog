@@ -38,6 +38,8 @@ router.onReady(() => {
       return next();
     }
 
+    console.log(asyncDataHooks.length);
+
     Promise.all(asyncDataHooks.map(hook => hook({ store, route: to })))
       .then(next)
       .catch(next);
