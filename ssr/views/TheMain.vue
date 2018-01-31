@@ -55,10 +55,6 @@
 
     <main class="fcc-main">
 
-      <button @click="$message({message: 'test', type: 'success'})">success</button>      
-      <button @click="$message({message: 'test', type: 'error'})">error</button>      
-      <button @click="$message({message: 'test', type: 'info'})">info</button>      
-      <button @click="$message({message: 'test', type: 'warn'})">warn</button>      
       <MainBreadcrumb />
 
       <transition name="fade" mode="out-in">
@@ -169,11 +165,7 @@ export default {
     };
 
     if (id) {
-      getUserInfo(id).then(({ data }) => {
-        if (data.code !== 200) {
-          throw new Error(data.msg);
-          return;
-        }
+      getUserInfo(id).then(data => {
         const { _id, username, userPic } = data.source;
         this.$store.commit('updateUser', {
           id: _id,
@@ -187,12 +179,20 @@ export default {
         });
       }).catch(err => {
         console.error(err);
+        this.$message({
+          message: '获取用户信息失败！',
+          type: 'error'
+        });
       });
     }
     document.addEventListener('scroll', throttle(scrollTop.bind(this), 100));
   },
   methods: {
     logout() {
+      const sure = confirm('确定要退出？');
+      if (!sure) {
+        return;
+      }
       Cookies.remove('blogUserId');
       Cookies.remove('blogToken');
       this.$store.commit('removeNavByRoute', `/blog/user/${this.user.id}`);
@@ -333,7 +333,6 @@ export default {
 }
 .fcc-nav-login{
   text-align: center;
-  color: #fff;
   margin-bottom: 1em;
 }
 .fcc-nav-login-btn{
@@ -343,6 +342,14 @@ export default {
 }
 .fcc-nav-login-btn:hover{
   color: #fff !important;
+}
+@media screen and (max-width: 1024px) {
+  .fcc-nav-login{
+    color: #fff !important;
+  }
+  .fcc-nav-login-btn{
+    text-decoration: underline;
+  }
 }
 .fcc-nav-list{
   height: calc(100% - 8em);

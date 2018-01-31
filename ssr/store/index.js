@@ -48,9 +48,9 @@ export function createStore() {
     },
     actions: {
       getPosts({ commit, state }, currentPage) {
-        return getPosts(currentPage).then(res => {
-          const posts = res.data.sources;
-          const total = res.data.total;
+        return getPosts(currentPage).then(data => {
+          const posts = data.sources;
+          const total = data.total;
           posts.forEach(element => {
             element.date = element.date.split(' ')[0];
           });
@@ -62,8 +62,8 @@ export function createStore() {
         if (state.tags.length) {
           return Promise.resolve();
         }
-        return getTags().then(res => {
-          const tags = res.data.sources;
+        return getTags().then(data => {
+          const tags = data.sources;
           commit('setTags', tags);
         });
       },
@@ -71,8 +71,8 @@ export function createStore() {
         if (state.newestPosts.length) {
           return Promise.resolve();
         }
-        return getNewestPosts().then(res => {
-          const newestPosts = res.data.sources;
+        return getNewestPosts().then(data => {
+          const newestPosts = data.sources;
           newestPosts.forEach(element => {
             element.date = date2text(element.date);
           });
@@ -83,8 +83,8 @@ export function createStore() {
         if (state.newestComments.length) {
           return Promise.resolve();
         }
-        return getNewestComments().then(res => {
-          const newestComments = res.data.sources;
+        return getNewestComments().then(data => {
+          const newestComments = data.sources;
           newestComments.forEach(element => {
             element.createdDate = date2text(element.createdDate);
           });
@@ -92,14 +92,14 @@ export function createStore() {
         });
       },
       getPostDetail({ commit }, id) {
-        return getPostDetail(id).then(res => {
-          const post = res.data.source;
+        return getPostDetail(id).then(data => {
+          const post = data.source;
           commit('setPostDetail', post);
         });
       },
       getTagName({ commit }, id) {
-        return getTagById(id).then(res => {
-          const tag = res.data.source;
+        return getTagById(id).then(data => {
+          const tag = data.source;
           commit('setQueryTagName', tag.name);
         });
       }

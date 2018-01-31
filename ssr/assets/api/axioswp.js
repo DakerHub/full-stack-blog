@@ -16,6 +16,14 @@ axioswp.interceptors.request.use(function (config) {
   return Promise.reject(error);
 });
 
+axioswp.interceptors.response.use(function (res) {
+  const { data } = res;
+  if (data.code !== 200) {
+    return Promise.reject(data);
+  }
+  return data;
+}, function (error) {});
+
 export default {
   axioswp
 };

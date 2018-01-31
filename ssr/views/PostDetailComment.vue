@@ -2,7 +2,8 @@
   <section class="post-comment">
     <h3 class="post-comment-title primary-text-color">评论</h3>
     <div class="post-comment-to-post">
-      <textarea class="post-comment-textarea" v-model="comment" rows="4"></textarea>
+      <textarea class="post-comment-textarea" v-model="comment" :maxlength="totalSize" rows="4"></textarea>
+      <span class="post-comment-to-post__count">{{`${curCount}/${totalSize}`}}</span>
       <button
         :class="{
           'post-comment-btn': true,
@@ -11,7 +12,7 @@
         :disabled="!comment"
         @click="submit">{{btnName}}</button>
     </div>
-    <div class="post-comment-list">
+    <div class="post-comment-list" v-if="commentList.length">
       <div
         class="post-comment-main" 
         v-for="(item, index) in commentList"
@@ -80,7 +81,8 @@
               <input
                 type="text"
                 v-model="item.replyInput"
-                :placeholder="item.replyInputTo.id?`@${item.replyInputTo.name}:`:''">
+                :maxlength="totalSize"
+                :placeholder="(item.replyInputTo.id?`@${item.replyInputTo.name}:`:'') + `内容长度限制在${totalSize}以内`">
 
               <!-- 
                 当点击某个自评论的回复时,意思为回复该子评论,输入框出现@某用户的字样,而且当输入框为空时,按钮字样为"取消,
@@ -99,6 +101,7 @@
         </div>
       </div>
     </div>
+    <div class="post-comment-placeholder" v-else><i class="iconfont icon-comment"></i>暂无评论，快来抢沙发！</div>
     <div class="post-comment-pagination">
       <BasePagination
         :total="total"
@@ -124,6 +127,9 @@ export default {
   },
   data() {
     return {
+      // 评论限制字数
+      totalSize: 10,
+
       comment: '',
       commentList: [],
       expands: [],
@@ -144,6 +150,9 @@ export default {
     },
     btnName() {
       return this.hasLogin ? '提交' : '登录后评论';
+    },
+    curCount() {
+      return this.comment.length;
     }
   },
   watch: {
@@ -186,7 +195,7 @@ export default {
         replyTo && (params.replyTo = replyTo);
         content && (params.content = content);
       }
-      newCommment(params).then(res => {
+      newCommment(params).then(data => {
         if (subComment) {
           const pId = subComment.pId;
           this.findAndSet(pId, 'replyInput', '');
@@ -204,7 +213,6 @@ export default {
     },
     showLogin() {
       this.$store.commit('showLogin', 'login');
-      console.log('login');
     },
     getPostComments(id) {
       const params = {
@@ -213,7 +221,7 @@ export default {
         page: this.currentPage,
         size: this.pageSize
       }
-      getPostComments(params).then(({ data }) => {
+      getPostComments(params).then(data => {
         data.sources.forEach(comment => {
           comment.createdDate = date2text(comment.createdDate);
           comment.subComments = [];
@@ -238,7 +246,7 @@ export default {
         page: this.findAndSet(pId, 'currentPage'),
         size: 5
       };
-      getSubComments(params).then(({ data }) => {
+      getSubComments(params).then(data => {
         data.sources.forEach(comment => {
           comment.createdDate = date2text(comment.createdDate);
         });
@@ -249,6 +257,10 @@ export default {
       });
     },
     deleteComment(comment, isToPost) {
+      const sure = confirm('删除评论可能会影响到其他评论，是否继续？');
+      if (!sure) {
+        return;
+      }
       deleteComment(comment._id).then(res => {
         isToPost ? this.getPostComments(comment.postId) : this.getSubComments(comment.pId);
         this.changeReplyCount(comment.pId, 'decrease');
@@ -326,12 +338,21 @@ export default {
   margin-top: 1em;
   overflow: hidden;
 }
+.post-comment-to-post__count{
+  font-size: .8em;
+}
 .post-comment-btn{
   float: right;
   margin-top: 5px;
 }
 .post-comment-list{
   margin-top: 1em;
+}
+.post-comment-placeholder{
+  width: 100%;
+  font-size: .8em;
+  margin-top: 1em;
+  text-align: center;
 }
 .post-comment-main{
   display: flex;

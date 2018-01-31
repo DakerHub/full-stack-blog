@@ -4,7 +4,6 @@ import { createApp } from './app';
 
 Vue.mixin({
   beforeRouteUpdate(to, from, next) {
-    console.log('======route-updated=========');
     const { asyncData } = this.$options;
     if (asyncData) {
       asyncData({
@@ -37,8 +36,6 @@ router.onReady(() => {
     if (!asyncDataHooks.length) {
       return next();
     }
-
-    console.log(asyncDataHooks.length);
 
     Promise.all(asyncDataHooks.map(hook => hook({ store, route: to })))
       .then(next)

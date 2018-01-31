@@ -132,9 +132,9 @@ button[data-type="text"]:hover{
   color: #2b155d;
   border: thin solid #caadff;
   background-color: #f1e3ff;
-  box-shadow: 0 0 7px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 7px 0px rgba(88, 88, 88, 0.2);
   border-radius: 4px;
-  z-index: 1000;
+  z-index: 10000;
 }
 .base-message--success{
   color: #67c23a;
@@ -170,4 +170,38 @@ button[data-type="text"]:hover{
   .base-message{
     line-height: 2em;
   }
+}
+
+.base-input{
+  position: relative;
+  padding-bottom: 1em;
+}
+.base-input__inner{
+  position: relative;
+}
+.base-input__info{
+  font-size: 12px;
+  line-height: 14px;
+  margin-top: 5px;
+  color: #757575;
+}
+.base-input__clear{
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  font-size: .9em;
+  color: #757575;
+}
+.base-input__clear:hover{
+  color: #212121;
+  cursor: pointer;
+}
+.base-input__info--error{
+  position: absolute;
+  font-size: 12px;
+  line-height: 16px;
+  color: #f56c6c;
 }

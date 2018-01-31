@@ -100,7 +100,9 @@ export default {
     }
   },
   mounted() {
-    this.highlightCode();
+    this.$nextTick(() => {
+      this.highlightCode();
+    });
   },
   beforeRouteEnter: (to, from, next) => {
     next(vm => {
@@ -115,7 +117,9 @@ export default {
     })
   },
   beforeRouteUpdate(to, from, next) {
-    console.log(1);
+    this.$nextTick(() => {
+      this.highlightCode();
+    });
     next();
   },
   methods: {
@@ -126,7 +130,16 @@ export default {
       this.$nextTick(() => {
         const $codes = document.querySelectorAll('.post-detail-content code');
         $codes.forEach($code => {
-          $code.innerHTML = Prism.highlight($code.innerText, Prism.languages.javascript);
+          let className = $code.getAttribute('class');
+          if (className) {
+            className = className.trim();
+            let lang = className.substring(className.indexOf('-') + 1);
+            console.log(lang);
+            if (!['javascript', 'css', 'html'].includes(lang)) {
+              lang = 'markup';
+            }
+            $code.innerHTML = Prism.highlight($code.innerText, Prism.languages[lang]);
+          }
         });
       });
     }

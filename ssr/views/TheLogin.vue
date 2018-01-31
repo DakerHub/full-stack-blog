@@ -5,17 +5,46 @@
         <h2 class="the-login-title">{{actionName}}</h2>
         <i class="iconfont icon-close" @click="close"></i>
         <form class="the-login-form">
-          <input
+          <BaseInput
             class="the-login-form-item"
             v-model="username"
-            type="text"
-            placeholder="请输入用户名">
-          <input
+            ref="usernameInput"
+            :maxlength="18"
+            :show-error="!isLogin"
+            :validators="[
+              {
+                reg: /^[\u4e00-\u9fa5\w]+$/,
+                errText: '请输入正确的用户名'
+              }
+            ]"
+            placeholder="请输入用户名"
+            @validation="val => usernameValid = !val">
+            <div class="base-input__info" v-if="!isLogin">
+              <p><i class="iconfont icon-warn"></i>只能使用中文、英文、数字、下划线。</p>
+              <p><i class="iconfont icon-warn"></i>长度小于18。</p>
+            </div>
+          </BaseInput>
+          <BaseInput
             class="the-login-form-item"
             v-model="password"
+            ref="passwordInput"
+            :minlength="6"
+            :maxlength="18"
+            :show-error="!isLogin"
+            :validators="[
+              {
+                reg: /^([A-Z]|[a-z]|[0-9]){6,18}$/,
+                errText: '请输入正确的密码'
+              }
+            ]"
             type="password"
-            autocomplete
-            placeholder="请输入密码">
+            placeholder="请输入密码"
+            @validation="val => passwordValid = !val">
+            <div class="base-input__info" v-if="!isLogin">
+              <p><i class="iconfont icon-warn"></i>包含英文、数字。</p>
+              <p><i class="iconfont icon-warn"></i>长度在6-18。</p>
+            </div>
+          </BaseInput>
           <button
             :class="{
               'the-login-form-item': true,
@@ -35,6 +64,7 @@
 
 <script>
 import Cookies from 'js-cookie';
+import BaseInput from './../components/BaseInput.vue';
 import { login, userRegister } from './../assets/api/index';
 
 export default {
@@ -48,15 +78,23 @@ export default {
     return {
       username: '',
       password: '',
-      submiting: false
+      submiting: false,
+      usernameValid: false,
+      passwordValid: false
     };
+  },
+  components: {
+    BaseInput
   },
   computed: {
     action() {
       return this.$store.state.loginAction;
     },
+    isLogin() {
+      return this.action === 'login';
+    },
     actionName() {
-      return this.action === 'login' ? '登录' : '注册';
+      return this.isLogin ? '登录' : '注册';
     },
     editable() {
       return this.username && this.password;
@@ -64,25 +102,27 @@ export default {
   },
   methods: {
     close() {
+      this.initForm();
       this.$store.commit('hideLogin');
     },
     submit() {
       if (this.submiting) {
         return;
       }
-      this.action === 'login' ? this.loginSubmit() : this.signup();
+      if (!(this.usernameValid && this.passwordValid)) {
+        return this.$message({
+          message: '请输入正确的用户名或者密码',
+          type: 'warn'
+        });
+      }
+      this.isLogin ? this.loginSubmit() : this.signup();
     },
     loginSubmit() {
       this.submiting = true;
       login({
         username: this.username,
         password: this.password
-      }).then(({ data }) => {
-        console.log(data);
-        if (data.code !== 200) {
-          throw new Error(data.msg);
-          return;
-        }
+      }).then(data => {
         this.username = '';
         this.password = '';
         const { _id, username, userPic, token } = data.source;
@@ -101,7 +141,6 @@ export default {
         this.submiting = false;
         this.close();
       }).catch(err => {
-        console.error(err);
         this.submiting = false;
       });
     },
@@ -118,10 +157,15 @@ export default {
         this.submiting = false;
       });
     },
-    changeAction(action) {
-      this.$store.commit('changeLoginAction', action);
+    initForm() {
       this.username = '';
       this.password = '';
+      this.$refs.usernameInput.clearError();
+      this.$refs.passwordInput.clearError();
+    },
+    changeAction(action) {
+      this.$store.commit('changeLoginAction', action);
+      this.initForm();
     }
   }
 }
@@ -171,7 +215,7 @@ export default {
   padding: 1em 2em;
 }
 .the-login-form-item{
-  margin-bottom: 1em;
+  margin-bottom: 1.2em;
   width: 100%;
 }
 .the-login-form button{
