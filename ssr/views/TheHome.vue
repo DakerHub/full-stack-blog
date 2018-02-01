@@ -39,8 +39,11 @@
               <span class="fcc-home-post-date" title="文章发布日期">
                 <i class="iconfont icon-calendar2"></i><time>{{post.date}}</time>
               </span>
-              <span title="评论数">
+              <span class="fcc-home-post-comment-count" title="评论数">
                 <i class="iconfont icon-comment"></i><span>{{post.commentCount}}</span>
+              </span>
+              <span title="浏览量">
+                <i class="iconfont icon-liulan1"></i><span>{{post.viewCount||0}}</span>
               </span>
             </div>
           </div>
@@ -225,6 +228,9 @@ export default {
   }
 }
 .fcc-home-post-date{
+  margin-right: 1em;
+}
+.fcc-home-post-comment-count{
   margin-right: 1em;
 }
 .fcc-home-post-tag{

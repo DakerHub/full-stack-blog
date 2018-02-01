@@ -111,7 +111,8 @@ export default {
     return Promise.all([
       store.dispatch('getNewestPosts'),
       store.dispatch('getTags'),
-      store.dispatch('getNewestComments')
+      store.dispatch('getNewestComments'),
+      store.dispatch('getPopularPosts')
     ]);
   },
   components: {

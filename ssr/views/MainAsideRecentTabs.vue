@@ -14,7 +14,21 @@
             <h3 class="aside-list-title">
               <router-link class="primary-text-color" :to="`/blog/post/${post._id}`">{{post.title}}</router-link>
             </h3>
-            <span class="aside-list-meta secondary-text-color"><i class="iconfont icon-shijian"></i>{{post.date}}</span>
+            <span class="aside-list-meta secondary-text-color"><i class="iconfont icon-shijian"></i><time>{{post.date}}</time></span>
+          </div>
+        </li>
+      </ul>
+      <ul class="aside-recent-list" v-show="activeTab === '2'">
+        <li v-for="post in popularPosts">
+          <div class="aside-list-poster light-2-primary-color">
+            <img :src="post.poster" alt="">
+          </div>
+          <div class="aside-list-detail">
+            <h3 class="aside-list-title">
+              <router-link class="primary-text-color" :to="`/blog/post/${post._id}`">{{post.title}}</router-link>
+            </h3>
+            <span class="aside-list-meta secondary-text-color"><i class="iconfont icon-shijian"></i><time>{{post.date}}</time></span>
+            <span class="aside-list-meta secondary-text-color"><i class="iconfont icon-liulan1"></i>{{post.viewCount}}</span>
           </div>
         </li>
       </ul>
@@ -36,7 +50,7 @@
               <i class="iconfont icon-triangle-left"></i>
               <p class="aside-list-comment">{{item.content}}</p>
             </div>
-            <p class="aside-list-comment-date secondary-text-color"><i class="iconfont icon-shijian"></i>{{item.createdDate}}</p>
+            <p class="aside-list-comment-date secondary-text-color"><i class="iconfont icon-shijian"></i><time>{{item.createdDate}}</time></p>
           </div>
         </li>
       </ul>
@@ -51,19 +65,19 @@ export default {
     return {
       tabs: [
         {
-          id: '1',
-          label: '最近文章'
-        },
-        {
           id: '2',
           label: '热门文章'
+        },
+        {
+          id: '1',
+          label: '最近文章'
         },
         {
           id: '3',
           label: '最近评论'
         }
       ],
-      activeTab: '1',
+      activeTab: '2',
       list: []
     };
   },
@@ -73,6 +87,9 @@ export default {
   computed: {
     newestPosts() {
       return this.$store.state.newestPosts;
+    },
+    popularPosts() {
+      return this.$store.state.popularPosts;
     },
     newestComments() {
       return this.$store.state.newestComments;
@@ -134,6 +151,7 @@ export default {
 }
 .aside-list-meta{
   font-size: .8em;
+  margin-right: 1em;
 }
 .aside-list-meta .iconfont{
   font-size: 1em;

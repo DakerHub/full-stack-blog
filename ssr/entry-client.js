@@ -1,6 +1,11 @@
 import Vue from 'vue';
 
 import { createApp } from './app';
+import ProgressBar from './components/ProgressBar.vue';
+
+// global progress bar
+const bar = new Vue(ProgressBar).$mount();
+document.body.appendChild(bar.$el);
 
 Vue.mixin({
   beforeRouteUpdate(to, from, next) {
@@ -37,8 +42,12 @@ router.onReady(() => {
       return next();
     }
 
+    bar.start();
     Promise.all(asyncDataHooks.map(hook => hook({ store, route: to })))
-      .then(next)
+      .then(() => {
+        bar.finish();
+        next();
+      })
       .catch(next);
   });
   app.$mount('#app');

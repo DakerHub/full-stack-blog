@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { getPosts, getTags, getNewestPosts, getNewestComments, getPostDetail, getTagById } from './../assets/api/index';
+import { getPosts, getTags, getNewestPosts, getPopularPosts, getNewestComments, getPostDetail, getTagById } from './../assets/api/index';
 import { date2text } from './../assets/util/util.js';
 
 Vue.use(Vuex);
@@ -36,6 +36,7 @@ export function createStore() {
       queryTagName: '',
       tags: [],
       newestPosts: [],
+      popularPosts: [],
       newestComments: [],
       postDetail: {
         title: '',
@@ -79,6 +80,18 @@ export function createStore() {
           commit('setNewestPosts', newestPosts);
         });
       },
+      getPopularPosts({ commit, state }) {
+        if (state.popularPosts.length) {
+          return Promise.resolve();
+        }
+        return getPopularPosts().then(data => {
+          const popularPosts = data.sources;
+          popularPosts.forEach(element => {
+            element.date = date2text(element.date);
+          });
+          commit('setPopularPosts', popularPosts);
+        });
+      },
       getNewestComments({ commit, state }) {
         if (state.newestComments.length) {
           return Promise.resolve();
@@ -116,6 +129,9 @@ export function createStore() {
       },
       setNewestPosts(state, newestPosts) {
         state.newestPosts = newestPosts;
+      },
+      setPopularPosts(state, popularPosts) {
+        state.popularPosts = popularPosts;
       },
       setNewestComments(state, newestComments) {
         state.newestComments = newestComments;

@@ -9,6 +9,7 @@ const { Users } = require('./../lib/models/users');
 const { Categories } = require('./../lib/models/categories');
 const { findByIds, deleteByIds, deleteByIdsRecursive } = require('./../lib/controllers/crud');
 const { hasMissing, formatDate } = require('./../lib/util/util');
+const { collectVisit } = require('./../lib/util/collectVisit');
 const { STATIC_PATH, SITE_PATH, STATIC_URL, AVATAR_PATH } = require('./../config/config');
 const logger = require('./../lib/util/log');
 
@@ -42,82 +43,16 @@ const uploadMid = function (req, res, next) {
 
 const router = express.Router();
 
-router.post('/user', function (req, res, next) {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    res.send({
-      code: 400,
-      msg: '`username` and `password` are both required.'
-    });
-  }
-  const user = {
-    username,
-    password,
-    userPic: '',
-    userType: '2',
-    regDate: Date.now()
-  };
-
-  Users.create(user, function (err, newUser) {
-    if (err) {
-      logger.reqErr(err, req);
-      res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        source: null
-      });
-      return;
-    }
-    const { username: name, userPic, regDate, _id } = newUser;
-    res.send({
-      code: 200,
-      msg: 'success',
-      source: {
-        username: name,
-        regDate,
-        userPic: '',
-        _id
-      }
-    });
-  });
-});
-
-router.use(['/comment', '/user', '/user/*'], jwtDecode);
-
 router.use('/login', login);
-
-router.get('/user', async function (req, res, next) {
-  const id = req.userId;
-  const query = {
-    _id: id
-  };
-  try {
-    const user = await Users.findById(id).lean().select('-__v -password').exec();
-    user.regDate = formatDate(user.regDate, 'YYYY-MM-DD hh:mm:ss');
-    res.send({
-      code: 200,
-      msg: 'success',
-      source: user
-    });
-  } catch (err) {
-    logger.reqErr(err, req);
-    res.send({
-      code: 500,
-      msg: err.errmsg || err.message,
-      sources: null,
-      total
-    });
-  }
-});
 
 router.get('/posts', async function (req, res, next) {
   let { page = '1', size = '10' } = req.query;
-  const { tag } = req.query;
+  const { tag, sortBy, dir } = req.query;
   const query = {
     publishStatus: '1'
   };
   const field = '-__v -content';
-  const sort = {
+  let sort = {
     date: -1
   };
   let total = 0;
@@ -125,6 +60,12 @@ router.get('/posts', async function (req, res, next) {
   if (tag) {
     query.tags = { $in: [tag] };
   }
+  if (sortBy && dir) {
+    sort = {
+      [sortBy]: dir
+    };
+  }
+  console.log(sort);
   page = Number.parseInt(page, 10);
   size = Number.parseInt(size, 10);
 
@@ -175,7 +116,6 @@ router.get('/posts', async function (req, res, next) {
         row.date = formatDate(row.date, 'YYYY-MM-DD hh:mm:ss');
       });
       Promise.all(promises).then((tagsMap) => {
-        console.log(rows);
         res.send({
           code: 200,
           msg: 'success',
@@ -198,8 +138,17 @@ router.get('/post/:id', async function (req, res, next) {
   const id = req.params.id;
   const promises = [];
   try {
-    const post = await Posts.findById(id).lean().select('-__v').exec();
-    
+    const hasVisit = await collectVisit(req);
+    console.log(hasVisit);
+
+    let post = await Posts.findById(id).select('-__v').exec();
+    if (!hasVisit) {
+      const oriViewCount = post.viewCount || 0;
+      post.$set('viewCount', oriViewCount + 1);
+      post.save();
+    }
+
+    post = post.toObject();
     const tagsRaw = Array.isArray(post.tags) ? post.tags : [];
     const cateRaw = Array.isArray(post.category) ? post.category : [];
     promises.push(findByIds(Tags, tagsRaw, '-__v').then(tags => {
@@ -216,7 +165,6 @@ router.get('/post/:id', async function (req, res, next) {
     post.date = formatDate(post.date, 'YYYY-MM-DD hh:mm:ss');
     post.prevPost = prevPost;
     post.nextPost = nextPost;
-
     res.send({
       code: 200,
       msg: 'success',
@@ -340,7 +288,127 @@ router.get('/comments', async function (req, res, next) {
     });
 });
 
-router.post('/comment', function (req, res, next) {
+router.get('/tags', function (req, res, next) {
+  Tags.find().lean().select('-__v').exec(function (err, rows) {
+    if (err) {
+      logger.reqErr(err, req);
+      res.send({
+        code: 500,
+        msg: err.errmsg || err.message,
+        sources: null
+      });
+      return;
+    }
+    Promise
+      .all(rows.map(row => 
+        Posts
+          .count({ publishStatus: '1', tags: { $in: [row._id] } })
+          .exec()
+          .then(count => {
+            row.postCount = count;
+          })))
+      .then(() => {
+        res.send({
+          code: 200,
+          msg: 'success',
+          sources: rows
+        });
+      });
+  });
+});
+
+router.get('/tag', async function (req, res, next) {
+  const { id } = req.query;
+
+  try {
+    const tag = await Tags.findById(id).lean().select('-__v').exec();
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: tag
+    });
+  } catch (err) {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message,
+      source: null
+    });
+  }
+});
+
+router.get('/search', async function (req, res, next) {
+
+});
+
+router.get('/user', jwtDecode, async function (req, res, next) {
+  const id = req.userId;
+  const query = {
+    _id: id
+  };
+  try {
+    const user = await Users.findById(id).lean().select('-__v -password').exec();
+    if (!user) {
+      throw new Error('user not fonud!');
+    }
+    user.regDate = formatDate(user.regDate, 'YYYY-MM-DD hh:mm:ss');
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: user
+    });
+  } catch (err) {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message,
+      sources: null,
+      total
+    });
+  }
+});
+
+router.post('/user', jwtDecode, function (req, res, next) {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    res.send({
+      code: 400,
+      msg: '`username` and `password` are both required.'
+    });
+  }
+  const user = {
+    username,
+    password,
+    userPic: '',
+    userType: '2',
+    regDate: Date.now()
+  };
+
+  Users.create(user, function (err, newUser) {
+    if (err) {
+      logger.reqErr(err, req);
+      res.send({
+        code: 500,
+        msg: err.errmsg || err.message,
+        source: null
+      });
+      return;
+    }
+    const { username: name, userPic, regDate, _id } = newUser;
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: {
+        username: name,
+        regDate,
+        userPic: '',
+        _id
+      }
+    });
+  });
+});
+
+router.post('/comment', jwtDecode, function (req, res, next) {
   const { content, postId, authorId, pId = '0', status = '1', replyTo } = req.body;
   const missing = hasMissing({ content, postId, authorId });
   if (missing) {
@@ -411,59 +479,9 @@ router.post('/comment', function (req, res, next) {
   });
 });
 
-router.get('/tags', function (req, res, next) {
-  Tags.find().lean().select('-__v').exec(function (err, rows) {
-    if (err) {
-      logger.reqErr(err, req);
-      res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        sources: null
-      });
-      return;
-    }
-    Promise
-      .all(rows.map(row => 
-        Posts
-          .count({ publishStatus: '1', tags: { $in: [row._id] } })
-          .exec()
-          .then(count => {
-            row.postCount = count;
-          })))
-      .then(() => {
-        res.send({
-          code: 200,
-          msg: 'success',
-          sources: rows
-        });
-      });
-  });
-});
-
-router.get('/tag', async function (req, res, next) {
-  const { id } = req.query;
-
-  try {
-    const tag = await Tags.findById(id).lean().select('-__v').exec();
-    res.send({
-      code: 200,
-      msg: 'success',
-      source: tag
-    });
-  } catch (err) {
-    logger.reqErr(err, req);
-    res.send({
-      code: 500,
-      msg: err.errmsg || err.message,
-      source: null
-    });
-  }
-});
-
-router.delete('/comment', async function (req, res, next) {
+router.delete('/comment', jwtDecode, async function (req, res, next) {
   const { userId, query } = req;
   const { id } = query;
-  console.log(userId);
   if (!userId) {
     return res.sendStatus(401);
   }
@@ -474,7 +492,6 @@ router.delete('/comment', async function (req, res, next) {
   try {
     const comment = await Comments.findById(id).lean().exec();
     if (userId !== comment.authorId) {
-      console.log(userId, comment.authorId);
       return res.sendStatus(401);
     }
     await deleteByIdsRecursive(Comments, [id], 'pId');
@@ -493,7 +510,7 @@ router.delete('/comment', async function (req, res, next) {
   }
 });
 
-router.patch('/user/avatar', uploadMid, function (req, res, next) {
+router.patch('/user/avatar', jwtDecode, uploadMid, function (req, res, next) {
   const { id } = req.body;
   const userPic = STATIC_URL + AVATAR_PATH + req.file.filename;
   Users.findByIdAndUpdate(id, { userPic }, { new: true, fields: '-__v -password' }, function (err, newUser) {
@@ -514,7 +531,7 @@ router.patch('/user/avatar', uploadMid, function (req, res, next) {
   });
 });
 
-router.patch('/user/password', async function (req, res, next) {
+router.patch('/user/password', jwtDecode, async function (req, res, next) {
   const { id, oldPw, newPw } = req.body;
   try {
     const user = await Users.findById(id).exec();

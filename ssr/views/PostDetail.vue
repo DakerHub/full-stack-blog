@@ -8,8 +8,13 @@
     <div class="post-detail-main">
       <h1 class="post-detail-title">{{postDetail.title}}</h1>
       <div class="post-detail-mate secondary-text-color">
-        <span class="post-detail-date"><i class="iconfont icon-calendar2"></i><time>{{postDetail.date}}</time></span>
-        <span class="post-detail-tag active-color">
+        <span class="post-detail-date" title="发布日期">
+          <i class="iconfont icon-calendar2"></i><time>{{postDetail.date}}</time>
+        </span>
+        <span class="post-detail-viewCount" title="浏览量">
+          <i class="iconfont icon-liulan1"></i><span>{{postDetail.viewCount}}</span>
+        </span>
+        <span class="post-detail-tag active-color" title="关联标签">
           <span v-for="tag in postDetail.tags">
             <i class="iconfont icon-tag"></i>
             <router-link class="active-color" :to="`/blog?tag=${tag._id}`">{{tag.name}}</router-link>
@@ -176,6 +181,10 @@ export default {
 }
 .post-detail-date{
   white-space: nowrap;
+  margin-right: 2em;
+  margin-bottom: 5px;
+}
+.post-detail-viewCount{
   margin-right: 2em;
   margin-bottom: 5px;
 }

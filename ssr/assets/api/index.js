@@ -23,9 +23,16 @@ const getNewestPosts = function () {
   const params = {
     size: 5
   };
-  return axios.get(APIS.posts, { params }).catch(err => {
-    console.log(err);
-  });
+  return axios.get(APIS.posts, { params });
+};
+
+const getPopularPosts = function () {
+  const params = {
+    size: 5,
+    sortBy: 'viewCount',
+    dir: 'desc'
+  };
+  return axios.get(APIS.posts, { params });
 };
 
 const getNewestComments = function () {
@@ -261,6 +268,7 @@ export {
   getTags,
   getTagById,
   getNewestPosts,
+  getPopularPosts,
   getNewestComments,
   getPostDetail,
   getUserInfo,
