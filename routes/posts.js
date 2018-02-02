@@ -1,11 +1,13 @@
 const express = require('express');
 const multer = require('multer');
-const { STATIC_PATH, SITE_PATH, STATIC_URL, POSTER_PATH } = require('./../config/config');
+const md5 = require('blueimp-md5');
+const { STATIC_PATH, SITE_PATH, STATIC_URL, POSTER_PATH, AVATAR_MAX_SIZE } = require('./../config/config');
 const { Posts } = require('./../lib/models/posts');
 const { Tags } = require('./../lib/models/tags');
 const { Categories } = require('./../lib/models/categories');
 const { findByIds, deleteByIds } = require('./../lib/controllers/crud');
 const { formatDate } = require('./../lib/util/util');
+const { uploadToQiniu, deleteFromQiniu } = require('./../lib/util/qiniu');
 const logger = require('./../lib/util/log');
 
 const router = express.Router();
@@ -19,11 +21,14 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const fileName = file.originalname.split('.');
     const extention = fileName.pop();
-    const newName = fileName.join('.') + Date.now() + '.' + extention;
+    const newName = md5(fileName.join('.') + Date.now()) + '.' + extention;
     cb(null, newName);
   }
 });
-const upload = multer({ storage }).single('poster');
+const limits = {
+  fileSize: AVATAR_MAX_SIZE
+};
+const upload = multer({ storage, limits }).single('poster');
 const uploadMid = function (req, res, next) {
   upload(req, res, function (err) {
     if (err) {
@@ -278,8 +283,7 @@ router.get('/', async function (req, res, next) {
  *               items:
  *                 $ref: '#/definitions/Post'
  */
-router.post('/', uploadMid, function (req, res, next) {
-  const poster = STATIC_URL + POSTER_PATH + req.file.filename;
+router.post('/', uploadMid, async function (req, res, next) {
   const { title, abstract, content, date = Date.now(), publishStatus = '1', tags, category } = req.body;
   const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
   const categoryIds = category && typeof category === 'string' ? category.split(',') : [];
@@ -287,7 +291,7 @@ router.post('/', uploadMid, function (req, res, next) {
   const post = {
     title,
     abstract,
-    poster,
+    poster: '',
     content,
     date,
     publishStatus,
@@ -298,36 +302,32 @@ router.post('/', uploadMid, function (req, res, next) {
     post.publishDate = date;
   }
 
-  const savePost = function (res, post) {
-    Posts.create(post, function (err, newPost) {
-      if (err) {
-        logger.reqErr(err, req);
-        res.send({
-          code: 500,
-          msg: err.errmsg || err.message,
-          sources: null
-        });
-        return;
-      }
-      const { title, date, publishStatus, _id } = newPost;
-      res.send({
-        code: 200,
-        msg: 'success',
-        sources: { title, date, publishStatus, _id }
-      });
+  try {
+    const qiniuRes = await uploadToQiniu(req.file.filename, req.file.path);
+    if (!qiniuRes.url) {
+      throw new Error('海报上传失败！');
+    }
+    post.poster = qiniuRes.url;
+
+    await Promise.all([findByIds(Categories, categoryIds), findByIds(Tags, tagIds)]);
+    const newPost = await Posts.create(post);
+    if (!newPost) {
+      throw new Error('新建文章失败！');
+    }
+    const { title, date, publishStatus, _id } = newPost;
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: { title, date, publishStatus, _id }
     });
-  };
-  Promise.all([findByIds(Categories, categoryIds), findByIds(Tags, tagIds)])
-    .then(() => {
-      savePost(res, post);
-    }).catch((err) => {
-      logger.reqErr(err, req);
-      res.send({
-        code: 400,
-        msg: err.errmsg || err.message || err,
-        sources: null
-      });
+  } catch (err) {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message || err,
+      source: null
     });
+  }
 });
 
 /**
@@ -402,13 +402,15 @@ router.post('/', uploadMid, function (req, res, next) {
  *               items:
  *                 $ref: '#/definitions/Post'
  */
-router.put('/', uploadMid, function (req, res, next) {
+router.put('/', uploadMid, async function (req, res, next) {
   
   const { _id, title, abstract, content, date, publishStatus, tags, category } = req.body;
   const tagIds = tags && typeof tags === 'string' ? tags.split(',') : [];
   const categoryIds = category && typeof category === 'string' ? category.split(',') : [];
   const plainObj = { title, abstract, content, date, publishStatus };
   const updatedPost = {};
+  let newPoster = false;
+
   for (const key in plainObj) {
     if (plainObj.hasOwnProperty(key)) {
       const element = plainObj[key];
@@ -421,42 +423,41 @@ router.put('/', uploadMid, function (req, res, next) {
   updatedPost.category = categoryIds;
 
   if (req.file && req.file.filename) {
-    updatedPost.poster = STATIC_URL + POSTER_PATH + req.file.filename;
+    newPoster = true;
   }
 
   if (!_id) {
     res.sendStatus(400);
   }
-  const updatePost = function () {
-    Posts.findByIdAndUpdate(_id, updatedPost, { new: true }, function (err, newPost) {
-      const { title, date, publishStatus, _id } = newPost;
-      if (err) {
-        logger.reqErr(err, req);
-        res.send({
-          code: 500,
-          msg: err.errmsg || err.message,
-          sources: null
-        });
-        return;
-      }
-      res.send({
-        code: 200,
-        msg: 'success',
-        sources: { title, date, publishStatus, _id }
-      });
-    });
-  };
 
-  Promise.all([findByIds(Categories, categoryIds), findByIds(Tags, tagIds)]).then(() => {
-    updatePost(res, updatedPost);
-  }).catch((err) => {
+  try {
+    await Promise.all([findByIds(Categories, categoryIds), findByIds(Tags, tagIds)]);
+    const post = await Posts.findById(_id).exec();
+    const oriPoster = post.poster;
+    if (newPoster && oriPoster) {
+      const oriPosterKey = oriPoster.substring(oriPoster.lastIndexOf('/') + 1);
+      deleteFromQiniu(oriPosterKey);
+      const qiniuRes = await uploadToQiniu(req.file.filename, req.file.path);
+      if (!qiniuRes.url) {
+        throw new Error('海报上传失败！');
+      }
+      updatedPost.poster = qiniuRes.url;
+    }
+    post.set(updatedPost);
+    await post.save();
+    res.send({
+      code: 200,
+      msg: 'success',
+      source: null
+    });
+  } catch (err) {
     logger.reqErr(err, req);
     res.send({
-      code: 400,
+      code: 500,
       msg: err.errmsg || err.message || err,
-      sources: null
+      source: null
     });
-  });
+  }
 });
 
 /**

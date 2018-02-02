@@ -1,7 +1,6 @@
 <template>
   <div class="fcc-page light-2-primary-color">
     <header class="fcc-header default-primary-color">
-      <i class="iconfont icon-sousuo fcc-header-search light-text-color" title="搜索" @click="searchShow=true"></i>
       <i class="iconfont icon-weibiaoti12 fcc-header-menu-trigger light-text-color" @click="sidebarShow = true"></i>
       <transition name="slide-right">
         <section class="fcc-nav" v-show="sidebarShow">
@@ -43,15 +42,6 @@
         </section>
       </transition>
     </header>
-
-    <transition name="zoom-in">
-      <div class="fcc-search-wp" v-show="searchShow">
-        <input class="fcc-search-input" type="text" placeholder="输入关键词">
-        <i
-          class="iconfont icon-close fcc-search-close light-text-color"
-          @click="searchShow=false"></i>
-      </div>
-    </transition>
 
     <main class="fcc-main">
 
@@ -232,71 +222,11 @@ export default {
   float: right;
   cursor: pointer;
 }
-.fcc-header-search{
-  position: absolute;
-  right: 2em;
-  display: flex;
-  font-size: 2em;
-  margin: .5em 0;
-  align-items: center;
-  color: rgba(255, 255, 255, .7);
-  cursor: pointer;
-  transition: color .3s ease;
-}
-.fcc-header-search:hover{
-  color: #fff !important;
-}
-.fcc-search-wp{
-  position: relative;
-  width: 100%;
-  height: 4em;
-  z-index: 1;
-}
-.fcc-search-input{
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  font-size: 2em;
-  padding-left: 2em;
-  box-sizing: border-box;
-  border: none;
-  border-radius: 0;
-  border-bottom: 2px solid #673ab7;
-  background-color: #2b155d;
-  outline: none;
-  color: rgba(255, 255, 255, .7);
-}
-.fcc-search-input::-webkit-input-placeholder{
-  color: rgba(255, 255, 255, .7);
-}
-.fcc-search-close{
-  position: absolute;
-  display: flex;
-  align-items: center;
-  right: 1em;
-  top: 0;
-  color: #fff;
-  font-size: 2em;
-  margin: .5em 0;
-  cursor: pointer;
-  transition: color .3s ease;
-}
-.fcc-search-close:hover{
-  color: #fff !important;
-}
+
 @media screen and (min-width: 1024px) {
   .fcc-main{
     padding: 0 1em;
     box-sizing: border-box;
-  }
-  .fcc-header-search{
-    right: 220px;
-    font-size: .8em;
-    margin: 2em 0;
-  }
-  .fcc-search-input{
-    padding-left: 4em;
   }
 }
 .fcc-nav{
@@ -388,9 +318,6 @@ export default {
     width: 100%;
     background-color: transparent;
     background-image: none;
-  }
-  .fcc-header-search{
-    z-index: 1000;
   }
   .fcc-nav-user-info{
     position: absolute;

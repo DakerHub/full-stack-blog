@@ -5,12 +5,9 @@ yarn-debug.log*
 yarn-error.log*
 /test/unit/coverage/
 /test/e2e/reports/
-src/node_modules/
-src/build/
-src/config/
-src/test/
-public/admin/*
-ssr/assets/config/
+/config/config.js
+/public/admin/*
+/ssr/assets/config/config.js
 selenium-debug.log
 
 # Editor directories and files

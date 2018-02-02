@@ -1,5 +1,4 @@
 const express = require('express');
-const multer = require('multer');
 const login = require('./login');
 const jwtDecode = require('./../lib/util/jwsDecode');
 const { Posts } = require('./../lib/models/posts');
@@ -10,36 +9,10 @@ const { Categories } = require('./../lib/models/categories');
 const { findByIds, deleteByIds, deleteByIdsRecursive } = require('./../lib/controllers/crud');
 const { hasMissing, formatDate } = require('./../lib/util/util');
 const { collectVisit } = require('./../lib/util/collectVisit');
+const { avatarUpload } = require('./../lib/util/avatarUpload');
+const { uploadToQiniu, deleteFromQiniu } = require('./../lib/util/qiniu');
 const { STATIC_PATH, SITE_PATH, STATIC_URL, AVATAR_PATH } = require('./../config/config');
 const logger = require('./../lib/util/log');
-
-const storage = multer.diskStorage({
-  // 文件存储路径为设置里的STATIC路径
-  destination: (req, file, cb) => {
-    cb(null, SITE_PATH + STATIC_PATH + AVATAR_PATH);
-  },
-  // 在文件名后加上时间戳
-  filename: (req, file, cb) => {
-    const fileName = file.originalname.split('.');
-    const extention = fileName.pop();
-    const newName = fileName.join('.') + Date.now() + '.' + extention;
-    cb(null, newName);
-  }
-});
-const upload = multer({ storage }).single('avatar');
-const uploadMid = function (req, res, next) {
-  upload(req, res, function (err) {
-    if (err) {
-      logger.reqErr(err, req);
-      res.send({
-        code: 500,
-        msg: err.errmsg || err.message
-      });
-      return;
-    }
-    next();
-  });
-};
 
 const router = express.Router();
 
@@ -337,10 +310,6 @@ router.get('/tag', async function (req, res, next) {
   }
 });
 
-router.get('/search', async function (req, res, next) {
-
-});
-
 router.get('/user', jwtDecode, async function (req, res, next) {
   const id = req.userId;
   const query = {
@@ -510,25 +479,37 @@ router.delete('/comment', jwtDecode, async function (req, res, next) {
   }
 });
 
-router.patch('/user/avatar', jwtDecode, uploadMid, function (req, res, next) {
+router.patch('/user/avatar', jwtDecode, avatarUpload, async function (req, res, next) {
   const { id } = req.body;
-  const userPic = STATIC_URL + AVATAR_PATH + req.file.filename;
-  Users.findByIdAndUpdate(id, { userPic }, { new: true, fields: '-__v -password' }, function (err, newUser) {
-    if (err) {
-      logger.reqErr(err, req);
-      res.send({
-        code: 500,
-        msg: err.errmsg || err.message,
-        source: null
-      });
-      return;
+  try {
+    const user = await Users.findById(id, '-__v -password').exec();
+    if (!user) {
+      throw new Error('未找到用户！');
     }
+    const oriUserPic = user.userPic;
+    if (oriUserPic) {
+      const oriUserPicKey = oriUserPic.substring(oriUserPic.lastIndexOf('/') + 1);
+      deleteFromQiniu(oriUserPicKey);
+    }
+    const qiniuRes = await uploadToQiniu(req.file.filename, req.file.path);
+    if (!qiniuRes.url) {
+      throw new Error('头像上传失败！');
+    }
+    user.$set('userPic', qiniuRes.url);
+    await user.save();
     res.send({
       code: 200,
       msg: 'success',
-      source: newUser
+      source: user
     });
-  });
+  } catch (err) {
+    logger.reqErr(err, req);
+    res.send({
+      code: 500,
+      msg: err.errmsg || err.message,
+      source: null
+    });
+  }
 });
 
 router.patch('/user/password', jwtDecode, async function (req, res, next) {
