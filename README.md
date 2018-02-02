@@ -13,18 +13,33 @@
 
 <pre>
   <code>
+    // 先clone到本地,修改config/config.example.js里面的设置,并改文件名为config.js
+
+    // 更改ssr/config/config.example.js里面的设置并改文件名为config.js
+
+    // 更改src/admin/assets/js/config.js里面的设置
+    
+  </code>
+</pre>
+
+<pre>
+  <code>
     # 进入到 /src/admin 下
 
     npm install
 
     npm run build
 
-    # 先clone到本地,根目录下
+    # 根目录下
 
     npm install
 
     npm run dev
+
+    npm run addAdmin
     
+    # 打开 http://localhost:3000/admin,可查看博客后台管理系统
+    # 打开 http://localhost:3000/blog,可查看博客页面
   </code>
 </pre>
 

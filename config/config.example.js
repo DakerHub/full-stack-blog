@@ -13,8 +13,8 @@ const config = {
   QINIU_BUCKET: 'fblog',
   QINIU_ZONE: 'Zone_z2',
 
-  SITE_URL: 'http://example:3000',
-  STATIC_URL: 'http://example:3000/static',
+  SITE_URL: 'http://localhost:3000',
+  STATIC_URL: 'http://localhost:3000/static',
 
   SITE_PATH: path.resolve(__dirname, './../'),
   STATIC_PATH: '/public/static',

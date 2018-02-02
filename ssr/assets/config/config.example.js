@@ -1,4 +1,4 @@
-const APIROOT = 'http://example:3000/api/blog/';
+const APIROOT = 'http://localhost:3000/api/blog/';
 export default {
   APIROOT
 };
