@@ -9,6 +9,25 @@
   <li><code>Mongoose</code> : <code>Node</code>框架，用于操作<code>MongoDB</code></li>
 </ul>
 
+<h2>本地构建</h2>
+
+<pre>
+  <code>
+    # 进入到 /src/admin 下
+
+    npm install
+
+    npm run build
+
+    # 先clone到本地,根目录下
+
+    npm install
+
+    npm run dev
+    
+  </code>
+</pre>
+
 <h2>开发流程</h2>
 <h4>服务端：<h4>
 
