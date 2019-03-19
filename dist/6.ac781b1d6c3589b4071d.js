@@ -1,0 +1,1 @@
+webpackJsonp([6],{60:function(e,n,t){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var l={name:"TheGallery"},r=function(){var e=this,n=e.$createElement;return(e._self._c||n)("div",[e._v("画廊")])},u=[],a={render:r,staticRenderFns:u},s=a,c=t(3),i=c(l,s,!1,null,null,null);n.default=i.exports}});
