@@ -9,6 +9,8 @@ yarn-error.log*
 /public/admin/*
 /ssr/assets/config/config.js
 selenium-debug.log
+/dist/*
+/log/*
 
 # Editor directories and files
 .idea
