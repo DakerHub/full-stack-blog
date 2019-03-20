@@ -130,9 +130,7 @@ var appLogStream = fs.createWriteStream(path.join(__dirname, './log/app.log'), {
   flags: 'a'
 })
 
-app.use(res => {
-  logger('common', { stream: appLogStream })
-})
+app.use(logger('common', { stream: appLogStream }))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
