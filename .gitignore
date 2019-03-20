@@ -6,7 +6,7 @@ yarn-error.log*
 /test/unit/coverage/
 /test/e2e/reports/
 /config/config.js
-/public/admin/*
+/public/*
 /ssr/assets/config/config.js
 selenium-debug.log
 /dist/*
