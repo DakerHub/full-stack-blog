@@ -310,7 +310,7 @@ router.get('/tag', async function (req, res, next) {
   }
 });
 
-router.get('/user', jwtDecode, async function (req, res, next) {
+router.get('/user', async function (req, res, next) {
   const id = req.userId;
   const query = {
     _id: id
@@ -337,7 +337,7 @@ router.get('/user', jwtDecode, async function (req, res, next) {
   }
 });
 
-router.post('/user', jwtDecode, function (req, res, next) {
+router.post('/user', function (req, res, next) {
   const { username, password } = req.body;
   if (!username || !password) {
     res.send({
